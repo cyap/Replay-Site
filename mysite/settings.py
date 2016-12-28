@@ -119,4 +119,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static"), )
-STATIC_ROOT = "/Users/cyap/Python/mysite/myapp/static"
+STATIC_ROOT = "myapp/static"
