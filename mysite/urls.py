@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from . import index, index2
+from . import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', index2),
-    url(r'^tournament', index),
+    url(r'^$', views.index2),
+    url(r'^tournament', views.index),
 ]
