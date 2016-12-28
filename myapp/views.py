@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.shortcuts import redirect
 
-from replay_parser import tournament, replayCompile, statCollector
+from . import replay_parser as rp
 
 def index2(request):
 	if request.method == "GET":
@@ -12,13 +12,13 @@ def index2(request):
 	if request.method == "POST":
 		if "thread_submit" in request.POST:
 			url = request.POST["url"]
-			replays = replayCompile.replays_from_thread(url)
+			replays = rp.replayCompile.replays_from_thread(url)
 		if "range_submit" in request.POST:
 			if not request.POST["tier"]:
 				tier = "gen7pokebankou"
 			else:
 				tier = request.POST["tier"]
-			replays = replayCompile.replays_from_range(
+			replays = rp.replayCompile.replays_from_range(
 			range(int(request.POST["start"]),int(request.POST["end"])),
 			tier = tier)
 		
