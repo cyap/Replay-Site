@@ -1,6 +1,6 @@
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'myapp/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
 
 <!DOCTYPE html>
 <html>
@@ -18,7 +18,7 @@
   
 		{% for element in usage_table %}
 		<tr>
-			<td><img src="static/myapp/icons/{{element.0}}.png"></td>
+			<td><img src="static/icons/{{element.0}}.png"></td>
 			<td>{{ element.0 }}</td>
 			<td>{{ element.1 }}</td> 
 			<td>{{ element.2 }}</td>
