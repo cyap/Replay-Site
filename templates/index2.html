@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+From thread:
+{% block content %}
+<form method="post">
+	{% csrf_token %}
+	URL:
+	<br>
+	<input type="text" name="url">
+	<br>
+	<input type="submit" name="thread_submit" value="Submit">
+</form>
+<br>
+
+By range:
+<form method="post">
+	{% csrf_token %}
+	Start: 
+	<br>
+	<input type="text" name="start">
+	<br>
+	End: 
+	<br>
+	<input type="text" name="end">
+	<br>
+	Tier:
+	<br>
+	<input type="text" name="tier">
+	<br>
+	<input type="submit" name="range_submit" value="Submit">
+</form>
+
+
+{% endblock %}
+
+</body>
+</html>

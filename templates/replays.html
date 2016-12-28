@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<style>
+#div1 {
+    width: 350px;
+    height: 70px;
+    padding: 10px;
+    border: 1px solid #aaaaaa;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script>
+function drag(ev) {
+    ev.dataTransfer.setData("text", "test");
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    ev.target.appendChild(document.getElementById(data));
+}
+
+</script>
+
+<body>
+
+<ul>
+{% for replay in replays %}
+    <li id="drag2" draggable="true" ondragstart="drag(ev)">{{ replay }}</li>
+{% endfor %}
+</ul>
+
+<img id="drag1" src="img_logo.gif" draggable="true"
+ondragstart="drag(event)" width="336" height="69">
+<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+<body>
+
+{% verbatim %}
+
+<div ng-app="">
+  <p>Name : <input type="text" ng-model="name"></p>
+  <h1>Hello {{name}}</h1>
+</div>
+
+{% endverbatim %}
+
+</body>
+</html>
