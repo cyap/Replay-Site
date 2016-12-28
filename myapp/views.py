@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.shortcuts import redirect
 
-from . import replay_parser as rp
+import replayCompile
+import statCollector
 
 def index2(request):
 	if request.method == "GET":
@@ -12,13 +13,13 @@ def index2(request):
 	if request.method == "POST":
 		if "thread_submit" in request.POST:
 			url = request.POST["url"]
-			replays = rp.replayCompile.replays_from_thread(url)
+			replays = replayCompile.replays_from_thread(url)
 		if "range_submit" in request.POST:
 			if not request.POST["tier"]:
 				tier = "gen7pokebankou"
 			else:
 				tier = request.POST["tier"]
-			replays = rp.replayCompile.replays_from_range(
+			replays = replayCompile.replays_from_range(
 			range(int(request.POST["start"]),int(request.POST["end"])),
 			tier = tier)
 		
@@ -56,7 +57,7 @@ def index2(request):
 											  "whitespace" : whitespace_table})
 
 
-
+'''
 def index(request):
 	if request.method == "GET":
 		return render(request, "index.html")
@@ -87,4 +88,4 @@ def index(request):
 						  else (
 						  (str(pairing).strip("frozenset")), "", "", "No match found") 
 						  for pairing in pairings]
-		})
+		})'''
