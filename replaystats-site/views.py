@@ -3,12 +3,13 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.shortcuts import redirect
 
-import replayCompile
-import statCollector
+from replay_parser import replayCompile, statCollector
+#replayCompile
+#import statCollector
 
-def index2(request):
+def index(request):
 	if request.method == "GET":
-		return render(request, "index2.html")
+		return render(request, "index.html")
 		
 	if request.method == "POST":
 		if "thread_submit" in request.POST:
