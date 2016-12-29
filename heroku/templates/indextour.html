@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+{% block content %}
+<form method="post">
+	{% csrf_token %}
+	Start: 
+	<br>
+	<input type="text" name="start">
+	<br>
+	End: 
+	<br>
+	<input type="text" name="end">
+	<br>
+	URL:
+	<br>
+	<input type="text" name="url">
+	<br>
+	<input type="submit" value="Submit">
+</form> 
+{% endblock %}
+
+</body>
+</html>

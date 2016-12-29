@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<div>
+	<h1>From thread:</h1>
+	Example: http://www.smogon.com/forums/threads/smogons-official-ladder-tournament-iii-logs-replays-usage-stats.3582785/
+</div>
+<br>
+
+<form method="post">
+	{% csrf_token %}
+	URL:
+	<br>
+	<input type="text" name="url">
+	<br>
+	<input type="submit" name="thread_submit" value="Submit">
+</form>
+<br>
+
+<div>
+	<h1>By range:</h1>
+	Example: 220000, 221000
+</div>
+<br>
+<form method="post">
+	{% csrf_token %}
+	Start: 
+	<br>
+	<input type="text" name="start">
+	<br>
+	End: 
+	<br>
+	<input type="text" name="end">
+	<br>
+	Tier: (Default: gen7pokebankou):
+	<br>
+	<input type="text" name="tier">
+	<br>
+	<input type="submit" name="range_submit" value="Submit">
+</form>
+
+</body>
+</html>
