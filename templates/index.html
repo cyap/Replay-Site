@@ -3,7 +3,6 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
 
-<!DOCTYPE html>
 <html>
 <body>
 
@@ -43,6 +42,20 @@
 	<input type="text" name="tier">
 	<br>
 	<input type="submit" name="range_submit" value="Submit">
+</form>
+<br>
+<div>
+	<h1>From list of URLs:</h1>
+	Example: http://replay.pokemonshowdown.com/gen7pokebankoususpecttest-507567783
+</div>
+<br>
+<form method="post">
+	{% csrf_token %}
+	URLs: 
+	<br>
+	<textarea rows="4" cols="80" name="replay_urls"></textarea>
+	<br>
+	<input type="submit" name="link_submit" value="Submit">
 </form>
 
 </body>
