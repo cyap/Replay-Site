@@ -12,52 +12,68 @@ def index(request):
 		return render(request, "index.html")
 		
 	if request.method == "POST":
-		if "thread_submit" in request.POST:
-			url = request.POST["url"]
-			replays = replayCompile.replays_from_thread(url)
-		if "range_submit" in request.POST:
-			if not request.POST["tier"]:
-				tier = "gen7pokebankou"
-			else:
-				tier = request.POST["tier"]
-			replays = replayCompile.replays_from_range(
-			range(int(request.POST["start"]),int(request.POST["end"])),
-			tier = tier)
-		
+		urls = request.POST["replay_urls"].split("\n")
+		replays = replayCompile.replays_from_links(urls)
+	
 		# Stats
-		usage = statCollector.usage(replays)
-		wins = statCollector.wins(replays)
-		total = (sum(usage.values())/6)
-		
-		# API request to match Pokemon w/dex number corresponding to sprite filename
-
-		usage_table = [(element[0], 
-						element[1], 
-						"{0:.2f}%".format(100 * float(element[1])/total),
-						"{0:.2f}%".format(100 * float(wins[element[0]])/element[1]),
-						)
-						for element in usage.most_common()]
-						
-		whitespace_table = [(
-						entry[0] + " " * (18 - len(entry[0])), 
-						str(entry[1]) + " " * (3 - len(str(entry[1]))), 
-						str(entry[2]) + " " * (6 - len(str(entry[2]))),
-						str(entry[3]) + " " * (7 - len(str(entry[3]))),
-						str(i+1) + " " * (4-len(str(i+1)))
-						)
-						for i, entry in enumerate(usage_table)]
-		'''
-		whitespace = [(
-					  " " * (22 - len(entry[0])),
-					  " " * (3 - len(str(entry[1]))),
-					  " " * (3 - len(str(entry[2]))),
-					  " " * (3 - len(str(entry[3])))
-					  ) for entry in usage_table]'''
-					  
+		usage_table = usage(replays)
+		whitespace_table = whitespace(usage_table)
 		return render(request, "stats.html", {"usage_table" : usage_table,
 											  "whitespace" : whitespace_table})
 
+def spl_index(request):
+	if request.method == "GET":
+		return render(request, "spl_index.html")
+		
+	if request.method == "POST":
+		urls = request.POST["replay_urls"].split("\n")
+		replays = replayCompile.replays_from_links(urls)
+		moves = [replay.get_moves() for replay in replays]
+		
+		# Overall Stats
+		usage_table = usage(replays)
+		whitespace_table = whitespace(usage_table)
+		return render(request, "spl_stats.html", {
+					"usage_table" : usage_table,
+					"whitespace" : whitespace_table,
+					"replays" : replays})
+		#for replay in replays:
+	'''
+	- Enter list of URLs
+	- Return:
+		- URL: URL
+		- Player1: Team, Moves
+		- Player2: Team, Moves
+			- Refactor replay to decide player name
+			- Refactor tour matching to call format method
+	- Overall:
+		- Usage stats
+			- Pokemon used
+			- Combinations used'''
 
+
+
+def usage(replays):
+	usage = statCollector.usage(replays)
+	wins = statCollector.wins(replays)
+	total = (sum(usage.values())/6)
+	return [(element[0], 
+			 element[1], 
+			 "{0:.2f}%".format(100 * float(element[1])/total),
+			 "{0:.2f}%".format(100 * float(wins[element[0]])/element[1]),
+			 )
+			 for element in usage.most_common()]
+
+def whitespace(usage_table):
+	return [(
+			entry[0] + " " * (18 - len(entry[0])), 
+			str(entry[1]) + " " * (3 - len(str(entry[1]))), 
+			str(entry[2]) + " " * (6 - len(str(entry[2]))),
+			str(entry[3]) + " " * (7 - len(str(entry[3]))),
+			str(i+1) + " " * (4-len(str(i+1)))
+			)
+			for i, entry in enumerate(usage_table)]
+	
 '''
 def index(request):
 	if request.method == "GET":

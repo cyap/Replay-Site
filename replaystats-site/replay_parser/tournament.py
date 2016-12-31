@@ -48,7 +48,7 @@ class Tournament():
 		corresponding to the existence of the replay's player set in the pairing
 		list.
 		"""
-		pairing = frozenset(replay.get_players())
+		pairing = frozenset(format_name(player) for player in replay.players)
 		if pairing in pairings:
 			self.pairingReplayMap[pairing] = (replay, "exact")
 			return True
@@ -59,7 +59,7 @@ class Tournament():
 		corresponding to the existence of the replay's player set in the pairing
 		list.
 		"""
-		pairing = frozenset(self.get_closest(p) for p in replay.get_players())
+		pairing = frozenset(format_name(self.get_closest(p)) for p in replay.players)
 		if pairing in pairings:
 			self.pairingReplayMap[pairing] = (replay, "fuzzy")
 			return True
@@ -70,9 +70,9 @@ class Tournament():
 		corresponding to the existence of at least one player in the replay's
 		player set in at least one pairing in the pairing set.
 		"""
-		for player in replay.get_players():
+		for player in replay.players:
 			for pairing in pairings:
-				if self.get_closest(player) in pairing:
+				if self.get_closest(format_name(player)) in pairing:
 					self.pairingReplayMap[pairing] = (replay, "partial")
 					return True
 		return False
@@ -163,3 +163,13 @@ def participants_from_pairings(pairings):
 	# Pros: Negligibly faster, avoids typos made in further rounds
 	# Cons: Will mess up if "bye" is used for multiple r1 match-ups
 	return set(chain.from_iterable(pairing for pairing in pairings))
+	
+	
+def format_name(name):
+	""" Given a username, format to eliminate special characters. 
+	
+	Supported characters: Letters, numbers, spaces, period, apostrophe. 
+	"""
+	# User dictionary
+	# Move to other class?
+	return re.sub("[^\w\s'\.-]+", "", name).lower().strip()

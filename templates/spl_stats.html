@@ -1,0 +1,52 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+
+<!DOCTYPE html>
+<html>
+<body>
+
+	{% block content %}
+	{% for replay in replays %}
+		<a href={{replay.url}}>{{ replay.url }}</a>
+		<table class=movetable>
+			<tr>
+				<th class=move>{{ replay.winner }}</th>
+				<th class=move>1</th>
+				<th class=move>2</th>
+				<th class=move>3</th> 
+				<th class=move>4</th>
+			</tr>
+			{% for pokemon,moveset in replay.moves.win.items %}
+			<tr>
+				<td class=move>{{ pokemon }}</td>
+				<td class=move>{{ moveset.0 }}</td>
+				<td class=move>{{ moveset.1 }}</td>
+				<td class=move>{{ moveset.2 }}</td>
+				<td class=move>{{ moveset.3 }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		<table class=movetable>
+			<tr>
+				<th class=move>{{ replay.loser }}</th>
+				<th class=move>1</th>
+				<th class=move>2</th>
+				<th class=move>3</th> 
+				<th class=move>4</th>
+			</tr>
+			{% for pokemon,moveset in replay.moves.lose.items %}
+			<tr>
+				<td class=move>{{ pokemon }}</td>
+				<td class=move>{{ moveset.0 }}</td>
+				<td class=move>{{ moveset.1 }}</td>
+				<td class=move>{{ moveset.2 }}</td>
+				<td class=move>{{ moveset.3 }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	<br>
+	{% endfor %}
+	{% endblock %}
+</body>
+</html>

@@ -1,10 +1,8 @@
 import re
 from collections import defaultdict
-from itertools import combinations, takewhile
+from itertools import combinations
 from urllib2 import urlopen, Request
 import profile
-
-from fuzzywuzzy import process
 
 class replay:
 
@@ -27,7 +25,9 @@ class replay:
 		# Iterate through text vs line by line
 		# Get players
 		
-		winIndex = self.players.index(self.winner())
+		self.winner = self.winner()
+		winIndex = self.players.index(self.winner)
+		self.loser = self.players[winIndex-1]
 		self.wl = {"p"+str(winIndex + 1):"win",
 				   "p"+str((winIndex + 1) % 2 + 1):"lose"}
 		self._teams = None
@@ -42,12 +42,9 @@ class replay:
 		
 		players = (line for line in self.replayContent if
 				   line.startswith("|player"))
-		p1 = format_name(next(players).split("|")[3])
-		p2 = format_name(next(players).split("|")[3])
+		p1 = next(players).split("|")[3]
+		p2 = next(players).split("|")[3]
 		return (p1, p2)
-		
-	def get_players(self):
-		return self.players
 		
 	def generation(self):
 		""" Return int/string representing generation. """
@@ -127,7 +124,9 @@ class replay:
 	def get_moves(self):
 		if self.moves:
 			return self.moves
-		moves = {"win":defaultdict(list),"lose":defaultdict(list)}
+		#moves = {"win":defaultdict(list),"lose":defaultdict(list)}
+		moves = {"win":{pokemon: [] for pokemon in self.teams["win"]},
+				 "lose":{pokemon: [] for pokemon in self.teams["lose"]}}
 		nicknames = {"p1":{},"p2":{}}
 		for line in self.replayContent:
 			if line.startswith("|move"):
@@ -142,7 +141,6 @@ class replay:
 				moveset = moves[self.wl[player]][pokemon]
 				if move not in moveset:
 					moveset.append(move)
-				# defaultdicts
 			if line.startswith("|switch") or line.startswith("|drag"):
 				ll= line.split("|") 
 				player = ll[2].split("a:")[0]
@@ -164,9 +162,8 @@ class replay:
 	
 	def winner(self):
 		""" Parse replay for winner, declared at the bottom of replay. """
-		return format_name(next(line for line in reversed(self.replayContent) 
-								#if line.startswith("|win"))
-								if line[:4] == "|win")
+		return (next(line for line in reversed(self.replayContent) 
+								if line.startswith("|win"))
 								.split("|")[2].split("<")[0])
 
 	def turn_count(self):
@@ -190,15 +187,6 @@ class replay:
 		m = re.compile("\|move\|.*\|{0}\|.*".format(move))
 		return next((True for line in self.replayContent 
 					 if m.match(line)), False)
-
-def format_name(name):
-	""" Given a username, format to eliminate special characters. 
-	
-	Supported characters: Letters, numbers, spaces, period, apostrophe. 
-	"""
-	# User dictionary
-	# Move to other class?
-	return re.sub("[^\w\s'\.-]+", "", name).lower().strip()
 
 def main(l):
 	for r in l:
