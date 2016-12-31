@@ -11,6 +11,7 @@
 		<a href={{replay.url}}>{{ replay.url }}</a>
 		<table class=movetable>
 			<tr>
+				<th></th>
 				<th class=move>{{ replay.winner }}</th>
 				<th class=move>1</th>
 				<th class=move>2</th>
@@ -19,6 +20,7 @@
 			</tr>
 			{% for pokemon,moveset in replay.moves.win.items %}
 			<tr>
+				<td><img src="static/icons/{{pokemon}}.png"></td>
 				<td class=move>{{ pokemon }}</td>
 				<td class=move>{{ moveset.0 }}</td>
 				<td class=move>{{ moveset.1 }}</td>
@@ -29,6 +31,7 @@
 		</table>
 		<table class=movetable>
 			<tr>
+				<th></th>
 				<th class=move>{{ replay.loser }}</th>
 				<th class=move>1</th>
 				<th class=move>2</th>
@@ -37,6 +40,7 @@
 			</tr>
 			{% for pokemon,moveset in replay.moves.lose.items %}
 			<tr>
+				<td><img src="static/icons/{{pokemon}}.png"></td>
 				<td class=move>{{ pokemon }}</td>
 				<td class=move>{{ moveset.0 }}</td>
 				<td class=move>{{ moveset.1 }}</td>
