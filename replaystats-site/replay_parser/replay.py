@@ -28,6 +28,7 @@ class replay:
 		self.winner = self.winner()
 		winIndex = self.players.index(self.winner)
 		self.loser = self.players[winIndex-1]
+		self.playerwl = {"win":self.winner,"lose":self.loser}
 		self.wl = {"p"+str(winIndex + 1):"win",
 				   "p"+str((winIndex + 1) % 2 + 1):"lose"}
 		self._teams = None
@@ -77,13 +78,7 @@ class replay:
 			#if line[:5] == "|poke":
 				ll = line.split("|")
 				player = ll[2]
-				poke = ll[3].split(",")[0]
-				if poke.startswith("Keldeo"):
-					poke = "Keldeo"
-				if poke.startswith("Gastrodon"):
-					poke = "Gastrodon"
-				if poke.startswith("Genesect"):
-					poke = "Genesect"
+				poke = format_pokemon(ll[3].split(",")[0])
 				teams[self.wl[player]].append(poke)
 			if line.startswith("|teampreview"):
 			#elif line[:12] == "|teampreview":
@@ -98,7 +93,7 @@ class replay:
 			if line.startswith("|switch") or line.startswith("|drag"):
 				ll = line.split("|")
 				player = ll[2].split("a:")[0]
-				poke = ll[3].split(",")[0]
+				poke = format_pokemon(ll[3].split(",")[0])
 				team = teams[self.wl[player]]
 				if poke not in team:
 					team.append(poke)
@@ -118,7 +113,7 @@ class replay:
 			if line.startswith("|switch"):
 				ll = line.split("|")
 				player = ll[2].split("a:")[0]
-				poke = ll[3].split(",")[0]
+				poke = format_pokemon(ll[3].split(",")[0])
 				leads[self.wl[player]] = poke
 	
 	def get_moves(self):
@@ -145,7 +140,7 @@ class replay:
 				ll= line.split("|") 
 				player = ll[2].split("a:")[0]
 				nickname = ll[2]
-				pokemon = ll[3].split(",")[0]
+				pokemon = format_pokemon(ll[3].split(",")[0])
 				if nickname not in nicknames[player]:
 					nicknames[player][nickname] = pokemon 
 					moves[self.wl[player]][nicknames[player][nickname]] = []
@@ -187,6 +182,24 @@ class replay:
 		m = re.compile("\|move\|.*\|{0}\|.*".format(move))
 		return next((True for line in self.replayContent 
 					 if m.match(line)), False)
+
+def format_pokemon(pokemon):
+	if "-" not in pokemon:
+		return pokemon
+	if pokemon.startswith("Genesect"):
+		return "Genesect"
+	if pokemon.startswith("Keldeo"):
+		return "Keldeo"
+	if pokemon.startswith("Gastrodon"):
+		return "Gastrodon"
+	return pokemon
+
+def format_name(name):
+	""" Given a username, eliminate special characters and escaped unicode.
+	
+	Supported characters: Letters, numbers, spaces, period, apostrophe. 
+	"""
+	return re.sub("[^\w\s'\.-]+", "", re.sub("&#.*;", "", name)).lower().strip()
 
 def main(l):
 	for r in l:

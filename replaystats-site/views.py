@@ -33,10 +33,22 @@ def spl_index(request):
 		# Overall Stats
 		usage_table = usage(replays)
 		whitespace_table = whitespace(usage_table)
+		raw = (
+		"\n---\n\n".join([
+		"\n".join([
+		player+	": " + replay.playerwl[player] + "\n"
+		+ "".join([pokemon + ": " 
+		+ " / ".join([move for move in replay.moves[player][pokemon]]) + "\n"
+		for pokemon in replay.moves[player]])
+		for player in ("win","lose")])
+		for replay in replays]))
+		
+		#print raw
 		return render(request, "spl_stats.html", {
 					"usage_table" : usage_table,
 					"whitespace" : whitespace_table,
-					"replays" : replays})
+					"replays" : replays,
+					"raw":raw})
 		#for replay in replays:
 	'''
 	- Enter list of URLs

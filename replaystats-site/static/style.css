@@ -1,3 +1,14 @@
+#tables {
+	float:left;
+	margin-right: 70px;
+}
+
+#raw {
+	float:left;
+	width:500px;
+	height:1000px;
+}
+
 h1 {
 	font-size: 1.5em;
 	margin-bottom: 0;
@@ -14,10 +25,12 @@ th {
     text-align: left;
 }
 
-
-
 .move {
     width: 100px;
+}
+
+.pokemon_col {
+	width: 80px;
 }
 
 .exact {
