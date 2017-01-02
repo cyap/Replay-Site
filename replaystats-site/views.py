@@ -36,7 +36,7 @@ def spl_index(request):
 		
 		# Raw
 		raw = (
-		"\n---\n\n".join([
+		"\n\n---\n\n".join([
 		"\n\n".join([
 		player.capitalize() + ": " + replay.playerwl[player] + "\n"
 		+ "\n".join([pokemon + ": " 
@@ -45,7 +45,7 @@ def spl_index(request):
 		for player in ("win","lose")])
 		for replay in replays]))
 		
-		row_count = len(replays) * 18 - 3
+		row_count = len(replays) * 18 - 2
 		# Set not removing duplicates
 		print raw
 		return render(request, "spl_stats.html", {
