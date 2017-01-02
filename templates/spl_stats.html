@@ -7,12 +7,12 @@
 <body>
 
 	{% block content %}
+	<div id=tables>
 	{% for replay in replays %}
 		<a href={{replay.url}}>{{ replay.url }}</a>
 		<table class=movetable>
 			<tr>
-				<th></th>
-				<th class=move>{{ replay.winner }}</th>
+				<th colspan=2>{{ replay.winner }}</th>
 				<th class=move>1</th>
 				<th class=move>2</th>
 				<th class=move>3</th> 
@@ -21,7 +21,7 @@
 			{% for pokemon,moveset in replay.moves.win.items %}
 			<tr>
 				<td><img src="static/icons/{{pokemon}}.png"></td>
-				<td class=move>{{ pokemon }}</td>
+				<td class=pokemon_col>{{ pokemon }}</td>
 				<td class=move>{{ moveset.0 }}</td>
 				<td class=move>{{ moveset.1 }}</td>
 				<td class=move>{{ moveset.2 }}</td>
@@ -31,8 +31,7 @@
 		</table>
 		<table class=movetable>
 			<tr>
-				<th></th>
-				<th class=move>{{ replay.loser }}</th>
+				<th colspan=2>{{ replay.loser }}</th>
 				<th class=move>1</th>
 				<th class=move>2</th>
 				<th class=move>3</th> 
@@ -41,7 +40,7 @@
 			{% for pokemon,moveset in replay.moves.lose.items %}
 			<tr>
 				<td><img src="static/icons/{{pokemon}}.png"></td>
-				<td class=move>{{ pokemon }}</td>
+				<td class=pokemon_col>{{ pokemon }}</td>
 				<td class=move>{{ moveset.0 }}</td>
 				<td class=move>{{ moveset.1 }}</td>
 				<td class=move>{{ moveset.2 }}</td>
@@ -51,6 +50,14 @@
 		</table>
 	<br>
 	{% endfor %}
+	</div>
 	{% endblock %}
+
+Raw:
+<br>
+<textarea id=raw>
+{{ raw }}
+</textarea>
+		
 </body>
 </html>
