@@ -36,39 +36,23 @@ def spl_index(request):
 		
 		# Raw
 		raw = (
-		"\n\n---\n\n".join([
-		"\n\n".join([
-		player.capitalize() + ": " + replay.playerwl[player] + "\n"
-		+ "\n".join([pokemon + ": " 
-		+ " / ".join([move for move in replay.moves[player][pokemon]])
-		for pokemon in replay.moves[player]])
-		for player in ("win","lose")])
-		for replay in replays]))
-		
+			"\n\n---\n\n".join([
+			"\n\n".join([
+			player.capitalize() + ": " + replay.playerwl[player] + "\n"
+			+ "\n".join([pokemon + ": " 
+			+ " / ".join([move for move in replay.moves[player][pokemon]])
+			for pokemon in replay.moves[player]])
+			for player in ("win","lose")])
+			for replay in replays]))
 		row_count = len(replays) * 18 - 2
+		
 		# Set not removing duplicates
-		print raw
 		return render(request, "spl_stats.html", {
 					"usage_table" : usage_table,
 					"whitespace" : whitespace_table,
 					"replays" : replays,
 					"raw":raw,
 					"row_count":row_count})
-		#for replay in replays:
-	'''
-	- Enter list of URLs
-	- Return:
-		- URL: URL
-		- Player1: Team, Moves
-		- Player2: Team, Moves
-			- Refactor replay to decide player name
-			- Refactor tour matching to call format method
-	- Overall:
-		- Usage stats
-			- Pokemon used
-			- Combinations used'''
-
-
 
 def usage(replays):
 	usage = statCollector.usage(replays)
