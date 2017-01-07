@@ -12,8 +12,20 @@ def index(request):
 		return render(request, "index.html")
 		
 	if request.method == "POST":
-		urls = request.POST["replay_urls"].split("\n")
-		replays = replayCompile.replays_from_links(urls)
+		if "thread_submit" in request.POST:
+			url = request.POST["url"]
+			replays = replayCompile.replays_from_thread(url)
+		elif "range_submit" in request.POST:
+			if not request.POST["tier"]:
+				tier = "gen7pokebankou"
+			else:
+				tier = request.POST["tier"]
+			replays = replayCompile.replays_from_range(
+			range(int(request.POST["start"]),int(request.POST["end"])),
+			tier = tier)
+		elif "link_submit" in request.POST:
+			urls = request.POST["replay_urls"].split("\n")
+			replays = replayCompile.replays_from_links(urls)
 	
 		# Stats
 		usage_table = usage(replays)
