@@ -4,96 +4,61 @@ from itertools import combinations
 from urllib2 import urlopen, Request
 import profile
 
-# User-agent wrapper to mimic browser requests
-REQUEST_HEADER = {"User-Agent" : 
-"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML,"
-"like Gecko) Chrome/54.0.2840.98 Safari/537.36"}
-
-FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Pumpkaboo"}
-
 class replay:
+
+	# User-agent wrapper to mimic browser requests
+	REQUEST_HEADER = {"User-Agent" : 
+	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML,"
+	"like Gecko) Chrome/54.0.2840.98 Safari/537.36"}
 
 	def __init__(self, url):
 		self.url = url
 		self.number = int(url.split("-")[-1])
 		self.tier = url.split("-")[-2]
-		self.replay_content = [line for line in
-			urlopen(Request(url, headers=REQUEST_HEADER))
+		self.replayContent = [line for line in
+			urlopen(Request(url, headers=replay.REQUEST_HEADER))
 			.read()
 			.split("\n")
 			if line.startswith("|")]
-		
+		self.players = self.players() # (Eo, Finchinator) (p1, p2)
 		
 		# Iterate through text vs line by line
 		# Get players
 		
-		#self._players = None
-		self.players = self.get_players() # p1 -> name
-		self.winner = self.winner() # win -> name
+		self.winner = self.winner()
 		winIndex = self.players.index(self.winner)
 		self.loser = self.players[winIndex-1]
-		self.playerwl = {"win":self.winner,
-						 "lose":self.loser} # win -> name
+		self.playerwl = {"win":self.winner,"lose":self.loser}
 		self.wl = {"p"+str(winIndex + 1):"win",
-				   "p"+str((winIndex + 1) % 2 + 1):"lose"} #p1 -> win
-		self._teams = {"win":[], "lose":[]} # win -> teams
-		
-		
-		self.wl = {"p"+str(winIndex + 1):"win",
-				   "p"+str((winIndex + 1) % 2 + 1):"lose"} #win -> p1'''
-		
-		# Info:
-		# win -> name
-		# p1 -> name
-		# p2 -> name
-		# p1 -> team
-		
-		
-		# p1 -> win -> team or
-		# win -> p1 -> team
-		
-		# Need:
-		# win -> team / lose -> team
-		# win -> name
-		# 
-		
-		
-		
-		# win -> p1 or p2 -> name
-		# lose -> p1 or p2 -> name
-		
-		# Teams: {p1 / p2}		
+				   "p"+str((winIndex + 1) % 2 + 1):"lose"}
+		self._teams = None
 		self.leads = None
 		self.moves = None
 		
 	def __repr__(self):
 		return self.players.__str__()
 	
-	#@property
-	def get_players(self):
-		""" Return dict with formatted player names. """
-		players = (line for line in self.replay_content if
+	def players(self):
+		""" Return tuple with formatted player names. """
+		
+		players = (line for line in self.replayContent if
 				   line.startswith("|player"))
 		p1 = next(players).split("|")[3]
 		p2 = next(players).split("|")[3]
-		#self.players = (p1, p2)
-		return (p1,p2)
-		#return {"p1":p1, "p2":p2}
+		return (p1, p2)
 		
 	def generation(self):
 		""" Return int/string representing generation. """
 		# Handle output
 		return next(line.split("|")[2]
-					for line in self.replay_content 
+					for line in self.replayContent 
 					if line.startswith("|gen"))
 	@property
 	def teams(self):
-		if self._teams["win"] and self._teams["lose"]:
+		if self._teams:
 			return self._teams
-		# Generations 1-4: No team preview; must manually parse teams from log
 		if re.compile(".*gen[1-4].*").match(self.tier):
 			return self.teams_from_parse()
-		# Generation 5+: Team preview
 		return self.teams_from_preview()
 	
 	def add_to_team(self, team, pokemon):
@@ -106,34 +71,42 @@ class replay:
 		
 		Only works for gen 5+, where teams are stated at the beginning of
 		replays. 
-		"""	
-		for line in self.replay_content:
+		"""
+		teams = {"win":[], "lose":[]}		
+		for line in self.replayContent:
 			if line.startswith("|poke"):
+			#if line[:5] == "|poke":
 				ll = line.split("|")
 				player = ll[2]
 				poke = format_pokemon(ll[3].split(",")[0])
-				self._teams[self.wl[player]].append(poke)
+				teams[self.wl[player]].append(poke)
 			if line.startswith("|teampreview"):
-				return self._teams
+			#elif line[:12] == "|teampreview":
+				self._teams = teams
+				return teams
 				
 	def teams_from_parse(self):
-		for line in self.replay_content:
+		#|drag|p1a: Zapdos|Zapdos|278\/383
+		#|switch|p1a: Isa|Flygon, F|301\/301
+		teams = {"win":[], "lose":[]}
+		for line in self.replayContent:
 			if line.startswith("|switch") or line.startswith("|drag"):
 				ll = line.split("|")
 				player = ll[2].split("a:")[0]
 				poke = format_pokemon(ll[3].split(",")[0])
-				team = self._teams[self.wl[player]]
+				team = teams[self.wl[player]]
 				if poke not in team:
 					team.append(poke)
-			if len(self._teams["win"]) == 6 and len(self._teams["lose"]) == 6:
+			if len(teams["win"]) == 6 and len(teams["lose"]) == 6:
 				break
-		return self._teams
+		self.teams = teams
+		return teams
 	
 	def get_leads(self):
 		if self.leads:
 			return self.leads
 		leads = {"win":None,"lose":None}
-		for line in self.replay_content:
+		for line in self.replayContent:
 			if leads["win"] and leads["lose"]:
 				self.leads = leads
 				return leads
@@ -150,7 +123,7 @@ class replay:
 		moves = {"win":{pokemon: [] for pokemon in self.teams["win"]},
 				 "lose":{pokemon: [] for pokemon in self.teams["lose"]}}
 		nicknames = {"p1":{},"p2":{}}
-		for line in self.replay_content:
+		for line in self.replayContent:
 			if line.startswith("|move"):
 				ll = line.split("|")
 				p = ll[2]
@@ -178,19 +151,19 @@ class replay:
 	def combos(self, n, teams = None):
 		""" Returns all possible combinations of n Pokemon for both teams. """
 		if not teams:
-			teams = self.teams
+			teams = self.teams_from_preview()
 		return {"win":list(combinations(teams["win"], n)),
 				"lose":list(combinations(teams["lose"], n))}
-
+	
 	def winner(self):
 		""" Parse replay for winner, declared at the bottom of replay. """
-		return (next(line for line in reversed(self.replay_content) 
+		return (next(line for line in reversed(self.replayContent) 
 								if line.startswith("|win"))
 								.split("|")[2].split("<")[0])
 
 	def turn_count(self):
 		""" Find last line marking a turn. Number corresponds to turn count. """
-		return int(next(line for line in reversed(self.replay_content) 
+		return int(next(line for line in reversed(self.replayContent) 
 						if line.startswith("|turn"))
 						.split("|")[2])
 
@@ -198,7 +171,7 @@ class replay:
 		""" Return boolean indicating if Pokemon existed in match. """
 		# TODO: Non-tp gens
 		# Check teams
-		for line in self.replay_content:
+		for line in self.replayContent:
 			if line.startswith("|poke") and pokemon in line:
 				return True
 			if line.startswith("|rule"):
@@ -207,13 +180,18 @@ class replay:
 	def move_in_replay(self, move):
 		""" Return boolean indicating if move was used in match. """
 		m = re.compile("\|move\|.*\|{0}\|.*".format(move))
-		return next((True for line in self.replay_content 
+		return next((True for line in self.replayContent 
 					 if m.match(line)), False)
 
 def format_pokemon(pokemon):
-	base_form = pokemon.split("-")[0] 
-	if base_form in FORMS:
-		return base_form
+	if "-" not in pokemon:
+		return pokemon
+	if pokemon.startswith("Genesect"):
+		return "Genesect"
+	if pokemon.startswith("Keldeo"):
+		return "Keldeo"
+	if pokemon.startswith("Gastrodon"):
+		return "Gastrodon"
 	return pokemon
 
 def format_name(name):
@@ -226,7 +204,6 @@ def format_name(name):
 def main(l):
 	for r in l:
 		a = r.teams_from_preview()
-		b = r.get_moves()
 
 if __name__ == "__main__":
 	l = [replay("http://replay.pokemonshowdown.com/smogtours-ou-39893") for i in xrange(0,100)]
