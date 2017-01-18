@@ -9,7 +9,9 @@ REQUEST_HEADER = {"User-Agent" :
 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML,"
 "like Gecko) Chrome/54.0.2840.98 Safari/537.36"}
 
-FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Pumpkaboo"}
+FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Groudon",
+		 "Kyogre"}
+COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*"}
 
 class replay:
 
@@ -56,7 +58,6 @@ class replay:
 		# win -> team / lose -> team
 		# win -> name
 		# 
-		
 		
 		
 		# win -> p1 or p2 -> name
@@ -106,17 +107,29 @@ class replay:
 		
 		Only works for gen 5+, where teams are stated at the beginning of
 		replays. 
-		"""	
+		"""
 		for line in self.replay_content:
 			if line.startswith("|poke"):
 				ll = line.split("|")
 				player = ll[2]
 				poke = format_pokemon(ll[3].split(",")[0])
 				self._teams[self.wl[player]].append(poke)
+			# |teampreview denotes the conclusion of both teams
 			if line.startswith("|teampreview"):
-				return self._teams
+				# Parse entire log to find specific forms for certain Pokemon
 				
-	def teams_from_parse(self):
+				# Change
+				# return self.teams_from_parse(len([poke for poke in COUNTED_FORMS,etc)
+				#if (poke for poke 
+				try: 
+					next(poke for poke
+					in self._teams["win"] + self._teams["lose"]
+					if poke in COUNTED_FORMS)
+					return self.teams_from_parse(7)
+				except:
+					return self._teams
+				
+	def teams_from_parse(self, limit=6):
 		for line in self.replay_content:
 			if line.startswith("|switch") or line.startswith("|drag"):
 				ll = line.split("|")
@@ -125,7 +138,7 @@ class replay:
 				team = self._teams[self.wl[player]]
 				if poke not in team:
 					team.append(poke)
-			if len(self._teams["win"]) == 6 and len(self._teams["lose"]) == 6:
+			if len(self._teams["win"]) == limit and len(self._teams["lose"]) == limit:
 				break
 		return self._teams
 	
@@ -211,8 +224,8 @@ class replay:
 					 if m.match(line)), False)
 
 def format_pokemon(pokemon):
-	base_form = pokemon.split("-")[0] 
-	if base_form in FORMS:
+	base_form = pokemon.split("-")[0]
+	if base_form in FORMS or pokemon.endswith("-Mega"):
 		return base_form
 	return pokemon
 
