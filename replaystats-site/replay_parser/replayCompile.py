@@ -2,7 +2,7 @@
 
 import multiprocessing.dummy
 import traceback
-from urllib2 import urlopen
+from urllib2 import urlopen, HTTPError
 
 from bs4 import BeautifulSoup
 
@@ -10,15 +10,15 @@ from replay import replay
 
 DEFAULT_URL_HEADER = "http://replay.pokemonshowdown.com/"
 
-def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tier=None):
+def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None):
 	""" Parse given thread for replay links and convert to set of replays. """
 	thread = BeautifulSoup(urlopen(threadurl).read(), "html.parser")
 	urls = (url.get("href") for url in thread.findAll("a") 
 			if url.get("href") and url.get("href").startswith(url_header))
 	# Optional: Filter by tier
 	# TODO: Tier from replay object or URL?
-	if tier:
-		urls = (url for url in urls if url.split("-")[-2] == tier)
+	if tiers:
+		urls = (url for url in urls if url.split("-")[-2] in tiers)
 	return replays_from_links(urls)
 
 def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
@@ -48,8 +48,10 @@ def open_replay(url):
 	""" Validate replay links and open; return None if 404 error. """
 	try:
 		return replay(url)
+	except HTTPError:
+		return
 	except:
-		#traceback.print_exc()
-		#print url
+		traceback.print_exc()
+		print url
 		return	
 

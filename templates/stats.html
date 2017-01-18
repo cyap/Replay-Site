@@ -28,13 +28,12 @@
 	</table>
 
 <pre>
-Raw:
-+ ---- + ------------------ + --- + -------- + ------- +
-| Rank | Pokemon            | Use |  Usage % |  Win %  |
-+ ---- + ------------------ + --- + -------- + ------- +
-{% for element in whitespace %}
-| {{ element.4 }} | {{ element.0 }} | {{ element.1 }} |  {{ element.2 }}  | {{ element.3 }} |
-{% endfor %}
+[CODE]
++ ---- + ------------------ + --- + ------- + ------- +
+| Rank | Pokemon            | Use | Usage % |  Win %  |
++ ---- + ------------------ + --- + ------- + ------- +
+{% for element in whitespace %}| {{ element.4 }} | {{ element.0 }} | {{ element.1 }} | {{ element.2 }} | {{ element.3 }} |
+{% endfor %}[/CODE]
 </pre>
 	{% endblock %}
 </body>
