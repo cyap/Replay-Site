@@ -2,17 +2,30 @@
 
 import multiprocessing.dummy
 import traceback
-from urllib2 import urlopen, HTTPError
+from urllib2 import urlopen, Request, HTTPError
 
 from bs4 import BeautifulSoup
 
 from replay import replay
 
 DEFAULT_URL_HEADER = "http://replay.pokemonshowdown.com/"
+# User-agent wrapper to mimic browser requests
+REQUEST_HEADER = {'User-Agent' : 
+"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML,"
+"like Gecko) Chrome/54.0.2840.98 Safari/537.36"}
 
-def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None):
-	""" Parse given thread for replay links and convert to set of replays. """
-	thread = BeautifulSoup(urlopen(threadurl).read(), "html.parser")
+def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None, 
+						start=1, end=None):
+	""" Parse given thread for replay links and convert to set of replays.
+	Parse entire thread by default, with optional start and end parameters to
+	limit parsing to a range of posts.
+	"""
+	thread = BeautifulSoup(
+			"".join(
+			urlopen(threadurl)
+			.read()
+			.split("</article>")[start-1:end])
+			, "html.parser")
 	urls = (url.get("href") for url in thread.findAll("a") 
 			if url.get("href") and url.get("href").startswith(url_header))
 	# Optional: Filter by tier
@@ -38,6 +51,24 @@ def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
 	urls = (complete_url_header + str(i) for i in range)
 	return replays_from_links(urls)
 
+def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
+	tier="gen7pokebankou"):
+	""" Query the PS replay database for the saved replays of a given username
+		(limit: last 10 pages' worth of replays).
+	"""
+	complete_url_header = url_header + 'search/?user=' + name + '&page='
+	page = BeautifulSoup(
+			"\n".join(
+			(urlopen(Request(complete_url_header + str(i),
+			headers=REQUEST_HEADER))
+			.read() 
+			for i in xrange(1, 11)))
+			, "html.parser")
+	urls = (url.get("href").strip("/") for url in page.findAll("a") 
+			if url.get("data-target"))
+	urls = [url_header + url for url in urls if url.split("-")[-2] == tier]
+	return replays_from_links(urls)
+		
 def replays_from_links(urls):
 	""" Helper function to convert replay links to replay objects. """
 	pool = multiprocessing.dummy.Pool(13)
@@ -51,7 +82,14 @@ def open_replay(url):
 	except HTTPError:
 		return
 	except:
+		# Case 1: Replay with no winner
+		# Case 2: Unsaved replay
 		traceback.print_exc()
 		print url
 		return	
 
+if __name__ == "__main__":
+	#print set(replays_from_user("McMeghan", tier="gen5ou"))
+	a = replays_from_user("Atq)+Fear", tier="gen2ou")
+	for replay in a:
+		print replay.url

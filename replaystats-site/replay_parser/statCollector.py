@@ -103,4 +103,23 @@ def pretty_print(cname, cwidth, usage, wins, total, hide = 1):
 	print body
 	return header + "\n" + body
 #	print footer
-		
+
+def stats_from_text(text):
+	rows = text.split("\n")[3:] # TODO: Account for header
+	split_row = rows[0].split("|")
+	total = int(split_row[3].strip()) / (float(split_row[4].strip().strip("%"))/100)
+
+	return {"usage": Counter({split_row[2].strip(): int(split_row[3].strip()) for
+			split_row in (row.split("|") for row in rows)}),
+			"wins": Counter({split_row[2].strip():
+				int(round(int(split_row[3].strip())
+				* float(split_row[5].strip().strip("%"))/100)) for split_row in (row.split("|") for row in rows)}),
+			"total":total}
+			
+			#"total": next(int(split_row[3].strip()) / int(split_row[4].strip()) for split_row in (rows[0].split("|")))}
+			
+			
+			
+			
+			
+			

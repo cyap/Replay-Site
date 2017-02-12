@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict
+from collections import namedtuple, defaultdict
 from itertools import combinations
 from urllib2 import urlopen, Request
 import profile
@@ -11,75 +11,72 @@ REQUEST_HEADER = {"User-Agent" :
 
 FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Groudon",
 		 "Kyogre"}
-COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*"}
+COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
 
 class replay:
 
 	def __init__(self, url):
 		self.url = url
-		self.number = int(url.split("-")[-1])
-		self.tier = url.split("-")[-2]
+		# Move to other class
+		
 		self.replay_content = [line for line in
 			urlopen(Request(url, headers=REQUEST_HEADER))
 			.read()
 			.split("\n")
 			if line.startswith("|")]
 		
-		
+		# Validate replay based on winner
+		# Move to other class
+		try:
+			self.number = int(url.split("-")[-1])
+			#self.tier = next(line for line in replay_content if line.startswith("|tier"))
+			self.tier = url.split("-")[-2]
+			# Change to parse tier from log rather than URL
+		except:
+			self.number = 0
+			self.tier = "N/A"
+
 		# Iterate through text vs line by line
 		# Get players
 		
-		#self._players = None
-		self.players = self.get_players() # p1 -> name
-		self.winner = self.winner() # win -> name
-		winIndex = self.players.index(self.winner)
-		self.loser = self.players[winIndex-1]
-		self.playerwl = {"win":self.winner,
-						 "lose":self.loser} # win -> name
-		self.wl = {"p"+str(winIndex + 1):"win",
-				   "p"+str((winIndex + 1) % 2 + 1):"lose"} #p1 -> win
+		self._players = None # p1 -> name
+		self._playerwl = None # win -> name
+		win_index = self.players.index(self.playerwl["win"])
+		self.wl = {"p"+str(win_index + 1):"win",
+				   "p"+str((win_index + 1) % 2 + 1):"lose"} #p1 -> win
 		self._teams = {"win":[], "lose":[]} # win -> teams
-		
-		
-		self.wl = {"p"+str(winIndex + 1):"win",
-				   "p"+str((winIndex + 1) % 2 + 1):"lose"} #win -> p1'''
-		
-		# Info:
-		# win -> name
-		# p1 -> name
-		# p2 -> name
-		# p1 -> team
-		
-		
-		# p1 -> win -> team or
-		# win -> p1 -> team
-		
-		# Need:
-		# win -> team / lose -> team
-		# win -> name
-		# 
-		
-		
-		# win -> p1 or p2 -> name
-		# lose -> p1 or p2 -> name
-		
-		# Teams: {p1 / p2}		
 		self.leads = None
 		self.moves = None
 		
 	def __repr__(self):
 		return self.players.__str__()
 	
-	#@property
-	def get_players(self):
+	def validate_replay(self):
+		return self.players and self.winner
+	
+	@property
+	def players(self):
 		""" Return dict with formatted player names. """
+		if self._players:
+			return self._players
 		players = (line for line in self.replay_content if
 				   line.startswith("|player"))
 		p1 = next(players).split("|")[3]
 		p2 = next(players).split("|")[3]
-		#self.players = (p1, p2)
-		return (p1,p2)
-		#return {"p1":p1, "p2":p2}
+		Players = namedtuple('Players', 'p1 p2')
+		return Players(p1, p2)
+		
+	@property
+	def playerwl(self):	
+		""" Parse replay for winner, declared at the bottom of replay. """
+		if self._playerwl:
+			return self._playerwl
+		winner = (next(line for line in reversed(self.replay_content) 
+								if line.startswith("|win"))
+								.split("|")[2].split("<")[0])
+		win_index = self.players.index(winner)
+		loser = self.players[win_index-1]
+		return {"win":winner,"lose":loser}
 		
 	def generation(self):
 		""" Return int/string representing generation. """
@@ -89,7 +86,7 @@ class replay:
 					if line.startswith("|gen"))
 	@property
 	def teams(self):
-		if self._teams["win"] and self._teams["lose"]:
+		if self._teams["win"]:
 			return self._teams
 		# Generations 1-4: No team preview; must manually parse teams from log
 		if re.compile(".*gen[1-4].*").match(self.tier):
@@ -98,7 +95,7 @@ class replay:
 		return self.teams_from_preview()
 	
 	def add_to_team(self, team, pokemon):
-		if not self._teams:
+		if not self._teams["win"]:
 			self.teams_from_parse()
 		self._teams[team].append(pokemon)
 	
@@ -120,7 +117,7 @@ class replay:
 				
 				# Change
 				# return self.teams_from_parse(len([poke for poke in COUNTED_FORMS,etc)
-				#if (poke for poke 
+				
 				try: 
 					next(poke for poke
 					in self._teams["win"] + self._teams["lose"]
@@ -194,12 +191,6 @@ class replay:
 			teams = self.teams
 		return {"win":list(combinations(teams["win"], n)),
 				"lose":list(combinations(teams["lose"], n))}
-
-	def winner(self):
-		""" Parse replay for winner, declared at the bottom of replay. """
-		return (next(line for line in reversed(self.replay_content) 
-								if line.startswith("|win"))
-								.split("|")[2].split("<")[0])
 
 	def turn_count(self):
 		""" Find last line marking a turn. Number corresponds to turn count. """
