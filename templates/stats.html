@@ -7,6 +7,9 @@
 <body>
 
 	{% block content %}
+	# of replays: {{ net_replays }}
+	<br>
+	# of Pokemon: {{ net_mons }}
 	<table>
 		<tr>
 			<th></th>
@@ -28,12 +31,17 @@
 	</table>
 
 <pre>
+[IMG]https://replaystats-eo.herokuapp.com/static/icons/{{usage_table.0.0}}.png[/IMG][B]{{ tier_label }}[/B][IMG]https://replaystats-eo.herokuapp.com/static/icons/{{usage_table.0.0}}.png[/IMG]
 [CODE]
 + ---- + ------------------ + --- + ------- + ------- +
 | Rank | Pokemon            | Use | Usage % |  Win %  |
 + ---- + ------------------ + --- + ------- + ------- +
 {% for element in whitespace %}| {{ element.4 }} | {{ element.0 }} | {{ element.1 }} | {{ element.2 }} | {{ element.3 }} |
 {% endfor %}[/CODE]
+{% if missing %}[LIST]
+{% for miss in missing %}[*][I]Missing {{miss.1}} Pokemon from {{miss.0}}.[/I]
+{% endfor %}[/LIST]
+{% endif %}
 </pre>
 	{% endblock %}
 </body>

@@ -20,5 +20,22 @@
 	<input type="submit" name="link_submit" value="Submit">
 </form>
 
+<div>
+	<h1>Name of player:</h1>
+</div>
+<br>
+<form method="post">
+	{% csrf_token %}
+	Name:
+	<br>
+	<input type="text" name="player">
+	<br>
+	Tier:
+	<br>
+	<input type="text" name="tier">
+	<br>
+	<input type="submit" name="player_submit" value="Submit">
+</form>
+
 </body>
 </html>
