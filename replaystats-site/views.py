@@ -54,8 +54,7 @@ def index(request):
 		
 		# Stats
 		cumulative = (statCollector.stats_from_text(request.POST["stats"]) 
-					  #if "stats" in request.POST else None)
-					  if request.POST["stats"] else None)
+					  if "stats" in request.POST and request.POST["stats"] else None)
 		missing = chain.from_iterable((((replay.playerwl[wl],6-len(replay.teams[wl])) for wl in replay.teams if len(replay.teams[wl]) < 6) for replay in replays))
 		usage_table = usage(replays, tiers, cumulative)
 		whitespace_table = whitespace(usage_table['usage'])

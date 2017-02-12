@@ -78,7 +78,11 @@ def replays_from_links(urls):
 def open_replay(url):
 	""" Validate replay links and open; return None if 404 error. """
 	try:
-		return replay(url)
+		return replay(url,[line for line in
+			urlopen(Request(url, headers=REQUEST_HEADER))
+			.read()
+			.split("\n")
+			if line.startswith("|")])
 	except HTTPError:
 		return
 	except:

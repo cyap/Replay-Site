@@ -15,15 +15,9 @@ COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
 
 class replay:
 
-	def __init__(self, url):
+	def __init__(self, url, replay_content):
 		self.url = url
-		# Move to other class
-		
-		self.replay_content = [line for line in
-			urlopen(Request(url, headers=REQUEST_HEADER))
-			.read()
-			.split("\n")
-			if line.startswith("|")]
+		self.replay_content = replay_content
 		
 		# Validate replay based on winner
 		# Move to other class
