@@ -2,7 +2,7 @@ import operator
 from collections import Counter
 from itertools import chain, combinations
 
-from replay import replay
+from replay import Replay
 
 # Separate responsibilities: for filtering teams and running data on teams
 # Port to database
@@ -17,6 +17,11 @@ def usage(replays):
 	teams = chain.from_iterable([replay.teams["win"]
 							   + replay.teams["lose"] 
 							   for replay in replays])
+	return Counter(teams)
+
+def usage2(replays, key):
+	teams = chain.from_iterable([replay.teams[key] for replay in replays])
+	print teams
 	return Counter(teams)
 
 def wins(replays):
