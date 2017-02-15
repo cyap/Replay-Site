@@ -2,19 +2,24 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+<script src="{% static 'scripts/index.js' %}"></script>
 
 <html>
 <body>
 
-<div>
+<ul class="tab">
+  <li><a href="javascript:void(0)" class="tabLink" onclick="openTab(event, 'thread')" name="threadTab">From thread</a></li>
+  <li><a href="javascript:void(0)" class="tabLink" onclick="openTab(event, 'range')" name="rangeTab">By range</a></li>
+  <li><a href="javascript:void(0)" class="tabLink" onclick="openTab(event, 'link')" name="linkTab">From list of URLs</a></li>
+</ul>
+
+<div id="thread" class="tabContent">
+<form method="post">
 	<h1>From thread:</h1>
 	Example: http://www.smogon.com/forums/threads/smogons-official-ladder-tournament-iii-logs-replays-usage-stats.3582785/
-</div>
-<br>
-
-<form method="post">
+	<br><br>
 	{% csrf_token %}
-	URL:
+	Thread URL:
 	<br>
 	<input type="text" name="url">
 	<br>
@@ -40,13 +45,12 @@
 	<br>
 	<input type="submit" name="thread_submit" value="Submit">
 </form>
-<br>
+</div>
 
-<div>
+<div id="range" class="tabContent">
 	<h1>By range:</h1>
 	Example: 220000, 221000
-</div>
-<br>
+	<br><br>
 <form method="post">
 	{% csrf_token %}
 	Start: 
@@ -63,12 +67,12 @@
 	<br>
 	<input type="submit" name="range_submit" value="Submit">
 </form>
-<br>
-<div>
+</div>
+
+<div id="link" class="tabContent">
 	<h1>From list of URLs:</h1>
 	Example: http://replay.pokemonshowdown.com/gen7pokebankoususpecttest-507567783
-</div>
-<br>
+	<br><br>
 <form method="post">
 	{% csrf_token %}
 	URLs: 
@@ -77,6 +81,7 @@
 	<br>
 	<input type="submit" name="link_submit" value="Submit">
 </form>
+</div>
 
 </body>
 </html>

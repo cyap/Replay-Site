@@ -55,7 +55,7 @@ def index(request):
 		# Stats
 		cumulative = (statCollector.stats_from_text(request.POST["stats"]) 
 					  if "stats" in request.POST and request.POST["stats"] else None)
-		missing = chain.from_iterable((((replay.playerwl[wl],6-len(replay.teams[wl])) for wl in replay.teams if len(replay.teams[wl]) < 6) for replay in replays))
+		missing = chain.from_iterable((((replay.playerwl[wl],6-len(replay.teams[wl])) for wl in ("win","lose") if len(replay.teams[wl]) < 6) for replay in replays))
 		usage_table = usage(replays, tiers, cumulative)
 		whitespace_table = whitespace(usage_table['usage'])
 		return render(request, "stats.html", 
@@ -75,15 +75,21 @@ def spl_index(request):
 			urls = request.POST["replay_urls"].split("\n")
 			replays = replayCompile.replays_from_links(urls)
 		else:
-			replays = replayCompile.replays_from_user(request.POST["player"],tier=request.POST["tier"])
+			replays = replayCompile.replays_from_user(request.POST["player"],
+					  tier=request.POST["tier"])
+			moves = [replay.moves[request.POST["player"]] for replay in replays]
+			choice = request.POST["player"]
+			pairings = [{"replay":replay, "moves":replay.moves[choice]} for replay in replays]
 
-		moves = [replay.get_moves() for replay in replays]
-		
+		#moves = [replay.moves for replay in replays]
+
 		# Overall Stats
-		usage_table = usage(replays)
+		#usage_table = usage(replays)
+		usage_table = usage(replays, key = choice)
 		whitespace_table = whitespace(usage_table)
 		
-		# Raw
+		# Raw original
+		'''
 		raw = (
 			"\n\n---\n\n".join([
 			"\n\n".join([
@@ -93,18 +99,33 @@ def spl_index(request):
 			for pokemon in replay.moves[player]])
 			for player in ("win","lose")])
 			for replay in replays]))
+		row_count = len(replays) * 18 - 2'''
+		raw = (
+			"\n\n---\n\n".join([
+			choice + "\n"
+			+ "\n".join([pokemon + ": " 
+			+ " / ".join([move for move in replay.moves[choice][pokemon]])
+			for pokemon in replay.moves[choice]])
+			for replay in replays]))
 		row_count = len(replays) * 18 - 2
 		
 		# Set not removing duplicates
-		return render(request, "spl_stats.html", {
+		#return render(request, "spl_stats.html", {
+		return render(request, "scout_stats.html", {
 					"usage_table" : usage_table,
 					"whitespace" : whitespace_table,
 					"replays" : replays,
 					"raw":raw,
-					"row_count":row_count})
+					"row_count":row_count,
+					"moves":moves,
+					"pairings":pairings,
+					"choice":choice})
 
-def usage(replays, tiers = [], cumulative = None):
-	usage = statCollector.usage(replays)
+def usage(replays, tiers = [], cumulative = None, key = None):
+	if key:
+		usage = statCollector.usage2(replays, key)
+	else:
+		usage = statCollector.usage(replays)
 	wins = statCollector.wins(replays)
 	total = len(replays) * 2
 	if "gen4ou" in tiers:

@@ -6,7 +6,7 @@ from urllib2 import urlopen, Request, HTTPError
 
 from bs4 import BeautifulSoup
 
-from replay import replay
+from replay import Log, Replay
 
 DEFAULT_URL_HEADER = "http://replay.pokemonshowdown.com/"
 # User-agent wrapper to mimic browser requests
@@ -66,7 +66,8 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 			, "html.parser")
 	urls = (url.get("href").strip("/") for url in page.findAll("a") 
 			if url.get("data-target"))
-	urls = [url_header + url for url in urls if url.split("-")[-2] == tier]
+	urls = [url_header + url for url in urls if len(url.split("-")) > 2 and url.split("-")[-2] == tier]
+	#urls = [url_header + url for url in urls if url.split("-")[-2] == tier]
 	return replays_from_links(urls)
 		
 def replays_from_links(urls):
@@ -76,18 +77,29 @@ def replays_from_links(urls):
 	return set(filter(None, pool.map(open_replay, urls)))
 	
 def open_replay(url):
-	""" Validate replay links and open; return None if 404 error. """
+	""" Open replay links and validate; return None if 404 error. """
+	# Check if URL adheres to the usual format of /*tier-number
 	try:
-		return replay(url,[line for line in
-			urlopen(Request(url, headers=REQUEST_HEADER))
-			.read()
-			.split("\n")
-			if line.startswith("|")])
+		number = int(url.split("-")[-1])
+		tier = url.split("-")[-2]
+	except:
+		number = 0
+		tier = "gen7ou"
+	# Validate log
+	try:
+		log = Log([line for line in 
+				urlopen(Request(url, headers=REQUEST_HEADER))
+				.read()
+				.split("\n")
+				if line.startswith("|")])
+		players = log.parse_players()
+		winner = log.parse_winner()
+		return Replay(log, players, winner, url, number, tier)
 	except HTTPError:
+		# Unsaved replay
 		return
 	except:
-		# Case 1: Replay with no winner
-		# Case 2: Unsaved replay
+		# Corrupted log file
 		traceback.print_exc()
 		print url
 		return	
