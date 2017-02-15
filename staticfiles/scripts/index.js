@@ -1,13 +1,16 @@
-//document.getElementsByName(localStorage.getItem('openTab'))[0].click()
-Window.onload = function() {
+window.onload = function() {
 	// load clicked tab from localStorage
-	console.log("test")
-	document.getElementsByName(Window.localStorage.getItem('openTab'))[0].click()
+	try {
+		document.getElementsByName(localStorage.getItem("openTab"))[0].click();
+	}
+	catch(e) {
+		document.getElementsByName("threadTab")[0].click();
+	}
 };
 
-Window.onbeforeunload = function() {
+window.onbeforeunload = function() {
 	// save clicked tab to localStorage
-	Window.localStorage.setItem('openTab', 
+	localStorage.setItem("openTab", 
 		document.getElementsByClassName("tabLink active")[0].name);
 }
 
@@ -30,6 +33,4 @@ function openTab(event, tabName) {
 	// Show the current tab, and add an "active" class to the link that opened the tab
 	document.getElementById(tabName).style.display = "block";
 	event.currentTarget.className += " active";
-		//localStorage.setItem('openTab', 
-		//document.getElementsByClassName("tabLink active")[0].name);
 }
