@@ -8,78 +8,69 @@
 <body>
 
 <ul class="tab">
-  <li><a href="javascript:void(0)" class="tabLink" onclick="openTab(event, 'thread')" name="threadTab">From thread</a></li>
-  <li><a href="javascript:void(0)" class="tabLink" onclick="openTab(event, 'range')" name="rangeTab">By range</a></li>
-  <li><a href="javascript:void(0)" class="tabLink" onclick="openTab(event, 'link')" name="linkTab">From list of URLs</a></li>
+  <li><a href="javascript:void(0)" class="tabLink" name="threadTab" 
+    onclick="openTab(event, 'thread')">From thread</a></li>
+  <li><a href="javascript:void(0)" class="tabLink" name="rangeTab"
+    onclick="openTab(event, 'range')">By range</a></li>
+  <li><a href="javascript:void(0)" class="tabLink" name="linkTab"
+    onclick="openTab(event, 'link')">From list of URLs</a></li>
 </ul>
 
 <div id="thread" class="tabContent">
+<h1>From thread:</h1>
+Example:
+http://www.smogon.com/forums/threads/smogons-official-ladder-tournament-iii-logs-replays-usage-stats.3582785/<br><br>
+
 <form method="post">
-	<h1>From thread:</h1>
-	Example: http://www.smogon.com/forums/threads/smogons-official-ladder-tournament-iii-logs-replays-usage-stats.3582785/
-	<br><br>
-	{% csrf_token %}
-	Thread URL:
-	<br>
-	<input type="text" name="url">
-	<br>
-	Starting post (Default = First):
-	<br>
-	<input type="text" name="start">
-	<br>
-	Ending post (Default = Last):
-	<br>
-	<input type="text" name="end">
-	<br>
-	Tiers (Default = gen7pokebankou):
-	<br>
-	<input type="text" name="tier">
-	<br>
-	Cumulative stats: 
-	<br>
-	<textarea rows="4" cols="80" name="stats"></textarea>
-	<br>
-	Additional replays:
-	<br>
-	<textarea rows="4" cols="80" name="additional"></textarea>
-	<br>
-	<input type="submit" name="thread_submit" value="Submit">
+  {% csrf_token %}
+  <ul class="form">
+    <li>Thread URL:</li>
+    <li><input type="text" name="url"></li>
+    <li>Starting post (Default = First):</li>
+    <li><input type="text" name="start"></li>
+    <li>Ending post (Default = Last):</li>
+    <li><input type="text" name="end"></li>
+    <li>Tiers (Default = gen7pokebankou):</li>
+    <li><input type="text" name="tier"></li>
+    <li>Cumulative stats:</li>
+    <li><textarea rows="4" cols="80" name="stats"></textarea></li>
+    <li>Additional replays:</li>
+    <li><textarea rows="4" cols="80" name="additional"></textarea></li>
+    <li><input type="submit" name="thread_submit" value="Submit"></li>
+  </ul>
 </form>
+
 </div>
 
 <div id="range" class="tabContent">
-	<h1>By range:</h1>
-	Example: 220000, 221000
-	<br><br>
+<h1>By range:</h1>
+Example: 220000, 221000<br><br>
+
 <form method="post">
-	{% csrf_token %}
-	Start: 
-	<br>
-	<input type="text" name="start">
-	<br>
-	End: 
-	<br>
-	<input type="text" name="end">
-	<br>
-	Tier (Default = gen7pokebankou):
-	<br>
-	<input type="text" name="tier">
-	<br>
-	<input type="submit" name="range_submit" value="Submit">
+  {% csrf_token %}
+  <ul class="form">
+    <li>Start:</li>
+    <li><input type="text" name="start"></li>
+    <li>End:</li>
+    <li><input type="text" name="end"></li>
+    <li>Tier (Default = gen7pokebankou):</li>
+    <li><input type="text" name="tier"></li>
+    <li><input type="submit" name="range_submit" value="Submit"></li>
+  </ul>
 </form>
 </div>
 
 <div id="link" class="tabContent">
-	<h1>From list of URLs:</h1>
-	Example: http://replay.pokemonshowdown.com/gen7pokebankoususpecttest-507567783
-	<br><br>
+<h1>From list of URLs:</h1>
+Example: http://replay.pokemonshowdown.com/gen7pokebankoususpecttest-507567783
+<br><br>
 <form method="post">
-	{% csrf_token %}
-	URLs: 
-	<br>
-	<textarea rows="4" cols="80" name="replay_urls"></textarea>
-	<br>
-	<input type="submit" name="link_submit" value="Submit">
+  {% csrf_token %}
+  <ul class="form">
+    <li>URLs:</li>
+	<li><textarea rows="4" cols="80" name="replay_urls"></textarea></li>
+	<li><input type="submit" name="link_submit" value="Submit"></li>
+  </ul>
 </form>
 </div>
 
