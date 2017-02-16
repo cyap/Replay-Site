@@ -21,5 +21,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index),
     url(r'^spl2039', views.spl_index),
-    #url(r'^tournament', views.index),
+    url(r'^tournament', views.tour_index),
 ]

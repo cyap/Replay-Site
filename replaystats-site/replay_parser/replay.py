@@ -15,10 +15,13 @@ class Log:
 		""" Return dict with formatted player names. """
 		players = (line for line in self.text if
 				   line.startswith("|player"))
+		#p1 = format_name(next(players).split("|")[3])
+		#p2 = format_name(next(players).split("|")[3])
 		p1 = next(players).split("|")[3].lower()
 		p2 = next(players).split("|")[3].lower()
-		Players = namedtuple('Players', 'p1 p2')
-		return Players(p1, p2)
+		#Players = namedtuple('Players', 'p1 p2')
+		#return Players(p1, p2)
+		return (p1, p2)
 	
 	def parse_winner(self):
 		""" Parse replay for winner, declared at the bottom of replay. """

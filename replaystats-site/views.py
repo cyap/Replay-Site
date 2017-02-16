@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.shortcuts import redirect
 
-from replay_parser import replayCompile, statCollector
+from replay_parser import replayCompile, statCollector, tournament
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
@@ -74,23 +74,10 @@ def spl_index(request):
 		if "link_submit" in request.POST:
 			urls = request.POST["replay_urls"].split("\n")
 			replays = replayCompile.replays_from_links(urls)
-		else:
-			replays = replayCompile.replays_from_user(request.POST["player"],
-					  tier=request.POST["tier"])
-			moves = [replay.moves[request.POST["player"]] for replay in replays]
-			choice = request.POST["player"]
-			pairings = [{"replay":replay, "moves":replay.moves[choice]} for replay in replays]
-
-		#moves = [replay.moves for replay in replays]
-
-		# Overall Stats
-		#usage_table = usage(replays)
-		usage_table = usage(replays, key = choice)
-		whitespace_table = whitespace(usage_table)
-		
-		# Raw original
-		'''
-		raw = (
+			choice = None
+			template = "spl_stats.html"
+			
+			raw = (
 			"\n\n---\n\n".join([
 			"\n\n".join([
 			player.capitalize() + ": " + replay.playerwl[player] + "\n"
@@ -99,19 +86,41 @@ def spl_index(request):
 			for pokemon in replay.moves[player]])
 			for player in ("win","lose")])
 			for replay in replays]))
-		row_count = len(replays) * 18 - 2'''
-		raw = (
+			moves = [replay.moves for replay in replays]
+			pairings = None
+			
+		else:
+			replays = replayCompile.replays_from_user(request.POST["player"],
+					  tier=request.POST["tier"])
+			moves = [replay.moves[request.POST["player"]] for replay in replays]
+			choice = request.POST["player"]
+			pairings = [{"replay":replay, "moves":replay.moves[choice]} for replay in replays]
+			template = "scout_stats.html"
+			
+			raw = (
 			"\n\n---\n\n".join([
 			choice + "\n"
 			+ "\n".join([pokemon + ": " 
 			+ " / ".join([move for move in replay.moves[choice][pokemon]])
 			for pokemon in replay.moves[choice]])
 			for replay in replays]))
+
+		
+
+		# Overall Stats
+		#usage_table = usage(replays)
+		usage_table = usage(replays, key = choice)
+		whitespace_table = whitespace(usage_table)
+		
+		# Raw original
+
+		
 		row_count = len(replays) * 18 - 2
 		
 		# Set not removing duplicates
 		#return render(request, "spl_stats.html", {
-		return render(request, "scout_stats.html", {
+		
+		return render(request, template, {
 					"usage_table" : usage_table,
 					"whitespace" : whitespace_table,
 					"replays" : replays,
@@ -194,50 +203,72 @@ def accumulate(iterable, func=operator.add):
 	for element in it:
 		total = func(total, element)
 		yield total
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-'''
-def index(request):
+
+def tour_index(request):	
 	if request.method == "GET":
-		return render(request, "index.html")
+		return render(request, "indextour.html")
 
 	if request.method == "POST":
-		start = request.POST["start"]
-		end = request.POST["end"]
-		url = request.POST["url"]
-		rng = range(int(start), int(end))
-		pairings = tournament.parsePairings(url = url)
-		participants = tournament.participantsFromPairings(pairings)
-		tour = tournament.Tournament(
-			   replayCompile.replaysFromRange(rng), pairings, participants)
-		replays = tour.matchTournament()
-		matches = tour.pairingReplayMap
-		return render(request, "results.html", {
-		#return redirect('/replays/', {
-			"start" : start,
-			"end" : end,
-			"url" : url,
-			#"pairings" : pairings,
-			"participants" : participants,
-			"matches" : [(str(pairing).strip("frozenset"), 
-						  matches[pairing][0].number, 
-						  matches[pairing][0].players,
-						  matches[pairing][1],
-						  matches[pairing][0].url) if pairing in matches 
-						  else (
-						  (str(pairing).strip("frozenset")), "", "", "No match found") 
-						  for pairing in pairings]
-		})'''
+	
+		if "replay_submit" in request.POST:
+			replay_urls = set(request.POST.getlist("replays"))
+			replays = set(replay for replay in request.session["replays"] if replay.url in replay_urls)
+			# change to dict
+			tiers = []
+			try:
+				gen_num = next((char for char in min(tiers) 
+					if char.isdigit()), 6)
+				tier_name = (min(tiers).split(gen_num)[1]
+					.split("pokebank")[-1].upper())
+				tier_label = TIERS[int(gen_num)-1] + " " + tier_name
+			except:
+				tier_label = "???"
+		
+			# Stats
+			cumulative = (statCollector.stats_from_text(request.POST["stats"]) 
+						  if "stats" in request.POST and request.POST["stats"]
+						  else None)
+			missing = chain.from_iterable((((
+				replay.playerwl[wl],6-len(replay.teams[wl])) 
+				for wl in ("win","lose") if len(replay.teams[wl]) < 6) 
+				for replay in replays))
+			usage_table = usage(replays, tiers, cumulative)
+			whitespace_table = whitespace(usage_table['usage'])
+			return render(request, "stats.html", 
+						 {"usage_table" : usage_table['usage'],
+						  "whitespace" : whitespace_table,
+						  "net_mons" : usage_table['net_mons'],
+						  "net_replays" : usage_table['net_replays'],
+						  "missing":missing,
+						  "tier_label":tier_label})
+			
+		else:
+			start = request.POST["start"]
+			end = request.POST["end"]
+			url = request.POST["url"]
+			rng = range(int(start), int(end))
+			pairings = tournament.parse_pairings(url = url)
+			participants = tournament.participants_from_pairings(pairings)
+			tour = tournament.Tournament(
+				   replayCompile.replays_from_range(rng), pairings,
+				   participants)
+			replays = tour.match_tournament()
+			request.session["replays"] = replays
+			matches = tour.pairingReplayMap
+			return render(request, "results.html", {
+			#return redirect('/replays/', {
+				"start" : start,
+				"end" : end,
+				"url" : url,
+				#"pairings" : pairings,
+				"participants" : participants,
+				"matches" : [(str(pairing).strip("frozenset"), 
+							  matches[pairing][0].number, 
+							  matches[pairing][0].players,
+							  matches[pairing][1],
+							  matches[pairing][0].url) if pairing in matches 
+							  else ((str(pairing).strip("frozenset")), 
+							  "", "", "no match") 
+							  for pairing in pairings],
+				"unmatched_replays":tour.unmatchedReplays
+		})
