@@ -120,3 +120,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ( os.path.join(BASE_DIR, 'replaystats-site/static'), )
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'

@@ -1,10 +1,14 @@
-#tables {
-	float:left;
-	margin-right: 70px;
+h1 {
+	font-size: 1.5em;
+	margin-bottom: 0;
 }
 
-#raw {
-	float:left;
+.move {
+    width: 100px;
+}
+
+.pokemon_col {
+	width: 80px;
 }
 
 pre {
@@ -14,34 +18,32 @@ pre {
     margin-bottom:5px;
 }
 
+#raw {
+	float:left;
+}
+
 #ruw {
 	float:left;
 	width:500px;
 	height:1000px;
 }
 
-h1 {
-	font-size: 1.5em;
-	margin-bottom: 0;
-}
-
 table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
 }
+
+#tables {
+	float:left;
+	margin-right: 70px;
+}
+
 th, td {
     padding: 5px;
 }
+
 th {
     text-align: left;
-}
-
-.move {
-    width: 100px;
-}
-
-.pokemon_col {
-	width: 80px;
 }
 
 .exact {
@@ -54,6 +56,14 @@ th {
 
 .partial {
 	background-color:#EAA01F
+}
+
+/* Style the tab content */
+.tabContent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
 }
 
 ul.form {
@@ -95,10 +105,6 @@ ul.tab li a:hover {background-color: #ddd;}
 /* Create an active/current tablink class */
 ul.tab li a:focus, .active {background-color: #ccc;}
 
-/* Style the tab content */
-.tabContent {
-    display: none;
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-top: none;
+#unmatched_replays {
+	float:left;
 }
