@@ -92,8 +92,9 @@ def spl_index(request):
 		else:
 			replays = replayCompile.replays_from_user(request.POST["player"],
 					  tier=request.POST["tier"])
-			moves = [replay.moves[request.POST["player"]] for replay in replays]
-			choice = request.POST["player"]
+			choice = request.POST["player"].lower()
+			moves = [replay.moves[choice] for replay in replays]
+			
 			pairings = [{"replay":replay, "moves":replay.moves[choice]} for replay in replays]
 			template = "scout_stats.html"
 			
