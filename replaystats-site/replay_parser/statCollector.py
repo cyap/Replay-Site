@@ -39,7 +39,7 @@ def combos(replays, size = 2, cutoff = 2):
 			 for replay in replays)
 
 	combos = Counter((format_combo(frozenset(combination)) 
-					for combination in combos))
+					for combination in uncounted_combos))
 	if cutoff:
 		combos = Counter({combo:use for combo,use in combos.iteritems() 
 						  if use > cutoff})
@@ -112,7 +112,7 @@ def pretty_print(cname, cwidth, usage, wins, total, hide = 1):
 def stats_from_text(text):
 	rows = text.split("\n")[3:] # TODO: Account for header
 	split_row = rows[0].split("|")
-	total = int(split_row[3].strip()) / (float(split_row[4].strip().strip("%"))/100)
+	total = round(int(split_row[3].strip()) / (float(split_row[4].strip().strip("%"))/100))
 
 	return {"usage": Counter({split_row[2].strip(): int(split_row[3].strip()) for
 			split_row in (row.split("|") for row in rows)}),

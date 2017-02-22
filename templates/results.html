@@ -8,21 +8,28 @@
 <body>
 
 {% block content %}
-
-Start: {{ start }}
-<br>
-End: {{ end }}
-<br>
-Thread: <a href={{url}}>{{ url }}</a>
-<br>
+Start: {{ start }}<br>
+End: {{ end }}<br>
+Thread: <a href={{url}}>{{ url }}</a><br>
 
 <div id="tables">
+  <table>
+  	<tr class={{ match.3 }}>
+  	  <th>Pairings</th>
+  	</tr>
+  	{% for match in matches %}
+  	<tr>
+  	  <td>{{ match.0 }}</td>
+  	</tr>
+  	{% endfor %}
+  </table>
+</div>
+<div id="table-match">
 <form method=post>
   {% csrf_token %}
   
   <table>
 	<tr>
-		<th>Pairing</th>
 		<th>Drag</th>
 		<th>#</th>
 		<th>Players</th> 
@@ -31,15 +38,12 @@ Thread: <a href={{url}}>{{ url }}</a>
 
 	{% for match in matches %}
 	<tr class={{ match.3 }}>
-	  <td>{{ match.0 }}</td>
-	  <div class="replay_container" >
-	  	<td draggable="true" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
-	    <input type="hidden" name="replays" value={{ match.4 }}>
-	      <td><a href="{{ match.4 }}">{{ match.1 }}</a></td>
-	    </input>
-	    <td>{{ match.2 }}</td>
-	    <td>{{ match.3 }}</td>  
-	  </div>
+	  <td draggable="true" id="{{match.0}}" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
+	  <input type="hidden" name="replays" value={{ match.4 }}>
+	  <td><a href="{{ match.4 }}">{{ match.1 }}</a></td>
+	  </input>
+	  <td>{{ match.2 }}</td>
+	  <td>{{ match.3 }}</td>
 	</tr>
 	{% endfor %}
   </table>
@@ -47,6 +51,7 @@ Thread: <a href={{url}}>{{ url }}</a>
   <input type="submit" name="replay_submit" value="Submit">
 </form>
 </div>
+
 {% endblock %}
 
 <table id="unmatched_replays">
@@ -59,7 +64,7 @@ Thread: <a href={{url}}>{{ url }}</a>
 {% for replay in unmatched_replays %}
   <tr>
   <div class="replay_container">
-	<td draggable="true">#</td>
+	<td draggable="true" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
 	<input type="hidden" name="replays" value={{ replay.url }}><td><a href="{{ replay.url }}">{{ replay.number }}</a></td></input>
 	<td>{{ replay.players }}</td>
   </div>

@@ -84,7 +84,7 @@ def open_replay(url):
 		tier = url.split("-")[-2]
 	except:
 		number = 0
-		tier = "gen7ou"
+		tier = None
 	# Validate log
 	try:
 		log = Log([line for line in 

@@ -1,17 +1,43 @@
 window.onload = function() {
 	// load clicked tab from localStorage
+	// update save
 	try {
 		document.getElementsByName(localStorage.getItem("openTab"))[0].click();
 	}
 	catch(e) {
 		document.getElementsByName("threadTab")[0].click();
 	}
+	
+	/*
+	// Function to fill in search
+	Array.prototype.forEach.call(document.getElementsByClassName("tier_input"),
+	function(field) {
+		field.oninput = function() {
+			// If value ends in comma
+			if (field.value.slice(-1) == ",") {
+				// Store as filter
+				// TODO: styling
+				filter = document.createElement("span");
+				filter.textContent = field.value.slice(0,-1)
+				filter.className = "tier_filter"
+				field.parentNode.insertBefore(filter, field)
+				// Insert x: field.parentNode.insertBefore(
+				field.value = ""
+				// TODO: Change to accept hidden input
+			}
+		
+	});*/
 };
 
 window.onbeforeunload = function() {
 	// save clicked tab to localStorage
-	localStorage.setItem("openTab", 
-		document.getElementsByClassName("tabLink active")[0].name);
+	try {
+		localStorage.setItem("openTab", 
+			document.getElementsByClassName("tabLink active")[0].name);
+	}
+	catch(e) {
+		return;
+	}
 }
 
 function openTab(event, tabName) {
@@ -31,6 +57,15 @@ function openTab(event, tabName) {
 		});
 
 	// Show the current tab, and add an "active" class to the link that opened the tab
-	document.getElementById(tabName).style.display = "block";
-	event.currentTarget.className += " active";
+	// Add x
+	//if (event.currentTarget.className.endsWith(" active")) {
+	//	document.getElementById(tabName).style.display = "none";
+	//	event.currentTarget.className -= " active";
+	//}
+	//else {
+		document.getElementById(tabName).style.display = "block";
+		event.currentTarget.className += " active";
+	//}
 }
+
+
