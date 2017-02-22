@@ -33,9 +33,13 @@ table, th, td {
     border-collapse: collapse;
 }
 
+#table-match {
+	float:left;
+	margin-right:70px;
+}
+
 #tables {
 	float:left;
-	margin-right: 70px;
 }
 
 th, td {
@@ -44,6 +48,12 @@ th, td {
 
 th {
     text-align: left;
+}
+
+.tier_filter {
+	background-color:blue;
+	color:#3FD188;
+	padding:2px;
 }
 
 .exact {

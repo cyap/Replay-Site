@@ -31,9 +31,12 @@ http://www.smogon.com/forums/threads/smogons-official-ladder-tournament-iii-logs
     <li>Ending post (Default = Last):</li>
     <li><input type="text" name="end"></li>
     <li>Tiers (Default = gen7pokebankou):</li>
-    <li><input type="text" name="tier"></li>
+    <li><input type="text" name="tier" class="tier_input"></li>
     <li>Cumulative stats:</li>
-    <li><textarea rows="4" cols="80" name="stats"></textarea></li>
+    <li>
+      <textarea rows="4" cols="80" name="stats"></textarea>
+      <button>Add more</button>
+    </li>
     <li>Additional replays:</li>
     <li><textarea rows="4" cols="80" name="additional"></textarea></li>
     <li><input type="submit" name="thread_submit" value="Submit"></li>
@@ -54,7 +57,7 @@ Example: 220000, 221000<br><br>
     <li>End:</li>
     <li><input type="text" name="end"></li>
     <li>Tier (Default = gen7pokebankou):</li>
-    <li><input type="text" name="tier"></li>
+    <li><input type="text" name="tier" class="tier_input"></li>
     <li><input type="submit" name="range_submit" value="Submit"></li>
   </ul>
 </form>

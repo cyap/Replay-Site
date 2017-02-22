@@ -51,6 +51,7 @@ class Tournament():
 		pairing = frozenset(format_name(player) for player in replay.players)
 		if pairing in pairings:
 			self.pairingReplayMap[pairing] = (replay, "exact")
+			pairings.remove(pairing)
 			return True
 		return False
 	
@@ -62,6 +63,7 @@ class Tournament():
 		pairing = frozenset(format_name(self.get_closest(p)) for p in replay.players)
 		if pairing in pairings:
 			self.pairingReplayMap[pairing] = (replay, "fuzzy")
+			pairings.remove(pairing)
 			return True
 		return False
 	
@@ -74,6 +76,7 @@ class Tournament():
 			for pairing in pairings:
 				if self.get_closest(format_name(player)) in pairing:
 					self.pairingReplayMap[pairing] = (replay, "partial")
+					pairings.remove(pairing)
 					return True
 		return False
 		
@@ -106,12 +109,12 @@ class Tournament():
 		#print exact, len(exact)
 		#print "Fuzzy matches", fuzzy, len(fuzzy)
 		#print "Partial matches:", partial, len(partial)
-		print "Unmatched replays:", self.unmatchedReplays
-		print "Unmatched pairings:", self.unmatchedPairings
+		#print "Unmatched replays:", self.unmatchedReplays
+		#print "Unmatched pairings:", self.unmatchedPairings
 		#print self.fuzzyNameMatches
-		for x in self.pairings:
-			if x in self.pairingReplayMap:
-				print x, self.pairingReplayMap[x]
+		#for x in self.pairings:
+			#if x in self.pairingReplayMap:
+				#print x, self.pairingReplayMap[x]
 		
 		r = exact | fuzzy | partial
 		#print sorted([replay.number for replay in r])

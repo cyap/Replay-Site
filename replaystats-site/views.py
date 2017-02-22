@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.shortcuts import redirect
 
-from replay_parser import replayCompile, statCollector, tournament
+from replay_parser import replayCompile, statCollector, tournament, circuitTours
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
@@ -35,6 +35,7 @@ def index(request):
 			  .split("\n")))
 			
 		if "range_submit" in request.POST:
+			tiers = []
 			if not request.POST["tier"]:
 				tier = "gen7pokebankou"
 			else:
@@ -138,6 +139,8 @@ def usage(replays, tiers = [], cumulative = None, key = None):
 		usage = statCollector.usage(replays)
 	wins = statCollector.wins(replays)
 	total = len(replays) * 2
+	
+	#circuitTours.extended_stats(replays, usage)
 	if "gen4ou" in tiers:
 		usage.update(list(chain.from_iterable(
 		("Rotom-Appliance" for i in range(usage[poke]))
@@ -210,9 +213,9 @@ def tour_index(request):
 		return render(request, "indextour.html")
 
 	if request.method == "POST":
-	
 		if "replay_submit" in request.POST:
 			replay_urls = set(request.POST.getlist("replays"))
+			print replay_urls
 			replays = set(replay for replay in request.session["replays"] if replay.url in replay_urls)
 			# change to dict
 			tiers = []
@@ -235,6 +238,8 @@ def tour_index(request):
 				for replay in replays))
 			usage_table = usage(replays, tiers, cumulative)
 			whitespace_table = whitespace(usage_table['usage'])
+			
+			
 			return render(request, "stats.html", 
 						 {"usage_table" : usage_table['usage'],
 						  "whitespace" : whitespace_table,
@@ -250,11 +255,16 @@ def tour_index(request):
 			rng = range(int(start), int(end))
 			pairings = tournament.parse_pairings(url = url)
 			participants = tournament.participants_from_pairings(pairings)
+			tiers = ["gen7oususpecttest", "gen7ou"]
+			replays = set()
+			for tier in tiers:
+				replays = replays | replayCompile.replays_from_range(rng, tier=tier) 
 			tour = tournament.Tournament(
-				   replayCompile.replays_from_range(rng), pairings,
+				   replays, pairings,
 				   participants)
 			replays = tour.match_tournament()
-			request.session["replays"] = replays
+			request.session["replays"] = replays | tour.unmatchedReplays
+			print request.session["replays"]
 			matches = tour.pairingReplayMap
 			return render(request, "results.html", {
 			#return redirect('/replays/', {

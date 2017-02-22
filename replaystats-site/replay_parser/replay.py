@@ -30,11 +30,14 @@ class Log:
 									.split("|")[2].split("<")[0]).lower()
 		
 	def parse_generation(self):
-		""" Return int/string representing generation. """
-		# Handle output
-		return next(line.split("|")[2]
+		""" Return int representing generation. """
+		return int(next(line.split("|")[2]
 					for line in self.text 
-					if line.startswith("|gen"))
+					if line.startswith("|gen")))
+					
+	def parse_tier(self):
+		return next(line.split("|")[2].lower() for line in self.text 
+					if line.startswith("|tier"))
 	
 	def parse_teams_from_preview(self):
 		""" Return dict containing p1 and p2's teams.
@@ -128,7 +131,7 @@ class Log:
 					 
 class Replay:
 
-	def __init__(self, log, players, winner, url=None, number=None, tier="gen7ou"):
+	def __init__(self, log, players, winner, url=None, number=None, tier=None):
 		self.log = log
 		self._players = players
 		self._winner = winner
@@ -136,7 +139,10 @@ class Replay:
 		# Optional args
 		self.url = url
 		self.number = number
-		self.tier = tier
+		if tier:
+			self.tier = tier
+		else:
+			self.tier = self.log.parse_tier()
 
 		# Refactor to properties
 		#self.leads = None
@@ -160,26 +166,38 @@ class Replay:
 		try:
 			return self._playerwl
 		except:
-			win_index = self.players.index(self._winner)
-			self._loser = self.players[win_index-1]
+			try:
+				win_index = self.players.index(self._winner)
+				self._loser = self.players[win_index-1]
+				win_num = "p"+str(win_index + 1)
+				lose_num = "p"+str((win_index + 1) % 2 + 1)
+			except:
+				win_num = next(line.split("|")[2] for line 
+					in reversed(self.log.text) if line.startswith("|player"))
+				lose_num = "p2" if win_num == "p1" else "p1"
+				self._loser = self._players[int(lose_num[1])-1]
+			
 			return {"win":self._winner, 
 					"lose":self._loser,
-					"p"+str(win_index + 1):"win", 
-					"p"+str((win_index + 1) % 2 + 1):"lose"}
-		
+					win_num:"win", 
+					lose_num:"lose"}
+	@property
 	def generation(self):
 		""" Return int/string representing generation. """
-		# Handle output
-		return next(line.split("|")[2]
-					for line in self.text 
-					if line.startswith("|gen"))
+		try:
+			return self._generation
+		except:
+			self._generation = self.log.parse_generation()
+			return self._generation
+			
 	@property
 	def teams(self):
 		try:
 			return self._teams
 		except:
 			# Generations 1-4: No team preview; must parse entire log for teams
-			if re.compile(".*gen[1-4].*").match(self.tier):
+			#if re.compile(".*gen.*[1-4].*").match(self.tier):
+			if self.generation < 5:
 				teams = self.log.parse_teams_from_scan()
 			# Generation 5+: Team preview
 			else:
