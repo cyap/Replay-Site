@@ -13,15 +13,69 @@ TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
 
 def index(request):
 	if request.method == "GET":
-		return render(request, "index.html")
+		return render(request, "index2.html")
 		
 	if request.method == "POST":
+	
+		print request.POST
+		# Thread
+		replays_from_thread = set(chain.from_iterable(
+			(replayCompile.replays_from_thread(
+				threadurl=threadurl, 
+				tiers=({tier.strip() for tier in tiers.split(",")} 
+					if tiers else {"gen7pokebankou"}), 
+				start=int(start or 1), 
+				end=int(end) if end else None)
+				for threadurl, tiers, start, end in zip(
+					request.POST.getlist("thread_url"),
+					request.POST.getlist("thread_tiers"),
+					request.POST.getlist("thread_start"),
+					request.POST.getlist("thread_end")
+			))))
+		
+		# Range
+		replays_from_range = set(chain.from_iterable(
+			(replayCompile.replays_from_range(
+				range=range(int(start),int(end)), tier=tier)
+				for start, end, tier in zip(
+					request.POST.getlist("range_start"),
+					request.POST.getlist("range_end"),
+					request.POST.getlist("range_tiers")))))
+
+		# Links
+		replays_from_links = replayCompile.replays_from_links(
+								request.POST["replay_urls"]
+								.split("\n"))
+
+		# Stats
+		try:
+			cumulative = reduce((lambda x,y: 
+							{"usage":x["usage"] + y["usage"],
+							"wins":x["wins"] + y["wins"],
+							"total":x["total"] + y["total"]}),
+						(statCollector.stats_from_text(text) for text in
+						 request.POST.getlist("stats")))
+		except:
+			cumulative = None
+		
+		
+		replays = replays_from_thread | replays_from_links | replays_from_range
+		tiers = {}
+		#tiers=({tier.strip() for tier in request.POST["thread_title"].split(",")} 
+					#if request.POST["thread_title"] else {"gen7pokebankou"})
+					
+		# Refactor
+		# Rotom method should go in .replay
+		# For tier display: calculate / autofill in form
+		
+		'''
 		if "link_submit" in request.POST:
 			tiers = [] #refactor
 			urls = request.POST["replay_urls"].split("\n")
 			replays = replayCompile.replays_from_links(urls)
 			
-		if "thread_submit" in request.POST:
+		#if "thread_submit" in request.POST:
+		if request.POST["parse_type"] == "thread":
 			if not request.POST["tier"]:
 				tiers = {"gen7pokebankou"}
 			else:
@@ -31,10 +85,12 @@ def index(request):
 			replays = (replayCompile.replays_from_thread(url, tiers=tiers,
 			start=int(request.POST["start"]) if request.POST["start"] else 1,
 			end=int(request.POST["end"]) if request.POST["end"] else None)
-			| replayCompile.replays_from_links(request.POST["additional"]
+			#| replayCompile.replays_from_links(request.POST["additional"]
+			| replayCompile.replays_from_links(request.POST["replay_urls"]
 			  .split("\n")))
-			
-		if "range_submit" in request.POST:
+		
+		if request.POST["parse_type"] == "range_submit":
+		#if "range_submit" in request.POST:
 			tiers = []
 			if not request.POST["tier"]:
 				tier = "gen7pokebankou"
@@ -43,7 +99,7 @@ def index(request):
 			replays = replayCompile.replays_from_range(
 					  				range(int(request.POST["start"]),
 					  				int(request.POST["end"])),
-					  				tier=tier)
+					  				tier=tier)'''
 		# Tier
 		# move to replays
 		try:
@@ -53,9 +109,7 @@ def index(request):
 		except:
 			tier_label = "???"
 		
-		# Stats
-		cumulative = (statCollector.stats_from_text(request.POST["stats"]) 
-					  if "stats" in request.POST and request.POST["stats"] else None)
+
 		missing = chain.from_iterable((((replay.playerwl[wl],6-len(replay.teams[wl])) for wl in ("win","lose") if len(replay.teams[wl]) < 6) for replay in replays))
 		usage_table = usage(replays, tiers, cumulative)
 		whitespace_table = whitespace(usage_table['usage'])
@@ -140,6 +194,8 @@ def usage(replays, tiers = [], cumulative = None, key = None):
 	wins = statCollector.wins(replays)
 	total = len(replays) * 2
 	
+	for pokemon in usage.most_common():
+		print pokemon[0], pokemon[1], pokemon[1]*100/total
 	#circuitTours.extended_stats(replays, usage)
 	if "gen4ou" in tiers:
 		usage.update(list(chain.from_iterable(

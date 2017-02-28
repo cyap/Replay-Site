@@ -1,5 +1,6 @@
 h1 {
 	font-size: 1.5em;
+	margin-top: 0;
 	margin-bottom: 0;
 }
 
@@ -68,6 +69,35 @@ th {
 	background-color:#EAA01F
 }
 
+.form {
+	padding: 10px;
+	border: 2px solid black;
+	margin: 5px;
+
+	background-color:white;
+}
+
+.form_pane {
+	padding: 10px;
+	border: 2px solid black;
+	margin: 5px;
+	background-color: #f0f0f5;
+}
+
+#parse_types {
+	margin: 5px;
+}
+
+#index_form {
+	border: 2px solid black;
+	padding: 5px;
+	background-color: white;
+}
+
+.form_template.hidden {
+	display:none;
+}
+
 /* Style the tab content */
 .tabContent {
     display: none;
@@ -79,11 +109,12 @@ th {
 ul.form {
 	display: block;
     list-style-type: none;
-    margin-top: 1em;
-    margin-bottom: 1 em;
     margin-left: 0;
     margin-right: 0;
-    padding-left: 0;
+    padding-left: 10px;
+    margin-top: 1em;
+    margin-bottom: 0;
+    
 }
 /* Style the list */
 ul.tab {
