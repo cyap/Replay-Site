@@ -1,10 +1,15 @@
-#tables {
-	float:left;
-	margin-right: 70px;
+h1 {
+	font-size: 1.5em;
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
-#raw {
-	float:left;
+.move {
+    width: 100px;
+}
+
+.pokemon_col {
+	width: 80px;
 }
 
 pre {
@@ -14,34 +19,42 @@ pre {
     margin-bottom:5px;
 }
 
+#raw {
+	float:left;
+}
+
 #ruw {
 	float:left;
 	width:500px;
 	height:1000px;
 }
 
-h1 {
-	font-size: 1.5em;
-	margin-bottom: 0;
-}
-
 table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
 }
+
+#table-match {
+	float:left;
+	margin-right:70px;
+}
+
+#tables {
+	float:left;
+}
+
 th, td {
     padding: 5px;
 }
+
 th {
     text-align: left;
 }
 
-.move {
-    width: 100px;
-}
-
-.pokemon_col {
-	width: 80px;
+.tier_filter {
+	background-color:blue;
+	color:#3FD188;
+	padding:2px;
 }
 
 .exact {
@@ -56,14 +69,52 @@ th {
 	background-color:#EAA01F
 }
 
+.form {
+	padding: 10px;
+	border: 2px solid black;
+	margin: 5px;
+
+	background-color:white;
+}
+
+.form_pane {
+	padding: 10px;
+	border: 2px solid black;
+	margin: 5px;
+	background-color: #f0f0f5;
+}
+
+#parse_types {
+	margin: 5px;
+}
+
+#index_form {
+	border: 2px solid black;
+	padding: 5px;
+	background-color: white;
+}
+
+.form_template.hidden {
+	display:none;
+}
+
+/* Style the tab content */
+.tabContent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
 ul.form {
 	display: block;
     list-style-type: none;
-    margin-top: 1em;
-    margin-bottom: 1 em;
     margin-left: 0;
     margin-right: 0;
-    padding-left: 0;
+    padding-left: 10px;
+    margin-top: 1em;
+    margin-bottom: 0;
+    
 }
 /* Style the list */
 ul.tab {
@@ -95,10 +146,6 @@ ul.tab li a:hover {background-color: #ddd;}
 /* Create an active/current tablink class */
 ul.tab li a:focus, .active {background-color: #ccc;}
 
-/* Style the tab content */
-.tabContent {
-    display: none;
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-top: none;
+#unmatched_replays {
+	float:left;
 }
