@@ -20,19 +20,23 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 	Parse entire thread by default, with optional start and end parameters to
 	limit parsing to a range of posts.
 	"""
-	thread = BeautifulSoup(
-			"".join(
-			urlopen(threadurl)
-			.read()
-			.split("</article>")[start-1:end])
-			, "html.parser")
-	urls = (url.get("href") for url in thread.findAll("a") 
-			if url.get("href") and url.get("href").startswith(url_header))
-	# Optional: Filter by tier
-	# TODO: Tier from replay object or URL?
-	if tiers:
-		urls = (url for url in urls if url.split("-")[-2] in tiers)
-	return replays_from_links(urls)
+	try:
+		thread = BeautifulSoup(
+				"".join(
+				urlopen(threadurl)
+				.read()
+				.split("</article>")[start-1:end])
+				, "html.parser")
+		urls = (url.get("href") for url in thread.findAll("a") 
+				if url.get("href") and url.get("href").startswith(url_header))
+		# Optional: Filter by tier
+		# TODO: Tier from replay object or URL?
+		if tiers:
+			urls = (url for url in urls if url.split("-")[-2] in tiers)
+		return replays_from_links(urls)
+	except:
+		return {}
+
 
 def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
 	tier="gen7pokebankou"):

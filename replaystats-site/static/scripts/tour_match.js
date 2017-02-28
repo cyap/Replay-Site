@@ -3,9 +3,6 @@ var swap, swap2;
 function dropFunc(obj) {
 	// swap two
 	//event.target = event
-	console.log(event.target)
-	//console.log(event.dataTransfer)
-	//console.log(event.dataTransfer.getData("picked"))
 	swap2 = event.target.parentNode;
 	position = swap2.nextSibling;
 	swap.parentNode.insertBefore(swap2, swap)
@@ -18,7 +15,6 @@ function overFunc() {
 };
 
 function pickFunc() {
-	console.log(event.target)
 	swap = event.target.parentNode
 	//dragged = event.target;
     //event.dataTransfer.setData("picked", event.target.id);
