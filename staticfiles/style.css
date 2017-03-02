@@ -72,8 +72,8 @@ th {
 .form {
 	padding: 10px;
 	border: 2px solid black;
-	margin: 5px;
-
+	margin-top: 5px;
+	margin-bottom: 5px;
 	background-color:white;
 }
 
@@ -96,6 +96,10 @@ th {
 
 .form_template.hidden {
 	display:none;
+}
+
+.rawtext {
+	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
 }
 
 /* Style the tab content */
