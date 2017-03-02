@@ -19,42 +19,57 @@ def index(request):
 	
 		print request.POST
 		# Thread
-		replays_from_thread = set(chain.from_iterable(
-			(replayCompile.replays_from_thread(
-				threadurl=threadurl, 
-				tiers=({tier.strip() for tier in tiers.split(",")} 
-					if tiers else {"gen7pokebankou"}), 
-				start=int(start or 1), 
-				end=int(end) if end else None)
-				for threadurl, tiers, start, end in zip(
-					request.POST.getlist("thread_url"),
-					request.POST.getlist("thread_tiers"),
-					request.POST.getlist("thread_start"),
-					request.POST.getlist("thread_end")
-			))))
+		replays_from_thread = set(
+			chain.from_iterable(
+				(replayCompile.replays_from_thread(
+					threadurl=threadurl, 
+					tiers=({tier.strip() for tier in tiers.split(",")} 
+						if tiers else {"gen7pokebankou"}), 
+					start=int(start or 1), 
+					end=int(end) if end else None)
+					for threadurl, tiers, start, end in zip(
+						request.POST.getlist("thread_url"),
+						request.POST.getlist("thread_tiers"),
+						request.POST.getlist("thread_start"),
+						request.POST.getlist("thread_end")
+					)
+				)
+			)
+		)
+		
 		
 		# Range
-		replays_from_range = set(chain.from_iterable(
-			(replayCompile.replays_from_range(
-				range=range(int(start),int(end)), tier=tier)
-				for start, end, tier in zip(
-					request.POST.getlist("range_start"),
-					request.POST.getlist("range_end"),
-					request.POST.getlist("range_tiers")))))
+		replays_from_range = set(
+			chain.from_iterable(
+				(replayCompile.replays_from_range(
+					range=range(int(start), int(end)), tier=tier)
+					for start, end, tier in zip(
+						request.POST.getlist("range_start"),
+						request.POST.getlist("range_end"),
+						request.POST.getlist("range_tiers")
+					)
+				)
+			)
+		)
+		
 
 		# Links
 		replays_from_links = replayCompile.replays_from_links(
 								request.POST["replay_urls"]
-								.split("\n"))
+								.split("\n")
+							)
 
 		# Stats
 		try:
-			cumulative = reduce((lambda x,y: 
-							{"usage":x["usage"] + y["usage"],
-							"wins":x["wins"] + y["wins"],
-							"total":x["total"] + y["total"]}),
-						(statCollector.stats_from_text(text) for text in
-						 request.POST.getlist("stats")))
+			cumulative = reduce(
+				(lambda x,y: {
+					"usage":x["usage"] + y["usage"],
+					"wins":x["wins"] + y["wins"],
+					"total":x["total"] + y["total"]
+				}), 
+				(statCollector.stats_from_text(text) for text in
+				request.POST.getlist("stats"))
+			)
 		except:
 			cumulative = None
 		

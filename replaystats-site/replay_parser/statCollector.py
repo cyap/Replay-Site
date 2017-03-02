@@ -122,7 +122,7 @@ def stats_from_text(text):
 					* float(split_row[5].strip().strip("%"))/100)) for split_row in (row.split("|") for row in rows)}),
 				"total":total}
 	except:
-		return None
+		return {"usage": Counter(), "wins": Counter(), "total": 0}
 			
 			#"total": next(int(split_row[3].strip()) / int(split_row[4].strip()) for split_row in (rows[0].split("|")))}
 			

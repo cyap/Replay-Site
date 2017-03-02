@@ -24,8 +24,8 @@ $(document).ready(function() {
 	
 	// Add more button
 	$("#stats_more").on("click", function() {
-		//$("#stats_pane").append($("#stats_form").clone());
-		$("#stats_form").clone().insertBefore($("#stats_more"));
+		$(".stats.form:first").clone().insertBefore($("#stats_more"))
+		.find("textarea").val("");
 	})
 	
 	// On form input

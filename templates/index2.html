@@ -5,7 +5,6 @@
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="{% static 'scripts/index.js' %}"></script>
 
-
 <html>
 <body>
 
@@ -48,15 +47,15 @@
 	</div>
   </div>
   <div class="form_pane" id="links_pane">
+    Replay URLs:
     <div class="form" id="links_form">
-      Replay URLs:<br>
 	  <textarea rows="4" cols="80" name="replay_urls"></textarea><br>
     </div>
   </div>
   <div class="form_pane" id="stats_pane">
-    <div class="form" id="stats_form">
-      Cumulative stats:<br>
-	  <textarea rows="4" cols="80" name="stats"></textarea><br>
+    Cumulative stats:
+    <div class="stats form">
+	  <textarea class="rawtext" name="stats" rows="4" cols="80"></textarea><br>
     </div>
     <input type="button" id="stats_more" value="Add more" /><br>
   </div>
