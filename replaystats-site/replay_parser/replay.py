@@ -232,6 +232,7 @@ class Replay:
 				self._moves[self.playerwl[player]] = self._moves[player]
 			self._moves[self._loser] = self._moves["lose"]
 			self._moves[self._winner] = self._moves["win"]
+			print self._moves
 			return self._moves
 					
 	# Refactor in other classes

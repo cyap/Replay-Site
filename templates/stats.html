@@ -6,43 +6,51 @@
 <html>
 <body>
 
-	{% block content %}
-	# of replays: {{ net_replays }}
-	<br>
-	# of Pokemon: {{ net_mons }}
-	<table>
-		<tr>
-			<th></th>
-			<th>Pokemon</th>
-			<th>Usage</th>
-			<th>Usage %</th> 
-			<th>Win %</th>
-		</tr>
-  
-		{% for element in usage_table %}
-		<tr>
-			<td><img src="static/icons/{{element.0}}.png"></td>
-			<td>{{ element.0 }}</td>
-			<td>{{ element.1 }}</td> 
-			<td>{{ element.2 }}</td>
-			<td>{{ element.3 }}</td>
-		</tr>
-		{% endfor %}
-	</table>
+{% block content %}
 
-<pre>
-[IMG]https://replaystats-eo.herokuapp.com/static/icons/{{usage_table.0.0}}.png[/IMG][B]{{ tier_label }}[/B][IMG]https://replaystats-eo.herokuapp.com/static/icons/{{usage_table.0.0}}.png[/IMG]
-[CODE]
-+ ---- + ------------------ + --- + ------- + ------- +
-| Rank | Pokemon            | Use | Usage % |  Win %  |
-+ ---- + ------------------ + --- + ------- + ------- +
-{% for element in whitespace %}| {{ element.4 }} | {{ element.0 }} | {{ element.1 }} | {{ element.2 }} | {{ element.3 }} |
-{% endfor %}[/CODE]
-{% if missing %}[LIST]
-{% for miss in missing %}[*][I]Missing {{miss.1}} Pokemon from {{miss.0}}.[/I]
-{% endfor %}[/LIST]
-{% endif %}
-</pre>
-	{% endblock %}
+
+<div class="results pane info">
+# of replays: {{ net_replays }}<br>
+# of Pokemon: {{ net_mons }}
+</div>
+
+<div id="wrapper">
+<div class="results pane visual">
+<table>
+  <tr>
+    <th></th>
+    <th>Pokemon</th>
+    <th>Usage</th>
+    <th>Usage %</th> 
+    <th>Win %</th>
+  </tr>
+
+  {% for element in usage_table %}
+  <tr>
+    <td><img src="static/icons/{{element.0}}.png"></td>
+    <td>{{ element.0 }}</td>
+    <td>{{ element.1 }}</td> 
+    <td>{{ element.2 }}</td>
+    <td>{{ element.3 }}</td>
+  </tr>
+{% endfor %}
+</table>
+</div>
+
+<div class="results pane text">
+Usage:<br>
+<textarea class="rawtext results">
+{{ usage_whitespace }}
+</textarea><br>
+
+Moves:<br>
+<textarea class="rawtext results">
+{{ moves_whitespace }}
+</textarea>
+</div>
+
+
+{% endblock %}
+</div>
 </body>
 </html>
