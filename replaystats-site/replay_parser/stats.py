@@ -4,7 +4,10 @@ from itertools import chain, combinations, groupby
 
 from replay import Replay
 
-AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
+AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*" "Rotom-Appliance"}
+ROTOM_FORMS = ["Rotom-Wash", "Rotom-Heat", "Rotom-Mow", "Rotom-Fan", "Rotom-Frost"]
+PUMPKIN_FORMS = ["", "-Large", "-Super", "-Small"]
+ARCEUS_FORMS = ["", "-Bug", "-Dark", "-Dragon", "-Electric", "-Fairy", "-Fighting", "-Fire", "-Flying", "-Ghost", "-Grass", "-Ground", "-Ice", "-Poison", "-Psychic", "-Rock", "-Steel", "-Water"]
 # Separate responsibilities: for filtering teams and running data on teams
 # Port to database
 
@@ -63,24 +66,45 @@ def lead_wins(replays):
 	return Counter(leads)
 
 def moves(replays, pokemonList):
-	# replay.moves = {win = team, lose = team}
-	# team = [pokemon:moveset, pokemon2:moveset]
-		# Create move counter
+	# Create move counter
 	return {pokemon: Counter(chain.from_iterable([
-				replay.moves["win"].get(pokemon, [])
-			  + replay.moves["lose"].get(pokemon, []) for replay in replays]))
-				for pokemon in pokemonList}
-	# check if pokemon in teams -> sets?
-	# [iterable of moves]
-	# return {pokemon:moveCounter, pokemon:moveCounter}
+						replay.moves["win"].get(pokemon, [])
+					  + replay.moves["lose"].get(pokemon, []) for replay in replays]))
+						for pokemon in pokemonList}
+	#return {key: value for key, value in unfiltered_moves.iteritems() if value} 
 
 def move_wins(replays, pokemonList):
+
+	
 	return {pokemon: Counter(chain.from_iterable([
 		replay.moves["win"].get(pokemon, []) for replay in replays]))
 		for pokemon in pokemonList}
+	#return {key: value for key, value in unfiltered_moves.iteritems() if value} 
 	
 def format_combo(pairing):
 	return str(pairing).strip("frozenset(").strip(")").replace("'","")
+	
+	
+def aggregate_forms(data, generation="4", counter=False):
+	if generation == "4":
+		if counter:
+			data.update(list(chain.from_iterable(
+				("Rotom-Appliance" for i in range(data[poke]))
+				for poke in data if poke.startswith("Rotom-"))))
+		else:
+			data["Rotom-Appliance"] = reduce(lambda x,y:x+y, (data.get(form, Counter()) 
+				for form in ROTOM_FORMS))
+	else:
+	# TODO: Try / catach with +=
+		if not counter:
+			data["Gourgeist-*"] = reduce(lambda x,y: x+y, 
+				(data.get("Gourgeist"+form, Counter()) for form in PUMPKIN_FORMS))
+			data["Pumpkaboo-*"] = reduce(lambda x,y: x+y, 
+				(data.get("Pumpkaboo"+form, Counter()) for form in PUMPKIN_FORMS))
+			data["Arceus-*"] = reduce(lambda x,y: x+y, 
+				(data.get("Arceus"+form, Counter()) for form in ARCEUS_FORMS))
+	return data
+
 			
 def pretty_print(cname, cwidth, usage, wins, total):
 	header = (

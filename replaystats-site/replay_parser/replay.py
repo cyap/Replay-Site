@@ -1,11 +1,11 @@
 import re
-from collections import namedtuple, defaultdict
+from collections import namedtuple, defaultdict, OrderedDict
 from itertools import combinations, islice
 import profile
 
 FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Groudon",
 		 "Kyogre"}
-COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
+COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 
 class Log:
 	def __init__(self, text):
@@ -13,15 +13,22 @@ class Log:
 	
 	def parse_players(self):
 		""" Return dict with formatted player names. """
-		players = (line for line in self.text if
-				   line.startswith("|player"))
+		player_lines = (line for line in self.text if
+				   line.startswith("|player") and len(line.split("|")) > 3)
+		# Handle name formatting
 		#p1 = format_name(next(players).split("|")[3])
 		#p2 = format_name(next(players).split("|")[3])
-		p1 = next(players).split("|")[3].lower()
-		p2 = next(players).split("|")[3].lower()
+		
+		players = OrderedDict()
+		for line in player_lines:
+			ll = line.split("|")
+			# Player -> Number
+			players[ll[3].lower()] = ll[2]
+		return players
+		
 		#Players = namedtuple('Players', 'p1 p2')
 		#return Players(p1, p2)
-		return (p1, p2)
+		#return (p1, p2)
 	
 	def parse_winner(self):
 		""" Parse replay for winner, declared at the bottom of replay. """
@@ -31,9 +38,12 @@ class Log:
 		
 	def parse_generation(self):
 		""" Return int representing generation. """
-		return int(next(line.split("|")[2]
+		try:
+			return int(next(line.split("|")[2]
 					for line in self.text 
 					if line.startswith("|gen")))
+		except:
+			return None
 					
 	def parse_tier(self):
 		return next(line.split("|")[2].lower() for line in self.text 
@@ -101,15 +111,15 @@ class Log:
 				# Glitch in replay formatting
 				if re.match("p[12]{1}:", p):
 					p = p.replace(":","a:")
-				player = p.split("a:")[0]
+				player = re.split("[ab]:",p)[0]
 				pokemon = nicknames[player][p]
 				move = ll[3]
 				moveset = moves[player][pokemon]
 				if move not in moveset:
 					moveset.append(move)
 			if line.startswith("|switch") or line.startswith("|drag"):
-				ll= line.split("|") 
-				player = ll[2].split("a:")[0]
+				ll= line.split("|")
+				player = re.split("[ab]:",ll[2])[0]
 				nickname = ll[2]
 				pokemon = format_pokemon(ll[3].split(",")[0])
 				if nickname not in nicknames[player]:
@@ -146,19 +156,23 @@ class Replay:
 
 		# Refactor to properties
 		#self.leads = None
-		#self.moves = None
-		
+
 	def __repr__(self):
 		return self.players.__str__()
 	
 	@property
 	def players(self):
-		""" Return dict with formatted player names. """
+		""" Return ordered pair (p1, p2) with players' names. Additional names,
+		which result from replacement players joining a battle in the instance
+		of a disconnection, are stored in a private variable rather than
+		displayed on access. 
+		"""
 		try:
-			return self._players
+			# Player 1, Player 2
+			return self._players.keys()[0:2]
 		except:
 			self._players = self.log.parse_players()
-			return self._players
+			return self._players.keys()[0:2]
 		
 	@property
 	def playerwl(self):	
@@ -166,6 +180,12 @@ class Replay:
 		try:
 			return self._playerwl
 		except:
+			# p1 -> name
+			win_player = self._players[self._winner]
+			lose_num = 1 ^ 2 ^ int(win_player[-1])
+			lose_player = "p" + str(lose_num)
+			self._loser = self.players[lose_num-1]
+			'''
 			try:
 				win_index = self.players.index(self._winner)
 				self._loser = self.players[win_index-1]
@@ -175,12 +195,11 @@ class Replay:
 				win_num = next(line.split("|")[2] for line 
 					in reversed(self.log.text) if line.startswith("|player"))
 				lose_num = "p2" if win_num == "p1" else "p1"
-				self._loser = self._players[int(lose_num[1])-1]
-			
+				self._loser = self._players[int(lose_num[1])-1]'''
 			return {"win":self._winner, 
 					"lose":self._loser,
-					win_num:"win", 
-					lose_num:"lose"}
+					win_player:"win", 
+					lose_player:"lose"}
 	@property
 	def generation(self):
 		""" Return int/string representing generation. """

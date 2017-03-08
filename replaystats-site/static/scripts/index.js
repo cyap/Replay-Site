@@ -1,32 +1,32 @@
-
-	/*try {
-	document.getElementById("form_pane").insertAdjacentHTML("afterbegin", localStorage.getItem("filled_form"))
-	}
-	catch(e) {
-		console.log("failed");}*/
 $(document).ready(function() {
 		
 	// Attach event handlers to radio buttons
-	$("#parse_types").children().each(function() {
-		$(this).click(function() {
-			$("#parse_pane").children().each(function() {
-				$(this).addClass("hidden");
-				$(":input", this).each(function() {
-					$(this).prop("disabled", true);
-				});
-			});
-			$("#"+this.value).removeClass("hidden")
-			$(":input","#"+this.value).each(function() {
-				$(this).prop("disabled", false);
-			});
-		});
+	
+	// Options pane
+	$("#parse_types").children().click(function() {
+		$("#parse_pane").children().addClass("hidden")
+			.find(":input")
+			.prop("disabled",true);
+		$("#"+this.value).removeClass("hidden").find(":input").prop("disabled",false);
+	});
+	
+	// Forms pane
+	$(".stats.form").find(":radio").click(function() {
+		$(this).siblings(".rawtext").attr("name", "stats_" + $(this).val())
 	});
 	
 	// Add more button
 	$("#stats_more").on("click", function() {
-		$(".stats.form:first").clone().insertBefore($("#stats_more"))
-		.find("textarea").val("");
-	})
+		// Clone div and reset textarea
+		var clone = $(".stats.form:last").clone(true);
+		clone.find("textarea").val("");
+		// Rename input
+		clone.find("input").attr("name", function() {
+			return $(this).attr("name").slice(0,-1) 
+			+ String(parseInt($(this).attr("name").slice(-1)) + 1)
+		});
+		clone.insertBefore($("#stats_more"));
+	});
 	
 	// On form input
 	$("#thread_tiers").on("input", function(event) {
@@ -35,12 +35,6 @@ $(document).ready(function() {
 	
 	$("#thread_button").click()
 });
-	
-				
-				
-									   
-
-	
 	//document.getElementById("thread_button").click()
 	/*
 	// Function to fill in search
