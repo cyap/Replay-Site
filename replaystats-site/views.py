@@ -6,9 +6,9 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.shortcuts import redirect
 
-from replay_parser import replayCompile, statCollector, tournament, circuitTours
+from replay_parser import replayCompile, stats, tournament, circuitTours
 
-AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Rotom-Appliance"}
+AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
 
 def index(request):
@@ -22,7 +22,7 @@ def index(request):
 				(replayCompile.replays_from_thread(
 					threadurl=threadurl, 
 					tiers=({tier.strip() for tier in tiers.split(",")} 
-						if tiers else {"gen7pokebankou"}), 
+							if tiers else {"gen7pokebankou"}), 
 					start=int(start or 1), 
 					end=int(end) if end else None)
 					for threadurl, tiers, start, end in zip(
@@ -53,27 +53,27 @@ def index(request):
 		)
 
 		# Stats
-		cumulative = reduce(
+		
+		print request.POST.getlist("stats_usage")
+		# Usage
+		usage_from_text = reduce(
 			(lambda x,y: 
 				{
 				"usage":x["usage"] + y["usage"],
 				"wins":x["wins"] + y["wins"],
 				"total":x["total"] + y["total"]
 				}
-			), (statCollector.stats_from_text(text) 
-				for text in request.POST.getlist("stats"))
+			), (stats.stats_from_text(text) 
+				for text in request.POST.getlist("stats_usage") or [""])
 		)
 		
 		# Aggregate replays
 		replays = replays_from_thread | replays_from_links | replays_from_range
 		
-		#tiers = {}
-		tiers=({tier.strip() for tier in request.POST["thread_tiers"].split(",")} 
-					if request.POST["thread_tiers"] else {"gen7pokebankou"})
-					
 		# Refactor
-		# Rotom method should go in .replay
-		# For tier display: calculate / autofill in form
+		tiers = {tier.strip() for tier in 
+				 request.POST.get("thread_tiers", "gen7pokebankou")
+				 .split(",")}
 		
 		# Tier
 		# move to replays
@@ -85,58 +85,81 @@ def index(request):
 			tier_label = "???"
 			
 		# Usage
-		usage = statCollector.usage(replays)
-		wins = statCollector.wins(replays)
+		usage = stats.aggregate_forms(
+			stats.usage(replays),gen_num, counter=True)
+		wins = stats.aggregate_forms(stats.wins(replays),gen_num,counter=True)
 		total = len(replays) * 2
 		
-		# Handling gen 4 rotom forms
-		if "gen4ou" in tiers:
-			usage.update(list(chain.from_iterable(
-			("Rotom-Appliance" for i in range(usage[poke]))
-			for poke in usage if poke.startswith("Rotom-"))))
-		
-			wins.update(list(chain.from_iterable(
-			("Rotom-Appliance" for i in range(wins[poke]))
-			for poke in usage if poke.startswith("Rotom-"))))
+		# Advanced stats
+		if True:
+			moves = stats.aggregate_forms(
+				stats.moves(replays, usage.keys()),gen_num)
+			move_wins = stats.aggregate_forms((
+				stats.move_wins(replays, usage.keys())))
+			'''
+			if True:
+				# Cumulative moves
+				moves_from_text = [
+					{
+					chart.split("\n")[0].split("|")[2].strip(" "):
+					stats.stats_from_text(chart) 
+					for chart in submission.split("\n\n")
+					}for submission in (request.POST.getlist("stats_moves"))]
+				#except:
+					#moves_from_text = []
+				print moves_from_text
+				# {Pokemon: {usage, wins, total}}++
+				pokemon_set = set(chain(dict.keys() for dict in moves_from_text))
+				cumulative_move_usage = {
+					pokemon: 
+					reduce((lambda x,y: x+y), 
+					(dict[pokemon]["usage"] for dict in moves_from_text)) 
+					for pokemon in pokemon_set}
+				print cumulative_move_usage
+				# list of dicts'''
+
+			moves_whitespace = "\n".join(
+				(stats.pretty_print(pokemon, 23, moves[pokemon],
+				move_wins[pokemon], uses) for pokemon, uses 
+				in usage.most_common() if moves[pokemon]))
+		else:
+			moves_whitespace = ""
+			
 			
 		# Adding cumulative stats
-		if cumulative:
-			usage.update(cumulative["usage"])
-			wins.update(cumulative["wins"])
-			total += cumulative["total"]
+		if usage_from_text:
+			usage.update(usage_from_text["usage"])
+			wins.update(usage_from_text["wins"])
+			total += usage_from_text["total"]
 		
 		usage_table = usage_view(usage, wins, total)
 		
+		# Throw error if no replays found
 		sprite_header = (
 			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
 			"{0}.png[/IMG][B]{1}[/B]"
 			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
 			"{0}.png[/IMG]"
 			).format(usage_table[0][0], tier_label)
+			
 		# Missing Pokemon
 		missing = chain.from_iterable(
-			(((replay.playerwl[wl],6-len(replay.teams[wl])) 
+			(((replay.playerwl[wl], 6-len(replay.teams[wl])) 
 			for wl in ("win","lose") if len(replay.teams[wl]) < 6) 
 			for replay in replays))
 		missing_whitespace = ("\n[LIST]" + "\n".join(
 				 "[*][I]Missing {0} Pokemon from {1}.[/I]"
 				 .format(miss[1], miss[0]) for miss in missing) + "\n[/LIST]" 
-				 if set(missing) else "")
+				 if missing else "")
 
 		usage_whitespace = (sprite_header + "\n[CODE]\n" +
-			statCollector.pretty_print("Pokemon", 18, usage, wins, total)
+			stats.pretty_print("Pokemon", 18, usage, wins, total)
 			+ "[/CODE]" + missing_whitespace)
 
-		# Advanced stats
-		# if advanced stats:
-		# Counter of moves
-		moves = statCollector.moves(replays, usage.keys())
-		move_wins = statCollector.move_wins(replays, usage.keys())
 
-		moves_whitespace = "\n".join(
-			(statCollector.pretty_print(pokemon, 23, moves[pokemon],
-			move_wins[pokemon], uses) for pokemon, uses 
-			in usage.most_common()))
+			
+		players = [replay.players for replay in replays]
+		print players
 
 		return render(request, "stats.html", 
 					 {"usage_table" : usage_table,
@@ -171,8 +194,9 @@ def spl_index(request):
 			pairings = None
 			
 		else:
-			replays = replayCompile.replays_from_user(request.POST["player"],
-					  tier=request.POST["tier"])
+			replays = replayCompile.replays_from_user(
+				request.POST["player"].replace(" ", "+"),
+				tier=request.POST["tier"])
 			choice = request.POST["player"].lower()
 			moves = [replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2") for replay in replays]
 			
@@ -263,12 +287,12 @@ def accumulate(iterable, func=operator.add):
 def usage(replays, tiers = [], cumulative = None, key = None):
 	# For scouting
 	if key:
-		usage = statCollector.usage2(replays, key)
+		usage = stats.usage2(replays, key)
 	else:
-		usage = statCollector.usage(replays)
+		usage = stats.usage(replays)
 		
 	# Separate
-	wins = statCollector.wins(replays)
+	wins = stats.wins(replays)
 	total = len(replays) * 2
 	
 	# For scouting
@@ -343,7 +367,7 @@ def tour_index(request):
 				tier_label = "???"
 		
 			# Stats
-			cumulative = (statCollector.stats_from_text(request.POST["stats"]) 
+			cumulative = (stats.stats_from_text(request.POST["stats"]) 
 						  if "stats" in request.POST and request.POST["stats"]
 						  else None)
 			missing = chain.from_iterable((((

@@ -109,7 +109,6 @@ def open_replay(url):
 		return	
 
 if __name__ == "__main__":
-	#print set(replays_from_user("McMeghan", tier="gen5ou"))
 	a = replays_from_user("Atq)+Fear", tier="gen2ou")
 	for replay in a:
 		print replay.url
