@@ -34,6 +34,7 @@ $(document).ready(function() {
 	});
 	
 	$("#thread_button").click()
+	$(".stats.form").find(":radio:first").click()
 });
 	//document.getElementById("thread_button").click()
 	/*

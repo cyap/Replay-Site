@@ -101,7 +101,8 @@ th {
 .rawtext.results {
 	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
 	width: 425px;
-	height: 500px;
+	height: 250px;
+	white-space: nowrap;
 }
 
 .results.pane {
@@ -150,3 +151,5 @@ ul.form {
 	float:left;
 }
 
+.replay-listing {
+}
