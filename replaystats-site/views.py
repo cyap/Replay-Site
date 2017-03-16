@@ -1,75 +1,64 @@
 from itertools import groupby, chain, repeat
+from collections import Counter
 import operator
+import re
 
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template import RequestContext
-from django.shortcuts import redirect
 
 from replay_parser import replayCompile, stats, tournament, circuitTours
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
+COL_WIDTH = 23
 
 def index(request):
 	if request.method == "GET":
 		return render(request, "index2.html")
 		
 	if request.method == "POST":
-		# Thread
-		replays_from_thread = set(
-			chain.from_iterable(
-				(replayCompile.replays_from_thread(
-					threadurl=threadurl, 
-					tiers=({tier.strip() for tier in tiers.split(",")} 
-							if tiers else {"gen7pokebankou"}), 
-					start=int(start or 1), 
-					end=int(end) if end else None)
-					for threadurl, tiers, start, end in zip(
-						request.POST.getlist("thread_url"),
-						request.POST.getlist("thread_tiers"),
-						request.POST.getlist("thread_start"),
-						request.POST.getlist("thread_end")
-					)
-				)
-			)
-		)
-		# Range
-		replays_from_range = set(
-			chain.from_iterable(
-				(replayCompile.replays_from_range(
-					range=range(int(start), int(end)), tier=tier)
-					for start, end, tier in zip(
-						request.POST.getlist("range_start"),
-						request.POST.getlist("range_end"),
-						request.POST.getlist("range_tiers")
-					)
-				)
-			)
-		)
-		# Links
-		replays_from_links = replayCompile.replays_from_links(
-			request.POST["replay_urls"].split("\n")
-		)
+	
+		# Check from which form
+		
+		# Resubmission
+		if "resubmit" in request.POST:
+			# Save new replays
+			replays = replayCompile.replays_from_links(
+				request.POST.getlist("replay_urls"))
+			request.POST = request.session["form"]
+			
+		else:
+			# Thread
+			thread_replays = set(
+				chain.from_iterable(
+					(replayCompile.replays_from_thread(
+						threadurl=threadurl, 
+						tiers=({tier.strip() for tier in tiers.split(",")} 
+								if tiers else {"gen7pokebankou"}), 
+						start=int(start or 1), 
+						end=int(end) if end else None)
+						for threadurl, tiers, start, end in zip(
+							request.POST.getlist("thread_url"),
+							request.POST.getlist("thread_tiers"),
+							request.POST.getlist("thread_start"),
+							request.POST.getlist("thread_end")))))
+			# Range
+			range_replays = set(
+				chain.from_iterable(
+					(replayCompile.replays_from_range(
+						range=range(int(start), int(end)), tier=tier)
+						for start, end, tier in zip(
+							request.POST.getlist("range_start"),
+							request.POST.getlist("range_end"),
+							request.POST.getlist("range_tiers")))))
+			# Links
+			link_replays = replayCompile.replays_from_links(
+				request.POST["replay_urls"].split("\n"))
+			
+			# Aggregate replays
+			replays = thread_replays | link_replays | range_replays
 
-		# Stats
-		
-		print request.POST.getlist("stats_usage")
-		# Usage
-		usage_from_text = reduce(
-			(lambda x,y: 
-				{
-				"usage":x["usage"] + y["usage"],
-				"wins":x["wins"] + y["wins"],
-				"total":x["total"] + y["total"]
-				}
-			), (stats.stats_from_text(text) 
-				for text in request.POST.getlist("stats_usage") or [""])
-		)
-		
-		# Aggregate replays
-		replays = replays_from_thread | replays_from_links | replays_from_range
-		
 		# Refactor
 		tiers = {tier.strip() for tier in 
 				 request.POST.get("thread_tiers", "gen7pokebankou")
@@ -79,96 +68,202 @@ def index(request):
 		# move to replays
 		try:
 			gen_num = next((char for char in min(tiers) if char.isdigit()), 6)
-			tier_name = min(tiers).split(gen_num)[1].split("pokebank")[-1].upper()
-			tier_label = TIERS[int(gen_num)-1] + " " + tier_name
+			name = min(tiers).split(gen_num)[1].split("pokebank")[-1].upper()
+			tier_label = TIERS[int(gen_num)-1] + " " + name
 		except:
 			tier_label = "???"
 			
-		# Usage
-		usage = stats.aggregate_forms(
-			stats.usage(replays),gen_num, counter=True)
-		wins = stats.aggregate_forms(stats.wins(replays),gen_num,counter=True)
-		total = len(replays) * 2
-		
-		# Advanced stats
-		if True:
-			moves = stats.aggregate_forms(
-				stats.moves(replays, usage.keys()),gen_num)
-			move_wins = stats.aggregate_forms((
-				stats.move_wins(replays, usage.keys())))
-			'''
-			if True:
-				# Cumulative moves
-				moves_from_text = [
-					{
-					chart.split("\n")[0].split("|")[2].strip(" "):
-					stats.stats_from_text(chart) 
-					for chart in submission.split("\n\n")
-					}for submission in (request.POST.getlist("stats_moves"))]
-				#except:
-					#moves_from_text = []
-				print moves_from_text
-				# {Pokemon: {usage, wins, total}}++
-				pokemon_set = set(chain(dict.keys() for dict in moves_from_text))
-				cumulative_move_usage = {
-					pokemon: 
-					reduce((lambda x,y: x+y), 
-					(dict[pokemon]["usage"] for dict in moves_from_text)) 
-					for pokemon in pokemon_set}
-				print cumulative_move_usage
-				# list of dicts'''
-
-			moves_whitespace = "\n".join(
-				(stats.pretty_print(pokemon, 23, moves[pokemon],
-				move_wins[pokemon], uses) for pokemon, uses 
-				in usage.most_common() if moves[pokemon]))
-		else:
-			moves_whitespace = ""
+		# Usage from text
+		usage_from_text = [stats.stats_from_text(submission) 
+			for submission in request.POST.getlist("stats_usage")]
 			
+		cumulative_usage = {
+			"usage": sum((d["usage"] for d in usage_from_text), Counter()),
+			"wins": sum((d["wins"] for d in usage_from_text), Counter()),
+			"total": sum((d["total"] for d in usage_from_text))
+			}
 			
-		# Adding cumulative stats
-		if usage_from_text:
-			usage.update(usage_from_text["usage"])
-			wins.update(usage_from_text["wins"])
-			total += usage_from_text["total"]
+		# Usage view
+		usage = (stats.aggregate_forms(
+					stats.usage(replays), gen_num, True) 
+					+ cumulative_usage["usage"])
+		wins = (stats.aggregate_forms(
+					stats.wins(replays), gen_num, True) 
+					+ cumulative_usage["wins"])
+		total = len(replays) * 2 + cumulative_usage["total"]
 		
 		usage_table = usage_view(usage, wins, total)
 		
+		# Sprites
 		# Throw error if no replays found
+		try:
+			sprite_name = usage_table[0][0].lower().replace(" ","_")
+		except:
+			sprite_name = "pikachu"
 		sprite_header = (
 			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
-			"{0}.png[/IMG][B]{1}[/B]"
+			"{0}.png[/IMG] [B]{1}[/B] "
 			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
 			"{0}.png[/IMG]"
-			).format(usage_table[0][0], tier_label)
+			).format(sprite_name, tier_label)
 			
 		# Missing Pokemon
 		missing = chain.from_iterable(
 			(((replay.playerwl[wl], 6-len(replay.teams[wl])) 
 			for wl in ("win","lose") if len(replay.teams[wl]) < 6) 
 			for replay in replays))
-		missing_whitespace = ("\n[LIST]" + "\n".join(
-				 "[*][I]Missing {0} Pokemon from {1}.[/I]"
-				 .format(miss[1], miss[0]) for miss in missing) + "\n[/LIST]" 
-				 if missing else "")
-
+		
+		missing_text = "\n".join(
+			"[*][I]Missing {0} Pokemon from {1}.[/I]"
+			.format(miss[1], miss[0]) for miss in missing)
+			
+		if missing_text:
+			missing_text = "\n[LIST]" + missing_text + "\n[/LIST]"
+		
+		# Usage rawtext
 		usage_whitespace = (sprite_header + "\n[CODE]\n" +
 			stats.pretty_print("Pokemon", 18, usage, wins, total)
-			+ "[/CODE]" + missing_whitespace)
-
-
+			+ "[/CODE]" + missing_text)
+		# Advanced stats
+		
+		# Moves
+		if True:
+			moves = stats.aggregate_forms(
+				stats.moves(replays, usage.keys()),gen_num)
+			move_wins = stats.aggregate_forms(
+				stats.move_wins(replays, usage.keys()), gen_num)
+				
+			# From submission
+			if False:
+				# for each submission
+				
+				# Parse text -> list of {Pokemon:"usage","wins","total"}
+				moves_from_text = [{
+					chart.split("\n")[1].split("|")[2].strip(" "): # pokemon
+					stats.stats_from_text(chart)
+					for chart in re.split(
+						"\\r\\n\\r\\n|\\n\\n", submission.strip())
+				} for submission in request.POST.getlist("stats_moves")]
+				
+				# List of Pokemon parsed
+				pokemon_set = set(chain.from_iterable(dict.keys() 
+					for dict in moves_from_text))
+				
+				# Merge all dictionaries
+				# List of dicts -> one dict of {Pokemon:attributes}
+				cumulative_moves = {}
+				for pokemon in pokemon_set:
+					net_move_usage = sum((dict.get(
+						pokemon, {"usage":Counter()})["usage"]
+						for dict in moves_from_text), Counter())
+					net_move_wins = sum((dict.get(
+						pokemon, {"wins":Counter()})["wins"]
+						for dict in moves_from_text), Counter())
+					net_move_totals = sum((dict.get(
+						pokemon, {"total":0})["total"]
+						for dict in moves_from_text))
+					cumulative_moves[pokemon] = {
+						"usage":net_move_usage, 
+						"wins":net_move_wins, 
+						"total":net_move_totals
+					}
+					'''
+					cumulative_moves[pokemon] = {
+						"usage":sum((d.get("usage", Counter()) 
+							for d in moves_from_text), Counter()),
+						"wins":sum((d.get("wins", Counter()) 
+							for d in moves_from_text), Counter()),
+						"total":sum((d.get("total",0) for d in moves_from_text))
+					}'''
+				
+				# Merge each attribute dictionary with dictionary from replays
+				moves = ({key:value["usage"] 
+					for key,value in cumulative_moves.iteritems()})
+				move_wins = ({key:value["wins"] 
+					for key,value in cumulative_moves.iteritems()})
+				
+			# TODO
+			# Change pokemon list and total variables
+			# Sort by lookup?
+			#pokemon_list = usage.most_common() 
+			# + ((pokemon, moves[pokemon]["total"]) for pokemon in pokemon_set)
 			
-		players = [replay.players for replay in replays]
-		print players
+			'''
+			moves_whitespace = "\n".join(
+				(stats.pretty_print(pokemon, COL_WIDTH, moves[pokemon],
+				move_wins[pokemon], uses) for pokemon, uses 
+				in usage.most_common() if moves[pokemon]))
+				#in pokemon_list if moves[pokemon]))'''
+			
+			move_rows = {pokemon:stats.generate_rows(
+				moves[pokemon], move_wins[pokemon], uses) 
+				for pokemon, uses in usage.most_common() if moves[pokemon]}
+			
+			# Teammates
+			teammates = stats.teammates(replays)
+			teammate_wins = stats.teammates(replays, "win")
+			teammates_rows = {pokemon:stats.generate_rows(
+				teammates[pokemon], teammate_wins.get(pokemon, Counter()), uses)
+				for pokemon, uses in usage.most_common()}
+				
+			'''
+			teammates_whitespace = "\n\n".join(stats.print_table(
+				pokemon, COL_WIDTH, teammates_rows[pokemon]) 
+				for pokemon, uses in usage.most_common() 
+				if pokemon in teammates_rows)
+			print teammates_whitespace
+				
+			
+			moves_whitespace = "\n\n".join(stats.print_table(
+				pokemon, COL_WIDTH, move_rows[pokemon]) 
+				for pokemon, uses in usage.most_common() 
+				if pokemon in move_rows)
+			'''
+			
+			moves_whitespace = "\n\n".join(
+				pokemon + "\n"
+				+ stats.print_table("Moves", COL_WIDTH, move_rows.get(
+					pokemon, [])) + "\n"
+				+ stats.print_table("Teammates", 
+					COL_WIDTH, teammates_rows[pokemon])
+				for pokemon, uses in usage.most_common()
+				if pokemon in move_rows)
 
+			#print stats.teammates(replays)
+			
+		else:
+			moves_whitespace = ""
+
+		# Items
+		# Combos
+		combo_rawtext = ""
+		# Change to user input
+		for i in xrange(2,7):
+			combos = stats.combos(replays, i, 0.02 * total)
+			combo_wins = stats.combo_wins(replays, i)
+			rows = list(stats.generate_rows(
+				combos, combo_wins, total, stats.format_combo2))
+			longest = len(max((row.element for row in rows) or ["Thundurus-Therian"], key=str.__len__))
+			combo_rawtext += (
+				stats.print_table("Combos of " + str(i), longest, rows) 
+				+ "\n\n")
+
+		replays = [(replay, tournament.format_name(replay.players[0]) 
+				   + " vs. " 
+				   + tournament.format_name(replay.players[1]))
+				   for replay in replays]
+		
+		request.session["form"] = request.POST
 		return render(request, "stats.html", 
-					 {"usage_table" : usage_table,
-					  "net_mons" : sum(usage.values()),
-					  "net_replays" : len(replays),
+					 {"usage_table":usage_table,
+					  "net_mons":sum(usage.values()),
+					  "net_replays":len(replays),
 					  "missing":missing,
 					  "tier_label":tier_label,
 					  "moves_whitespace":moves_whitespace,
-					  "usage_whitespace":usage_whitespace})
+					  "usage_whitespace":usage_whitespace,
+					  "replays":replays,
+					  "combo_rawtext":combo_rawtext})
 
 def spl_index(request):
 	if request.method == "GET":

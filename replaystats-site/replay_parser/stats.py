@@ -1,13 +1,16 @@
 import operator
-from collections import Counter
+from collections import Counter, namedtuple
 from itertools import chain, combinations, groupby
 
 from replay import Replay
 
-AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*" "Rotom-Appliance"}
 ROTOM_FORMS = ["Rotom-Wash", "Rotom-Heat", "Rotom-Mow", "Rotom-Fan", "Rotom-Frost"]
 PUMPKIN_FORMS = ["", "-Large", "-Super", "-Small"]
 ARCEUS_FORMS = ["", "-Bug", "-Dark", "-Dragon", "-Electric", "-Fairy", "-Fighting", "-Fire", "-Flying", "-Ghost", "-Grass", "-Ground", "-Ice", "-Poison", "-Psychic", "-Rock", "-Steel", "-Water"]
+AGGREGATED_FORMS = {"Arceus-*":ARCEUS_FORMS, 
+					"Pumpkaboo-*":PUMPKIN_FORMS, 
+					"Gourgeist-*":PUMPKIN_FORMS, 
+					"Rotom-Appliance":ROTOM_FORMS}
 # Separate responsibilities: for filtering teams and running data on teams
 # Port to database
 
@@ -32,7 +35,7 @@ def wins(replays):
 	teams = chain.from_iterable([replay.teams["win"] for replay in replays])
 	return Counter(teams)
 	
-def combos(replays, size = 2, cutoff = 2):
+def combos(replays, size = 2, cutoff = 0):
 
 	#combos = chain.from_iterable(list(combinations(replay.teams["win"], size)) 
 	#							+ list(combinations(replay.teams["lose"],size))
@@ -74,35 +77,54 @@ def moves(replays, pokemonList):
 	#return {key: value for key, value in unfiltered_moves.iteritems() if value} 
 
 def move_wins(replays, pokemonList):
-
-	
 	return {pokemon: Counter(chain.from_iterable([
 		replay.moves["win"].get(pokemon, []) for replay in replays]))
 		for pokemon in pokemonList}
 	#return {key: value for key, value in unfiltered_moves.iteritems() if value} 
 	
-def format_combo(pairing):
-	return str(pairing).strip("frozenset(").strip(")").replace("'","")
+def format_combo(combo):
+	return combo
 	
+def format_combo2(combo):
+	return ' / '.join(pokemon for pokemon in combo)
 	
+def teammates(replays, filter=None):
+	tm = {}
+	teams = (filter,) if filter else ("win", "lose")
+	# Assign teams to each Pokemon
+	for replay in replays:
+		#for team in (replay.teams["win"], replay.teams["lose"]): 
+		#for team in filter or ("win", "lose"):
+		for team in teams:
+			for pokemon in replay.teams[team]:
+				tm[pokemon] = tm.get(pokemon, Counter()) + Counter(replay.teams[team])
+	
+	# Delete Pokemon
+	for pokemon in tm:
+		del(tm[pokemon][pokemon])
+		
+	return aggregate_forms(tm)
+	
+	#return sum((sum((Counter({pokemon: team for pokemon in team}) for team in replay.teams.values()), Counter()) for replay in replays), Counter())
+
 def aggregate_forms(data, generation="4", counter=False):
 	if generation == "4":
-		if counter:
-			data.update(list(chain.from_iterable(
-				("Rotom-Appliance" for i in range(data[poke]))
-				for poke in data if poke.startswith("Rotom-"))))
-		else:
-			data["Rotom-Appliance"] = reduce(lambda x,y:x+y, (data.get(form, Counter()) 
-				for form in ROTOM_FORMS))
+		default = 0 if counter else Counter()
+		data["Rotom-Appliance"] = sum((data.get(form, default) 
+			for form in ROTOM_FORMS), default)
+		#else:
+			#data["Rotom-Appliance"] = sum((data.get(form, Counter()) 
+				#for form in ROTOM_FORMS), Counter())
+			#data["Rotom-Appliance"] = reduce(lambda x,y: x+y, 
+				#(data.get(form, Counter()) for form in ROTOM_FORMS))
 	else:
-	# TODO: Try / catach with +=
+		# TODO: Try / catch with +=
 		if not counter:
-			data["Gourgeist-*"] = reduce(lambda x,y: x+y, 
-				(data.get("Gourgeist"+form, Counter()) for form in PUMPKIN_FORMS))
-			data["Pumpkaboo-*"] = reduce(lambda x,y: x+y, 
-				(data.get("Pumpkaboo"+form, Counter()) for form in PUMPKIN_FORMS))
-			data["Arceus-*"] = reduce(lambda x,y: x+y, 
-				(data.get("Arceus"+form, Counter()) for form in ARCEUS_FORMS))
+			for pokemon in AGGREGATED_FORMS:
+				if pokemon != "Rotom-Appliance":
+					data[pokemon] = sum(
+						(data.get(pokemon.split("-")[0] + form, Counter())
+						for form in AGGREGATED_FORMS[pokemon]), Counter())			
 	return data
 
 			
@@ -136,15 +158,72 @@ def pretty_print(cname, cwidth, usage, wins, total):
 		uses = elemUse[1]
 		userate = 100 * float(uses)/total
 		winrate = 100 * float(wins[element])/uses
-		ranking = str(next(rankings)) if element not in AGGREGATED_FORMS else "-"
+		rank = str(next(rankings)) if element not in AGGREGATED_FORMS else "-"
 		
 		body += "| {0} | {1} | {2} | {3}{4:.2f}% | {5}{6:.2f}% |\n".format(
-				ranking + " " * (4 - len(ranking)),
-				element + " " * (cwidth - len(element)), 
+				rank + " " * (4 - len(rank)),
+				str(element) + " " * (cwidth - len(str(element))), 
 				" " * (3 - len(str(uses))) + str(uses), 
 				" " * (3-len(str(int(userate)))), userate,
 				" " * (3-len(str(int(winrate)))), winrate
 				)
+	return header + body
+
+def generate_rows(usage, wins, total, func=str):
+	
+	Row = namedtuple("Row", 'rank, element, uses, userate, winrate')
+	# Rankings
+	
+	# Sort by usage, then by win %
+	# Option: Sort by name as third tiebreaker
+	sorted_usage = sorted(usage.most_common(), 
+					  key=lambda x: (usage[x[0]], float(wins[x[0]])/x[1]),
+					  reverse=True)
+					  
+	# Calculating the rankings
+	# Number of Pokemon with same ranking
+	counts = [len(list(element[1])) for element in groupby(
+		 [poke for poke in sorted_usage if poke[0] not in AGGREGATED_FORMS],
+		 lambda x: x[1])]
+		 
+	# Translate to rankings
+	unique_ranks = accumulate([1] + counts[:-1:])
+
+	# Unpack rankings
+	rankings = chain.from_iterable([rank for i in xrange(0,count)] 
+		for rank, count in zip(unique_ranks, counts))
+	
+	return (
+		Row(
+			"-" if elem_use[0] in AGGREGATED_FORMS else str(next(rankings)), 
+			#names[elem_use[0]],
+			#str(elem_use[0]),
+			func(elem_use[0]),
+			elem_use[1],
+			100 * float(elem_use[1])/total,
+			100 * float(wins[elem_use[0]])/elem_use[1]
+		)
+		for i, elem_use in enumerate(sorted_usage))
+	
+def print_table(cname, cwidth, rows):
+
+	# Row: (rank, element, usage, use %, win %)
+	header = (
+		"+ ---- + {2} + --- + ------- + ------- +\n"
+		"| Rank | {0}{1} | Use | Usage % |  Win %  |\n"
+		"+ ---- + {2} + --- + ------- + ------- +\n"
+		).format(cname, " " * (cwidth - len(cname)), "-" * cwidth)
+		
+	body = "\n".join(
+		"| {0} | {1} | {2} | {3}{4:.2f}% | {5}{6:.2f}% |".format(
+			row.rank + " " * (4 - len(row.rank)),
+			row.element + " " * (cwidth - len(row.element)),
+			" " * (3 - len(str(row.uses))) + str(row.uses), 
+			" " * (3-len(str(int(row.userate)))), row.userate,
+			" " * (3-len(str(int(row.winrate)))), row.winrate
+		) for row in rows
+	)
+
 	return header + body
 
 def stats_from_text(text):

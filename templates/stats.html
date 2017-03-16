@@ -10,7 +10,18 @@
 
 <div class="results pane info">
 # of replays: {{ net_replays }}<br>
-# of Pokemon: {{ net_mons }}
+# of Pokemon: {{ net_mons }}<br>
+<form method="post" id="resubmit">
+  {% csrf_token %}
+  Replays:<br>
+  <ul>
+  {% for replay, player in replays %}
+	<li class="replay-listing"><a href="{{ replay.url }}">{{ player }}</a>
+	<input type="hidden" name="replay_urls" value={{ replay.url }}>
+  {% endfor %}
+  </ul>
+  <input type="submit" name="resubmit" value="Submit">
+</form>
 </div>
 
 <div id="wrapper">
@@ -42,10 +53,16 @@ Usage:<br>
 {{ usage_whitespace }}
 </textarea><br>
 
-Moves:<br>
+Moves and Teammates:<br>
 <textarea class="rawtext results">
 {{ moves_whitespace }}
+</textarea><br>
+
+Combos:<br>
+<textarea class="rawtext results">
+{{ combo_rawtext }}
 </textarea>
+</div>
 </div>
 
 </div>
