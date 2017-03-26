@@ -31,11 +31,15 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 				if url.get("href") and url.get("href").startswith(url_header))
 		# Optional: Filter by tier
 		# TODO: Tier from replay object or URL?
+		
+		# Change to tiers from log
+		# replay.pokemonshowdown.com/ou doesn't work
 		if tiers:
 			urls = (url for url in urls if url.split("-")[-2] in tiers)
 		return replays_from_links(urls)
 	except:
-		return {}
+		#return {}
+		return []
 
 
 def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
@@ -78,7 +82,8 @@ def replays_from_links(urls):
 	""" Helper function to convert replay links to replay objects. """
 	pool = multiprocessing.dummy.Pool(13)
 	# Throw out invalid replays
-	return set(filter(None, pool.map(open_replay, urls)))
+	#return set(filter(None, pool.map(open_replay, urls)))
+	return filter(None, pool.map(open_replay, urls))
 	
 def open_replay(url):
 	""" Open replay links and validate; return None if 404 error. """
@@ -106,9 +111,4 @@ def open_replay(url):
 		# Corrupted log file
 		traceback.print_exc()
 		print url
-		return	
-
-if __name__ == "__main__":
-	a = replays_from_user("Atq)+Fear", tier="gen2ou")
-	for replay in a:
-		print replay.url
+		return

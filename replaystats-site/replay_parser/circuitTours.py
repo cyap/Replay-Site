@@ -1,6 +1,6 @@
 """ Module used to generate stats for weekly tournament circuit. """
 
-import replayCompile
+import replay_compile
 import statCollector
 import tournament
 import profile
@@ -71,7 +71,7 @@ def tour(url = None, rng = None, omitReplays = None):
 	
 	pairings = tournament.parse_pairings(url = url)
 	players = tournament.participants_from_pairings(pairings)
-	replays = replayCompile.replays_from_range(rng)
+	replays = replay_compile.replays_from_range(rng)
 	tour = tournament.Tournament(replays, pairings, players, alts)
 	if omitReplays:
 		tour.filter_replays_by_number(*omitReplays)

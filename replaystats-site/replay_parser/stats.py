@@ -4,7 +4,7 @@ from itertools import chain, combinations, groupby
 
 from replay import Replay
 
-ROTOM_FORMS = ["Rotom-Wash", "Rotom-Heat", "Rotom-Mow", "Rotom-Fan", "Rotom-Frost"]
+ROTOM_FORMS = ["-Wash", "-Heat", "-Mow", "-Fan", "-Frost"]
 PUMPKIN_FORMS = ["", "-Large", "-Super", "-Small"]
 ARCEUS_FORMS = ["", "-Bug", "-Dark", "-Dragon", "-Electric", "-Fairy", "-Fighting", "-Fire", "-Flying", "-Ghost", "-Grass", "-Ground", "-Ice", "-Poison", "-Psychic", "-Rock", "-Steel", "-Water"]
 AGGREGATED_FORMS = {"Arceus-*":ARCEUS_FORMS, 
@@ -50,6 +50,25 @@ def combos(replays, size = 2, cutoff = 0):
 	if cutoff:
 		combos = Counter({combo:use for combo,use in combos.iteritems() 
 						  if use > cutoff})
+	
+	for combo in combos.keys():
+		for pokemon in AGGREGATED_FORMS:
+			if pokemon in combo:
+				for form in AGGREGATED_FORMS[pokemon]:
+					if pokemon.split("-")[0] + form in combo:
+						del(combos[combo])
+	'''
+	for pokemon in AGGREGATED_FORMS:
+		for form in AGGREGATED_FORMS[pokemon]:
+			try:
+				if pokemon == "Rotom-Appliance":
+					del(combos[frozenset((pokemon, form))])
+				else:
+					del(combos[frozenset((pokemon, pokemon.split("-")[0] + form))])
+			except:
+				pass'''
+	
+	# REFACTOR
 	return combos
 
 
@@ -58,29 +77,55 @@ def combo_wins(replays, size = 2):
 								  for replay in replays))
 	return Counter((format_combo(frozenset(combination)) 
 					for combination in combos))
-def leads(replays):
-	leads = chain.from_iterable((replay.get_leads()["win"], 
-								replay.get_leads()["lose"])
-								  for replay in replays)
+def leads(replays, doubles=False):
+	#print len(replays)
+	if not doubles:
+		leads = chain.from_iterable((replay.leads["win"], 
+									replay.leads["lose"])
+									  for replay in replays)
+	else:
+		leads = chain.from_iterable(replay.leads["win"] + replay.leads["lose"] for replay in replays)
+	
+	#print leads
+								  
+	#a = list(leads)
+	#print len(a)
+	#l = Counter(a)
+	#print sum(l.values())
 	return Counter(leads)
 	
-def lead_wins(replays):
-	leads = (replay.get_leads()["win"] for replay in replays)
+def lead_wins(replays, doubles=False):
+	if not doubles:
+		leads = (replay.leads["win"] for replay in replays)
+	else:
+		leads = chain.from_iterable(replay.leads["win"] for replay in replays)
 	return Counter(leads)
 
 def moves(replays, pokemonList):
 	# Create move counter
-	return {pokemon: Counter(chain.from_iterable([
-						replay.moves["win"].get(pokemon, [])
-					  + replay.moves["lose"].get(pokemon, []) for replay in replays]))
-						for pokemon in pokemonList}
-	#return {key: value for key, value in unfiltered_moves.iteritems() if value} 
+	'''
+	moves = {}
+	for replay in replays:
+		win = replay.moves["win"]
+		lose = replay.moves["lose"]
+		for pokemon in pokemonList:
+			moves[pokemon] = (moves.get(pokemon, Counter()) +
+				(Counter(chain.from_iterable(
+				[replay.moves["win"].get(pokemon, [])
+			   + replay.moves["lose"].get(pokemon, [])]))))
+	return moves
+	'''	
+	
+	# Sum lists
+	return {pokemon: Counter(chain.from_iterable(
+		replay.moves["win"].get(pokemon, []) + replay.moves["lose"].get(pokemon, [])
+		for replay in replays))
+		for pokemon in pokemonList}
 
 def move_wins(replays, pokemonList):
 	return {pokemon: Counter(chain.from_iterable([
 		replay.moves["win"].get(pokemon, []) for replay in replays]))
 		for pokemon in pokemonList}
-	#return {key: value for key, value in unfiltered_moves.iteritems() if value} 
 	
 def format_combo(combo):
 	return combo
@@ -99,10 +144,17 @@ def teammates(replays, filter=None):
 			for pokemon in replay.teams[team]:
 				tm[pokemon] = tm.get(pokemon, Counter()) + Counter(replay.teams[team])
 	
-	# Delete Pokemon
+	# Delete own Pokemon
 	for pokemon in tm:
 		del(tm[pokemon][pokemon])
-		
+	# Delete alternate forms
+	for pokemon in AGGREGATED_FORMS:
+		for form in AGGREGATED_FORMS[pokemon]:
+			try:
+				del(tm[pokemon][pokemon.split("-")[0]+form])
+				del(tm[pokemon.split("-")[0]+form][pokemon])
+			except:
+				pass
 	return aggregate_forms(tm)
 	
 	#return sum((sum((Counter({pokemon: team for pokemon in team}) for team in replay.teams.values()), Counter()) for replay in replays), Counter())
@@ -110,8 +162,10 @@ def teammates(replays, filter=None):
 def aggregate_forms(data, generation="4", counter=False):
 	if generation == "4":
 		default = 0 if counter else Counter()
-		data["Rotom-Appliance"] = sum((data.get(form, default) 
+		data["Rotom-Appliance"] = sum((data.get("Rotom"+form, default) 
 			for form in ROTOM_FORMS), default)
+		if data["Rotom-Appliance"] == 0:
+			del(data["Rotom-Appliance"])
 		#else:
 			#data["Rotom-Appliance"] = sum((data.get(form, Counter()) 
 				#for form in ROTOM_FORMS), Counter())
@@ -193,7 +247,7 @@ def generate_rows(usage, wins, total, func=str):
 	rankings = chain.from_iterable([rank for i in xrange(0,count)] 
 		for rank, count in zip(unique_ranks, counts))
 	
-	return (
+	return [
 		Row(
 			"-" if elem_use[0] in AGGREGATED_FORMS else str(next(rankings)), 
 			#names[elem_use[0]],
@@ -203,7 +257,7 @@ def generate_rows(usage, wins, total, func=str):
 			100 * float(elem_use[1])/total,
 			100 * float(wins[elem_use[0]])/elem_use[1]
 		)
-		for i, elem_use in enumerate(sorted_usage))
+		for i, elem_use in enumerate(sorted_usage)]
 	
 def print_table(cname, cwidth, rows):
 

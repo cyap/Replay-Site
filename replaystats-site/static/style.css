@@ -94,15 +94,19 @@ th {
 	background-color: white;
 }
 
-.form_template.hidden {
+.hidden {
 	display:none;
 }
 
-.rawtext.results {
+.rawtext {
 	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
+	white-space: nowrap;
+}
+
+
+.rawtext.results {
 	width: 425px;
 	height: 250px;
-	white-space: nowrap;
 }
 
 .results.pane {
@@ -151,5 +155,43 @@ ul.form {
 	float:left;
 }
 
-.replay-listing {
+#replay-listing {
+	list-style-type: none;
+	margin-left: 0;
+	padding-left: 0;
+}
+
+#replay-text {
+	width:100%;
+	box-sizing:border-box;
+	min-height: 150px;
+}
+
+.tab {
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	border: 1px solid black;
+	border-bottom: 0;
+	box-shadow: none;
+	margin-right:-5px;
+}
+
+#resubmit {
+	border: 1px solid black;
+	padding: 2px;
+}
+
+.replay-delete {
+	display: inline-block;
+	border: 1px solid black;
+	background-color: red;
+	padding: 2px;
+	color: white;
+    margin-bottom: 2%;
+    text-align: center;
+    line-height: 0.5;
+}
+
+.replay-entry {
+	box-sizing: border-box;
 }

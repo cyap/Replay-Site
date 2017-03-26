@@ -1,6 +1,8 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="{% static 'scripts/stats.js' %}"></script>
 
 <!DOCTYPE html>
 <html>
@@ -11,16 +13,25 @@
 <div class="results pane info">
 # of replays: {{ net_replays }}<br>
 # of Pokemon: {{ net_mons }}<br>
+
+<button class="tab" name="replay-listing">Replays</button>
+<button class="tab" name="replay-text">Links</button>
 <form method="post" id="resubmit">
   {% csrf_token %}
-  Replays:<br>
-  <ul>
-  {% for replay, player in replays %}
-	<li class="replay-listing"><a href="{{ replay.url }}">{{ player }}</a>
-	<input type="hidden" name="replay_urls" value={{ replay.url }}>
+  <ul id=replay-listing>
+  {% for replay, players in pairings %}
+	<li class="replay-entry">
+	  <input type="checkbox" name="replay_urls" value={{ replay.url }} checked>
+	  <a href="{{ replay.url }}">{{ players }}</a>
+	</li>
   {% endfor %}
   </ul>
-  <input type="submit" name="resubmit" value="Submit">
+  
+<textarea class="rawtext" id="replay-text">
+{{ replay_rawtext }}
+</textarea><br>
+  
+  <input type="submit" name="resubmit" value="Resubmit">
 </form>
 </div>
 
@@ -37,11 +48,11 @@
 
   {% for element in usage_table %}
   <tr>
-    <td><img src="static/icons/{{element.0}}.png"></td>
-    <td>{{ element.0 }}</td>
-    <td>{{ element.1 }}</td> 
-    <td>{{ element.2 }}</td>
-    <td>{{ element.3 }}</td>
+    <td><img src="static/icons/{{element.1}}.png"></td>
+    <td>{{ element.1 }}</td>
+    <td>{{ element.2 }}</td> 
+    <td>{{ element.3|stringformat:".2f" }}%</td>
+    <td>{{ element.4|stringformat:".2f" }}%</td>
   </tr>
 {% endfor %}
 </table>
@@ -61,8 +72,17 @@ Moves and Teammates:<br>
 Combos:<br>
 <textarea class="rawtext results">
 {{ combo_rawtext }}
+</textarea><br>
+
+Leads:<br>
+<textarea class="rawtext results">
+{{ leads_rawtext }}
 </textarea>
+
 </div>
+
+
+
 </div>
 
 </div>

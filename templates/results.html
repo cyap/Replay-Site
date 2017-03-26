@@ -1,19 +1,23 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="{% static 'scripts/tour_match.js' %}"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
 
 <!DOCTYPE html>
 <html>
 <body>
 
 {% block content %}
+{% csrf_token %}
 Start: {{ start }}<br>
 End: {{ end }}<br>
 Thread: <a href={{url}}>{{ url }}</a><br>
 
 <div id="tables">
-  <table>
+  <table id="pairings_table">
     <tr class={{ match.3 }}>
   	  <th>Pairings</th>
   	</tr>
@@ -24,31 +28,34 @@ Thread: <a href={{url}}>{{ url }}</a><br>
   	{% endfor %}
   </table>
 </div>
-<div id="table-match">
-<form method=post>
+<div id="matches">
+<form method=post action="/">
   {% csrf_token %}
   
-  <table>
+  <table id="table-match">
+  <thead>
 	<tr>
 		<th>Drag</th>
 		<th>#</th>
 		<th>Players</th> 
 		<th>Filter</th>
 	</tr>
-
+  </thead>
+  <tbody>
 	{% for match in matches %}
-	<tr class={{ match.3 }}>
+	<tr class={{ match.2 }}>
 	  <td draggable="true" id="{{match.0}}" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
-	  <input type="hidden" name="replays" value={{ match.4 }}>
-	  <td><a href="{{ match.4 }}">{{ match.1 }}</a></td>
+	  <input type="hidden" name="replay_urls" value={{ match.1.url }}>
+	  <td><a href="{{ match.1.url }}">{{ match.1.number }}</a></td>
 	  </input>
+	  <td>{{ match.1.players}}</td>
 	  <td>{{ match.2 }}</td>
-	  <td>{{ match.3 }}</td>
 	</tr>
 	{% endfor %}
+  </tbody>
   </table>
   
-  <input type="submit" name="replay_submit" value="Submit">
+  <input type="submit" name="rep_submit" value="Submit">
 </form>
 </div>
 
@@ -65,8 +72,9 @@ Thread: <a href={{url}}>{{ url }}</a><br>
   <tr>
   <div class="replay_container">
 	<td draggable="true" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
-	<input type="hidden" name="replays" value={{ replay.url }}><td><a href="{{ replay.url }}">{{ replay.number }}</a></td></input>
+	<input type="hidden" name="replay_urls" value={{ replay.url }}><td><a href="{{ replay.url }}">{{ replay.number }}</a></td></input>
 	<td>{{ replay.players }}</td>
+	<td>no match</td>
   </div>
 </tr>
 {% endfor %}
