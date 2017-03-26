@@ -1,5 +1,67 @@
 var swap, swap2;
 
+
+// On page exit, cache
+
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+window.onbeforeunload = function() {
+	
+	unmatched_replays = $(":input", "#unmatched_replays")
+							.map(function() {
+								return this.value
+							}).toArray();
+	// matches - {pairing: (replay, filter)}
+	// unmatched replays - replay objects
+	pairings = $("td", "#pairings_table").map(function() {
+					return this.innerHTML;
+				}).toArray()
+	$.post('/update_session/', {
+		"url":$("a").first().attr("href"),
+		"pairings":pairings,
+		"matches":$(":input", "#table-match")
+							.map(function() {
+								return this.value
+							}).toArray(),
+		"filters":$("tr", "#table-match").slice(1).map(function() {
+								return $(this).attr("class");
+							}).toArray(),
+		"unmatched_replays":unmatched_replays
+		})
+}
+
+// On page load, check if stored; if not, do stuff
+
 function dropFunc(obj) {
 	// swap two
 	//event.target = event
@@ -19,6 +81,8 @@ function pickFunc() {
 	//dragged = event.target;
     //event.dataTransfer.setData("picked", event.target.id);
 }
+
+
 
 /* TODO 
 - Swap from unmatched replays table

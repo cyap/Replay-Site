@@ -2,37 +2,47 @@ from itertools import groupby, chain, repeat
 from collections import Counter
 import operator
 import re
+import profile
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 
-from replay_parser import replayCompile, stats, tournament, circuitTours
+from replay_parser import replay_compile, stats, tournament, circuitTours
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
 COL_WIDTH = 23
 
+def index2(request):
+	profile.runctx('index2(request)', globals(), locals(), sort="tottime")
+	#return index2(request)
+	return render(request, "index.html")
+	
 def index(request):
 	if request.method == "GET":
-		return render(request, "index2.html")
+		return render(request, "index.html")
 		
 	if request.method == "POST":
-	
 		# Check from which form
 		
 		# Resubmission
-		if "resubmit" in request.POST:
+		if "resubmit" in request.POST or "rep_submit" in request.POST:
 			# Save new replays
-			replays = replayCompile.replays_from_links(
+			replays = replay_compile.replays_from_links(
 				request.POST.getlist("replay_urls"))
-			request.POST = request.session["form"]
+				
+			# TODO: Change to saving replay objects and filtering
+			if "resubmit" in request.POST:				
+				request.POST = request.session["form"]
+			
+			print request.POST.getlist("replay_urls")
 			
 		else:
 			# Thread
-			thread_replays = set(
+			thread_replays = list(
 				chain.from_iterable(
-					(replayCompile.replays_from_thread(
+					(replay_compile.replays_from_thread(
 						threadurl=threadurl, 
 						tiers=({tier.strip() for tier in tiers.split(",")} 
 								if tiers else {"gen7pokebankou"}), 
@@ -44,21 +54,22 @@ def index(request):
 							request.POST.getlist("thread_start"),
 							request.POST.getlist("thread_end")))))
 			# Range
-			range_replays = set(
+			range_replays = list(
 				chain.from_iterable(
-					(replayCompile.replays_from_range(
+					(replay_compile.replays_from_range(
 						range=range(int(start), int(end)), tier=tier)
 						for start, end, tier in zip(
 							request.POST.getlist("range_start"),
 							request.POST.getlist("range_end"),
 							request.POST.getlist("range_tiers")))))
 			# Links
-			link_replays = replayCompile.replays_from_links(
-				request.POST["replay_urls"].split("\n"))
+			link_replays = list(replay_compile.replays_from_links(
+				request.POST["replay_urls"].split("\n")))
 			
 			# Aggregate replays
-			replays = thread_replays | link_replays | range_replays
-
+			#replays = thread_replays | link_replays | range_replays
+			replays = thread_replays + link_replays + range_replays
+			
 		# Refactor
 		tiers = {tier.strip() for tier in 
 				 request.POST.get("thread_tiers", "gen7pokebankou")
@@ -92,12 +103,12 @@ def index(request):
 					+ cumulative_usage["wins"])
 		total = len(replays) * 2 + cumulative_usage["total"]
 		
-		usage_table = usage_view(usage, wins, total)
+		usage_table = list(stats.generate_rows(usage, wins, total))
 		
 		# Sprites
 		# Throw error if no replays found
 		try:
-			sprite_name = usage_table[0][0].lower().replace(" ","_")
+			sprite_name = usage_table[0][1].lower().replace(" ","_")
 		except:
 			sprite_name = "pikachu"
 		sprite_header = (
@@ -203,7 +214,7 @@ def index(request):
 			teammates = stats.teammates(replays)
 			teammate_wins = stats.teammates(replays, "win")
 			teammates_rows = {pokemon:stats.generate_rows(
-				teammates[pokemon], teammate_wins.get(pokemon, Counter()), uses)
+				teammates.get(pokemon, Counter()), teammate_wins.get(pokemon, Counter()), uses)
 				for pokemon, uses in usage.most_common()}
 				
 			'''
@@ -220,38 +231,80 @@ def index(request):
 				if pokemon in move_rows)
 			'''
 			
+			usage_dict = {}
+			for row in usage_table:
+				usage_dict[row[1]] = row
+			
 			moves_whitespace = "\n\n".join(
-				pokemon + "\n"
+				stats.print_table("Pokemon", COL_WIDTH, [usage_dict[pokemon]]) 
+				+ "\n"
 				+ stats.print_table("Moves", COL_WIDTH, move_rows.get(
 					pokemon, [])) + "\n"
 				+ stats.print_table("Teammates", 
 					COL_WIDTH, teammates_rows[pokemon])
-				for pokemon, uses in usage.most_common()
-				if pokemon in move_rows)
+				for i, (pokemon, uses) in enumerate(usage.most_common())
+				)
+				#if pokemon in move_rows)
 
-			#print stats.teammates(replays)
-			
 		else:
 			moves_whitespace = ""
 
 		# Items
+		
+		# Leads
+		
+		# Change to tier from replay
+		format = "DOUBLES" in tier_label
+		leads = stats.aggregate_forms(stats.leads(replays, format), gen_num, True)
+		lead_wins = stats.aggregate_forms(stats.lead_wins(replays, format), gen_num, True)
+		
+		leads_rows = stats.generate_rows(leads, lead_wins, total)
+		try:
+			lead_sprite = leads_rows[0][1].lower().replace(" ","_")
+		except:
+			lead_sprite = "pikachu"
+		sprite_header = (
+			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
+			"{0}.png[/IMG] [B]{1}[/B] "
+			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
+			"{0}.png[/IMG]"
+			).format(lead_sprite, tier_label)
+		leads_rawtext = (sprite_header 
+			+ "\n[CODE]\n{0}[/CODE]".format(
+			stats.print_table("Leads", COL_WIDTH,leads_rows)))
+		
+		
 		# Combos
 		combo_rawtext = ""
 		# Change to user input
 		for i in xrange(2,7):
-			combos = stats.combos(replays, i, 0.02 * total)
+			
+			# List index error
+			try:
+				combos = stats.combos(replays, i)
+				cutoff = combos.most_common()[
+					min(len(combos.most_common()), 150)][1]
+				combos = Counter({combo:use for combo,use in combos.iteritems() 
+						  if use > cutoff})
+			except:
+				combos = stats.combos(replays, i, 0.02 * total)
+				
 			combo_wins = stats.combo_wins(replays, i)
 			rows = list(stats.generate_rows(
 				combos, combo_wins, total, stats.format_combo2))
-			longest = len(max((row.element for row in rows) or ["Thundurus-Therian"], key=str.__len__))
+			longest = len(max([row.element for row in rows] or ["Thundurus-Therian"], key=str.__len__))
 			combo_rawtext += (
 				stats.print_table("Combos of " + str(i), longest, rows) 
 				+ "\n\n")
 
-		replays = [(replay, tournament.format_name(replay.players[0]) 
+		# Replay pane
+		pairings = [(replay, tournament.format_name(replay.players[0]) 
 				   + " vs. " 
 				   + tournament.format_name(replay.players[1]))
 				   for replay in replays]
+		
+		replay_rawtext = "\n".join(replay.url for replay in replays)
+		
 		
 		request.session["form"] = request.POST
 		return render(request, "stats.html", 
@@ -262,8 +315,10 @@ def index(request):
 					  "tier_label":tier_label,
 					  "moves_whitespace":moves_whitespace,
 					  "usage_whitespace":usage_whitespace,
-					  "replays":replays,
-					  "combo_rawtext":combo_rawtext})
+					  "pairings":pairings,
+					  "combo_rawtext":combo_rawtext,
+					  "leads_rawtext":leads_rawtext,
+					  "replay_rawtext":replay_rawtext})
 
 def spl_index(request):
 	if request.method == "GET":
@@ -272,7 +327,7 @@ def spl_index(request):
 	if request.method == "POST":
 		if "link_submit" in request.POST:
 			urls = request.POST["replay_urls"].split("\n")
-			replays = replayCompile.replays_from_links(urls)
+			replays = replay_compile.replays_from_links(urls)
 			choice = None
 			template = "spl_stats.html"
 			
@@ -289,7 +344,7 @@ def spl_index(request):
 			pairings = None
 			
 		else:
-			replays = replayCompile.replays_from_user(
+			replays = replay_compile.replays_from_user(
 				request.POST["player"].replace(" ", "+"),
 				tier=request.POST["tier"])
 			choice = request.POST["player"].lower()
@@ -305,11 +360,6 @@ def spl_index(request):
 			+ " / ".join([move for move in (replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2"))[pokemon]])
 			for pokemon in replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2")])
 			for replay in replays]))
-
-		# Overall Stats
-		#usage_table = usage(replays)
-		usage_table = usage(replays, key = choice)
-		whitespace_table = whitespace(usage_table)
 		
 		# Raw original
 		row_count = len(replays) * 18 - 2
@@ -318,201 +368,100 @@ def spl_index(request):
 		#return render(request, "spl_stats.html", {
 		
 		return render(request, template, {
-					"usage_table" : usage_table,
-					"whitespace" : whitespace_table,
 					"replays" : replays,
 					"raw":raw,
 					"row_count":row_count,
 					"moves":moves,
 					"pairings":pairings,
 					"choice":choice})
-
-
-def usage_view(counter, wins, total):
-	''' Given a Counter, translate to format for HTML presentation'''
-	
-	# Sort by usage, then by win %
-	# Option: Sort by name as third tiebreaker
-	sorted_usage = sorted(counter.most_common(), 
-						  key=lambda x: (counter[x[0]], float(wins[x[0]])/x[1]),
-						  reverse=True)
-						  
-	# Calculating the rankings
-	
-	# Number of Pokemon with same ranking
-	counts = [len(list(element[1])) for element in groupby(
-			 [poke for poke in sorted_usage if poke[0] not in AGGREGATED_FORMS],
-			 lambda x: x[1])]
-	# Translate to rankings
-	unique_ranks = accumulate([1] + counts[:-1:])
-	
-	# Unpack rankings
-	rankings = chain.from_iterable([rank for i in xrange(0,count)] 
-		for rank, count in zip(unique_ranks, counts))
-	
-	# refactor to dict for clarity
-	return [(
-		element[0], 
-		element[1], 
-		"{0:.2f}%".format(100 * float(element[1])/total),
-		"{0:.2f}%".format(100 * float(wins[element[0]])/element[1]),
-		str(next(rankings)) if element[0] not in AGGREGATED_FORMS else "-")
-		for i, element in enumerate(sorted_usage)]
-			 
-def whitespace(usage_table):
-	return [(
-			entry[0] + " " * (18 - len(entry[0])), 
-			" " * (3 - len(str(entry[1]))) + str(entry[1]), 
-			" " * (7 - len(str(entry[2]))) + str(entry[2]),
-			" " * (7 - len(str(entry[3]))) + str(entry[3]),
-			entry[4] + " " * (4-len(entry[4]))
-			)
-			for rank, entry in enumerate(usage_table, 1)]
-
-	
-def accumulate(iterable, func=operator.add):
-	''' Raw code for accumulate function (not available prior to Python 3) '''
-	it = iter(iterable)
-	total = next(it)
-	yield total
-	for element in it:
-		total = func(total, element)
-		yield total
-
-def usage(replays, tiers = [], cumulative = None, key = None):
-	# For scouting
-	if key:
-		usage = stats.usage2(replays, key)
-	else:
-		usage = stats.usage(replays)
-		
-	# Separate
-	wins = stats.wins(replays)
-	total = len(replays) * 2
-	
-	# For scouting
-	for pokemon in usage.most_common():
-		print pokemon[0], pokemon[1], pokemon[1]*100/total
-	
-	# Handling gen 4 rotom forms
-	if "gen4ou" in tiers:
-		usage.update(list(chain.from_iterable(
-		("Rotom-Appliance" for i in range(usage[poke]))
-		for poke in usage if poke.startswith("Rotom-"))))
-		
-		wins.update(list(chain.from_iterable(
-		("Rotom-Appliance" for i in range(wins[poke]))
-		for poke in usage if poke.startswith("Rotom-"))))
-	
-	# Adding cumulative stats
-	if cumulative:
-		usage.update(cumulative["usage"])
-		wins.update(cumulative["wins"])
-		total += cumulative["total"]
-	
-	# Sort by usage, then by win %
-	# Option: Sort by name as third tiebreaker
-	sorted_usage = sorted(usage.most_common(), 
-						  key=lambda x: (usage[x[0]], float(wins[x[0]])/x[1]),
-						  reverse=True)
-						  
-	# Calculating the rankings
-	
-	# Number of Pokemon with same ranking
-	counts = [len(list(element[1])) for element in groupby(
-			 [poke for poke in sorted_usage if poke[0] not in AGGREGATED_FORMS],
-			 lambda x: x[1])]
-	# Translate to rankings
-	unique_ranks = accumulate([1] + counts[:-1:])
-	
-	# Unpack rankings
-	rankings = chain.from_iterable([rank for i in xrange(0,count)] 
-		for rank, count in zip(unique_ranks, counts))
-	
-	return {'usage': [(
-		element[0], 
-		element[1], 
-		"{0:.2f}%".format(100 * float(element[1])/total),
-		"{0:.2f}%".format(100 * float(wins[element[0]])/element[1]),
-		str(next(rankings)) if element[0] not in AGGREGATED_FORMS else "-")
-		for i, element in enumerate(sorted_usage)],
-			 'net_mons':sum(usage.values()),
-			 'net_replays':len(replays)
-		}
-
-
+					
 def tour_index(request):	
 	if request.method == "GET":
 		return render(request, "indextour.html")
 
-	if request.method == "POST":
-		if "replay_submit" in request.POST:
+	'''
+	if "replay_submit" in request.POST:
 			replay_urls = set(request.POST.getlist("replays"))
 			print replay_urls
 			replays = set(replay for replay in request.session["replays"] if replay.url in replay_urls)
-			# change to dict
-			tiers = []
-			try:
-				gen_num = next((char for char in min(tiers) 
-					if char.isdigit()), 6)
-				tier_name = (min(tiers).split(gen_num)[1]
-					.split("pokebank")[-1].upper())
-				tier_label = TIERS[int(gen_num)-1] + " " + tier_name
-			except:
-				tier_label = "???"
-		
-			# Stats
-			cumulative = (stats.stats_from_text(request.POST["stats"]) 
-						  if "stats" in request.POST and request.POST["stats"]
-						  else None)
-			missing = chain.from_iterable((((
-				replay.playerwl[wl],6-len(replay.teams[wl])) 
-				for wl in ("win","lose") if len(replay.teams[wl]) < 6) 
-				for replay in replays))
-			usage_table = usage(replays, tiers, cumulative)
-			whitespace_table = whitespace(usage_table['usage'])
-			
-			
-			return render(request, "stats.html", 
-						 {"usage_table" : usage_table['usage'],
-						  "whitespace" : whitespace_table,
-						  "net_mons" : usage_table['net_mons'],
-						  "net_replays" : usage_table['net_replays'],
-						  "missing":missing,
-						  "tier_label":tier_label})
-			
+	'''
+	if request.method == "POST":
+		url = request.POST["url"]
+		rng = range(int(request.POST["start"]),int(request.POST["end"]))
+	
+		# Cached
+		if url in request.session and request.session[url].get("range") == rng:
+			participants = request.session[url]["participants"]
+			pairings = request.session[url]["pairings"]
+			matches = request.session[url]["matches"]
+			unmatched_replays = request.session[url]["unmatched_replays"]
+			replays = request.session[url]["replays"]
+
 		else:
-			start = request.POST["start"]
-			end = request.POST["end"]
-			url = request.POST["url"]
-			rng = range(int(start), int(end))
-			pairings = tournament.parse_pairings(url = url)
+			# Not cached
+			pairings = tournament.parse_pairings(url=url)
 			participants = tournament.participants_from_pairings(pairings)
-			tiers = ["gen7oususpecttest", "gen7ou"]
-			replays = set()
+			tiers = request.POST["tier"].split(",")
+			replays = []
 			for tier in tiers:
-				replays = replays | replayCompile.replays_from_range(rng, tier=tier) 
-			tour = tournament.Tournament(
-				   replays, pairings,
-				   participants)
+				replays = (replays + 
+					replay_compile.replays_from_range(rng, tier=tier))
+			tour = tournament.Tournament(set(replays), pairings, participants)
+
 			replays = tour.match_tournament()
-			request.session["replays"] = replays | tour.unmatchedReplays
-			print request.session["replays"]
 			matches = tour.pairingReplayMap
-			return render(request, "results.html", {
-			#return redirect('/replays/', {
-				"start" : start,
-				"end" : end,
-				"url" : url,
-				#"pairings" : pairings,
-				"participants" : participants,
-				"matches" : [(str(pairing).strip("frozenset"), 
-							  matches[pairing][0].number, 
-							  matches[pairing][0].players,
-							  matches[pairing][1],
-							  matches[pairing][0].url) if pairing in matches 
-							  else ((str(pairing).strip("frozenset")), 
-							  "", "", "no match") 
-							  for pairing in pairings],
-				"unmatched_replays":tour.unmatchedReplays
+			unmatched_replays = tour.unmatchedReplays
+		
+			# Caching
+			request.session[url] = {}
+			request.session[url]["range"] = rng
+			request.session[url]["pairings"] = pairings
+			request.session[url]["participants"] = participants
+			request.session[url]["replays"] = replays
+			request.session[url]["matches"] = matches
+			request.session[url]["unmatched_replays"] = unmatched_replays
+			
+		# Replays
+		request.session["replays"] = replays | unmatched_replays
+		formatted_matches = [(str(pairing).strip("frozenset"), # pairing
+							 matches[pairing][0], # replay
+							 matches[pairing][1]) # filter
+							 if pairing in matches
+							 else 
+							 (str(pairing).strip("frozenset"), "", "no match")
+							 for pairing in pairings]
+
+		return render(request, "results.html", {
+			"start":request.POST["start"],
+			"end":request.POST["end"],
+			"url":request.POST["url"],
+			"participants" : participants,
+			"matches" : formatted_matches,
+			"unmatched_replays":unmatched_replays
 		})
+
+def update_session(request):
+	if not request.is_ajax() or not request.method=='POST':
+		return HttpResponseNotAllowed(['POST'])
+		
+	# matches: {pairing: (replay, filter)}
+	# unmatched replays: replay objects
+	url = request.POST.getlist("url")[0]
+	
+	unmatched_replays = set(request.POST.getlist("unmatched_replays[]"))
+	request.session[url]["unmatched_replays"] = set(replay for replay 
+		in request.session["replays"] if replay.url in unmatched_replays)
+		
+	matched_urls = set(request.POST.getlist("matches[]"))
+	print "urls:", matched_urls
+	matched_replays = [replay for replay in request.session["replays"] 
+		if replay.url in matched_urls]
+	
+	# Change such that only URLs are being passed to the template
+	
+	#print matched_replays
+	request.session[url]["matches"] = {pairing: (replay, filter) for pairing, replay, filter in zip(request.POST.getlist("pairings[]"), matched_replays, request.POST.getlist("filters[]"))}
+	#print request.session[url]["matches"]
+	#request.session.save()
+	
+	return HttpResponse('ok')

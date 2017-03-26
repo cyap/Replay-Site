@@ -5,7 +5,7 @@ from urllib2 import urlopen
 
 from fuzzywuzzy import fuzz
 
-import replayCompile
+import replay_compile
 import statCollector
 
 class Tournament():
@@ -117,10 +117,9 @@ class Tournament():
 				#print x, self.pairingReplayMap[x]
 		
 		r = exact | fuzzy | partial
-		#print sorted([replay.number for replay in r])
 		return r
 		
-	# Might belong in replayCompile class
+	# Might belong in replay_compile class
 	def filter_replays_by_number(self, *numbers):
 		""" Remove replays from list by number. """
 		self.replays = self.unmatchedReplays = {replay for replay
