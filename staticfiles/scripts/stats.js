@@ -1,7 +1,4 @@
 $(document).ready(function() {
-		
-	// Attach event handlers to radio buttons
-	
 	
 	// Options pane
 	$(".tab").click(function() {
@@ -12,5 +9,7 @@ $(document).ready(function() {
 		//.find(":input").prop("disabled",true);
 	});
 	
+	$("#replay-text").width($("#replay-listing").width());
+	$("#replay-text").height($("#replay-listing").height());
 	$("[name=replay-listing]").click();
 })
