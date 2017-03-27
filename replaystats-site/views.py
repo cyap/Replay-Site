@@ -231,9 +231,12 @@ def index(request):
 				if pokemon in move_rows)
 			'''
 			
-			usage_dict = {}
-			for row in usage_table:
-				usage_dict[row[1]] = row
+			# Refactor to allow for customizable column name
+			#usage_dict = {}
+			#for row in usage_table:
+				#usage_dict[row[1]] = row
+			usage_formatted = list(stats.generate_rows(usage, wins, total, lambda x: "["+x+"]"))
+			usage_dict = {pokemon[1]: row for row, pokemon in zip(usage_formatted, usage_table)}
 			
 			moves_whitespace = "\n\n".join(
 				stats.print_table("Pokemon", COL_WIDTH, [usage_dict[pokemon]]) 

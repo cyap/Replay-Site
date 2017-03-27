@@ -158,13 +158,14 @@ ul.form {
 #replay-listing {
 	list-style-type: none;
 	margin-left: 0;
-	padding-left: 0;
+	/*padding-left: 0;*/
+	padding: 3;
 }
 
 #replay-text {
-	width:100%;
+	/*min-width:100%;*/
 	box-sizing:border-box;
-	min-height: 150px;
+	/*min-height: 150px;*/
 }
 
 .tab {
@@ -179,17 +180,6 @@ ul.form {
 #resubmit {
 	border: 1px solid black;
 	padding: 2px;
-}
-
-.replay-delete {
-	display: inline-block;
-	border: 1px solid black;
-	background-color: red;
-	padding: 2px;
-	color: white;
-    margin-bottom: 2%;
-    text-align: center;
-    line-height: 0.5;
 }
 
 .replay-entry {
