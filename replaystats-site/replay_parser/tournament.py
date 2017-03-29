@@ -6,7 +6,6 @@ from urllib2 import urlopen
 from fuzzywuzzy import fuzz
 
 import replay_compile
-import statCollector
 
 class Tournament():
 

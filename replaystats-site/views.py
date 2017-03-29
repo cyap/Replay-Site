@@ -36,8 +36,6 @@ def index(request):
 			if "resubmit" in request.POST:				
 				request.POST = request.session["form"]
 			
-			print request.POST.getlist("replay_urls")
-			
 		else:
 			# Thread
 			thread_replays = list(
@@ -138,7 +136,7 @@ def index(request):
 		# Advanced stats
 		
 		# Moves
-		if True:
+		if "moves_check" in request.POST:
 			moves = stats.aggregate_forms(
 				stats.moves(replays, usage.keys()),gen_num)
 			move_wins = stats.aggregate_forms(
@@ -213,8 +211,11 @@ def index(request):
 			# Teammates
 			teammates = stats.teammates(replays)
 			teammate_wins = stats.teammates(replays, "win")
-			teammates_rows = {pokemon:stats.generate_rows(
-				teammates.get(pokemon, Counter()), teammate_wins.get(pokemon, Counter()), uses)
+			teammates_rows = {
+				pokemon:stats.generate_rows(
+					teammates.get(pokemon, Counter()),
+					teammate_wins.get(pokemon, Counter()), 
+					uses)
 				for pokemon, uses in usage.most_common()}
 				
 			'''
@@ -223,7 +224,6 @@ def index(request):
 				for pokemon, uses in usage.most_common() 
 				if pokemon in teammates_rows)
 			print teammates_whitespace
-				
 			
 			moves_whitespace = "\n\n".join(stats.print_table(
 				pokemon, COL_WIDTH, move_rows[pokemon]) 
@@ -235,8 +235,10 @@ def index(request):
 			#usage_dict = {}
 			#for row in usage_table:
 				#usage_dict[row[1]] = row
-			usage_formatted = list(stats.generate_rows(usage, wins, total, lambda x: "["+x+"]"))
-			usage_dict = {pokemon[1]: row for row, pokemon in zip(usage_formatted, usage_table)}
+			usage_formatted = list(stats.generate_rows(
+				usage, wins, total, lambda x: "["+x+"]"))
+			usage_dict = {pokemon[1]: row 
+				for row, pokemon in zip(usage_formatted, usage_table)}
 			
 			moves_whitespace = "\n\n".join(
 				stats.print_table("Pokemon", COL_WIDTH, [usage_dict[pokemon]]) 
@@ -246,8 +248,7 @@ def index(request):
 				+ stats.print_table("Teammates", 
 					COL_WIDTH, teammates_rows[pokemon])
 				for i, (pokemon, uses) in enumerate(usage.most_common())
-				)
-				#if pokemon in move_rows)
+				) #if pokemon in move_rows)
 
 		else:
 			moves_whitespace = ""
@@ -256,49 +257,56 @@ def index(request):
 		
 		# Leads
 		
-		# Change to tier from replay
-		format = "DOUBLES" in tier_label
-		leads = stats.aggregate_forms(stats.leads(replays, format), gen_num, True)
-		lead_wins = stats.aggregate_forms(stats.lead_wins(replays, format), gen_num, True)
-		
-		leads_rows = stats.generate_rows(leads, lead_wins, total)
-		try:
-			lead_sprite = leads_rows[0][1].lower().replace(" ","_")
-		except:
-			lead_sprite = "pikachu"
-		sprite_header = (
-			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
-			"{0}.png[/IMG] [B]{1}[/B] "
-			"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
-			"{0}.png[/IMG]"
-			).format(lead_sprite, tier_label)
-		leads_rawtext = (sprite_header 
-			+ "\n[CODE]\n{0}[/CODE]".format(
-			stats.print_table("Leads", COL_WIDTH,leads_rows)))
-		
-		
-		# Combos
-		combo_rawtext = ""
-		# Change to user input
-		for i in xrange(2,7):
-			
-			# List index error
+		if "leads_check" in request.POST:
+			# Change to tier from replay
+			format = "DOUBLES" in tier_label
+			leads = stats.aggregate_forms(
+				stats.leads(replays, format), gen_num, True)
+			lead_wins = stats.aggregate_forms(
+				stats.lead_wins(replays, format), gen_num, True)
+			leads_rows = stats.generate_rows(leads, lead_wins, total)
+	
 			try:
-				combos = stats.combos(replays, i)
-				cutoff = combos.most_common()[
-					min(len(combos.most_common()), 150)][1]
-				combos = Counter({combo:use for combo,use in combos.iteritems() 
-						  if use > cutoff})
+				lead_sprite = leads_rows[0][1].lower().replace(" ","_")
 			except:
-				combos = stats.combos(replays, i, 0.02 * total)
+				lead_sprite = "pikachu"
+			sprite_header = (
+				"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
+				"{0}.png[/IMG] [B]{1}[/B] "
+				"[IMG]http://www.smogon.com/dex/media/sprites/xyicons/"
+				"{0}.png[/IMG]"
+				).format(lead_sprite, tier_label)
+			leads_rawtext = (sprite_header 
+				+ "\n[CODE]\n{0}[/CODE]".format(
+				stats.print_table("Leads", COL_WIDTH,leads_rows)))
+		else:
+			leads_rawtext = ""
+		
+		combo_rawtext = ""
+		if "combos_check" in request.POST:
+			# Combos
+			# Change to user input
+			for i in xrange(2,7):
+			
+				# List index error
+				try:
+					combos = stats.combos(replays, i)
+					cutoff = combos.most_common()[
+						min(len(combos.most_common()), 150)][1]
+					combos = Counter(
+						{combo:use for combo,use in combos.iteritems() 
+						if use > cutoff})
+				except:
+					combos = stats.combos(replays, i, 0.02 * total)
 				
-			combo_wins = stats.combo_wins(replays, i)
-			rows = list(stats.generate_rows(
-				combos, combo_wins, total, stats.format_combo2))
-			longest = len(max([row.element for row in rows] or ["Thundurus-Therian"], key=str.__len__))
-			combo_rawtext += (
-				stats.print_table("Combos of " + str(i), longest, rows) 
-				+ "\n\n")
+				combo_wins = stats.combo_wins(replays, i)
+				rows = list(stats.generate_rows(
+					combos, combo_wins, total, stats.format_combo2))
+				longest = len(max([row.element for row in rows] 
+					or ["Thundurus-Therian"], key=str.__len__))
+				combo_rawtext += (
+					stats.print_table("Combos of " + str(i), longest, rows) 
+					+ "\n\n")
 
 		# Replay pane
 		pairings = [(replay, tournament.format_name(replay.players[0]) 
@@ -382,13 +390,7 @@ def tour_index(request):
 	if request.method == "GET":
 		return render(request, "indextour.html")
 
-	'''
-	if "replay_submit" in request.POST:
-			replay_urls = set(request.POST.getlist("replays"))
-			print replay_urls
-			replays = set(replay for replay in request.session["replays"] if replay.url in replay_urls)
-	'''
-	if request.method == "POST":
+	elif request.method == "POST":
 		url = request.POST["url"]
 		rng = range(int(request.POST["start"]),int(request.POST["end"]))
 	
@@ -467,4 +469,10 @@ def update_session(request):
 	#print request.session[url]["matches"]
 	#request.session.save()
 	
+	return HttpResponse('ok')
+	
+def update_stats(request):
+	if not request.is_ajax() or not request.method=='POST':
+		return HttpResponseNotAllowed(['POST'])
+	print "okay"
 	return HttpResponse('ok')
