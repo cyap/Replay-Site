@@ -11,11 +11,19 @@
 <body>
 
 {% block content %}
+
 {% csrf_token %}
 Start: {{ start }}<br>
 End: {{ end }}<br>
 Thread: <a href={{url}}>{{ url }}</a><br>
 
+<form method=post action="/">
+	{% csrf_token %}
+	<div class="form_pane" id="options_pane">
+	Moves and Teammates <input type="checkbox" name="moves_check" checked/>
+	Combos <input type="checkbox" name="combos_check" checked/>
+	Leads <input type="checkbox" name="leads_check" checked/>
+	</div>
 <div id="tables">
   <table id="pairings_table">
     <tr class={{ match.3 }}>
@@ -28,9 +36,8 @@ Thread: <a href={{url}}>{{ url }}</a><br>
   	{% endfor %}
   </table>
 </div>
+
 <div id="matches">
-<form method=post action="/">
-  {% csrf_token %}
   
   <table id="table-match">
   <thead>

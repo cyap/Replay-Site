@@ -11,28 +11,29 @@
 {% block content %}
 
 <div class="results pane info">
-# of replays: {{ net_replays }}<br>
-# of Pokemon: {{ net_mons }}<br>
+  # of replays: {{ net_replays }}<br>
+  # of Pokemon: {{ net_mons }}<br>
 
-<button class="tab" name="replay-listing">Replays</button>
-<button class="tab" name="replay-text">Links</button>
-<form method="post" id="resubmit">
-  {% csrf_token %}
-  <ul id=replay-listing>
-  {% for replay, players in pairings %}
-	<li class="replay-entry">
-	  <input type="checkbox" name="replay_urls" value={{ replay.url }} checked>
-	  <a href="{{ replay.url }}">{{ players }}</a>
-	</li>
-  {% endfor %}
-  </ul>
+  <button class="tab" name="replay-listing">Replays</button>
+  <button class="tab" name="replay-text">Links</button>
+
+  <form method="post" id="resubmit">
+    {% csrf_token %}
+	<ul id=replay-listing>
+	{% for replay, players in pairings %}
+	  <li class="replay-entry">
+		<input type="checkbox" name="replay_urls" value={{ replay.url }} checked>
+		<a href="{{ replay.url }}">{{ players }}</a>
+	  </li>
+	{% endfor %}
+	</ul>
   
 <textarea class="rawtext" id="replay-text">
 {{ replay_rawtext }}
 </textarea><br>
   
-  <input type="submit" name="resubmit" value="Resubmit">
-</form>
+	<input type="submit" name="resubmit" value="Resubmit">
+  </form>
 </div>
 
 <div id="wrapper">
@@ -64,20 +65,26 @@ Usage:<br>
 {{ usage_whitespace }}
 </textarea><br>
 
+{% if moves_whitespace %}
 Moves and Teammates:<br>
 <textarea class="rawtext results">
 {{ moves_whitespace }}
 </textarea><br>
+{% endif %}
 
+{% if combos_rawtext %}
 Combos:<br>
 <textarea class="rawtext results">
 {{ combo_rawtext }}
 </textarea><br>
+{% endif %}
 
+{% if leads_rawtext %}
 Leads:<br>
 <textarea class="rawtext results">
 {{ leads_rawtext }}
 </textarea>
+{% endif %}
 
 </div>
 

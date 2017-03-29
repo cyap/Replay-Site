@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^$', views.index),
     url(r'^spl2039', views.spl_index),
     url(r'^tournament', views.tour_index),
-    url(r'^update_session', views.update_session)
+    url(r'^update_session', views.update_session),
+    url(r'^update_stats', views.update_stats)
 ]

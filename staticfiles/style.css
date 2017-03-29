@@ -34,6 +34,10 @@ table, th, td {
     border-collapse: collapse;
 }
 
+#pairings_table {
+	
+}
+
 #table-match {
 	float:left;
 	margin-right:70px;
