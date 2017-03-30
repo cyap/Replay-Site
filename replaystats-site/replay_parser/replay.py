@@ -243,10 +243,10 @@ class Replay:
 		"""
 		try:
 			# Player 1, Player 2
-			return self._players.keys()[0:2]
+			return list(self._players.keys())[0:2]
 		except:
 			self._players = self.log.parse_players()
-			return self._players.keys()[0:2]
+			return list(self._players.keys())[0:2]
 		
 	@property
 	def playerwl(self):	
@@ -387,6 +387,6 @@ def main(l):
 
 if __name__ == "__main__":
 	import replay_compile
-	l = [replay_compile.open_replay("http://replay.pokemonshowdown.com/smogtours-ou-39893") for i in xrange(0,500)]
+	l = [replay_compile.open_replay("http://replay.pokemonshowdown.com/smogtours-ou-39893") for i in range(0,500)]
 	profile.run('main(l)', sort="tottime")
 	
