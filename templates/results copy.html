@@ -28,7 +28,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
     <tr class={{ match.3 }}>
   	  <th>Pairings</th>
   	</tr>
-  	{% for match in matches %}
+  	{% for match in rows %}
   	<tr>
   	  <td>{{ match.0 }}</td>
   	</tr>
@@ -48,14 +48,14 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 	</tr>
   </thead>
   <tbody>
-	{% for match in matches %}
-	<tr class={{ match.2 }}>
+	{% for match in rows %}
+	<tr class={{ match.4 }}>
 	  <td draggable="true" id="{{match.0}}" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
-	  <input type="hidden" name="replay_urls" value={{ match.1.url }}>
-	  <td><a href="{{ match.1.url }}">{{ match.1.number }}</a></td>
+	  <input type="hidden" name="replay_urls" value={{ match.1 }}>
+	  <td><a href="{{ match.1 }}">{{ match.2 }}</a></td>
 	  </input>
-	  <td>{{ match.1.players}}</td>
-	  <td>{{ match.2 }}</td>
+	  <td>{{ match.3 }}</td>
+	  <td>{{ match.4 }}</td>
 	</tr>
 	{% endfor %}
   </tbody>

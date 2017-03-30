@@ -2,7 +2,7 @@ import operator
 from collections import Counter, namedtuple
 from itertools import chain, combinations, groupby
 
-from replay import Replay
+from .replay import Replay
 
 ROTOM_FORMS = ["-Wash", "-Heat", "-Mow", "-Fan", "-Frost"]
 PUMPKIN_FORMS = ["", "-Large", "-Super", "-Small"]
@@ -28,7 +28,7 @@ def usage(replays):
 
 def usage2(replays, key):
 	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays])
-	print teams
+	#printteams
 	return Counter(teams)
 
 def wins(replays):
@@ -48,7 +48,7 @@ def combos(replays, size = 2, cutoff = 0):
 	combos = Counter((format_combo(frozenset(combination)) 
 					for combination in uncounted_combos))
 	if cutoff:
-		combos = Counter({combo:use for combo,use in combos.iteritems() 
+		combos = Counter({combo:use for combo,use in combos.items() 
 						  if use > cutoff})
 	
 	for combo in combos.keys():
@@ -78,7 +78,7 @@ def combo_wins(replays, size = 2):
 	return Counter((format_combo(frozenset(combination)) 
 					for combination in combos))
 def leads(replays, doubles=False):
-	#print len(replays)
+	##printlen(replays)
 	if not doubles:
 		leads = chain.from_iterable((replay.leads["win"], 
 									replay.leads["lose"])
@@ -86,12 +86,12 @@ def leads(replays, doubles=False):
 	else:
 		leads = chain.from_iterable(replay.leads["win"] + replay.leads["lose"] for replay in replays)
 	
-	#print leads
+	##printleads
 								  
 	#a = list(leads)
-	#print len(a)
+	##printlen(a)
 	#l = Counter(a)
-	#print sum(l.values())
+	##printsum(l.values())
 	return Counter(leads)
 	
 def lead_wins(replays, doubles=False):
@@ -204,7 +204,7 @@ def pretty_print(cname, cwidth, usage, wins, total):
 	unique_ranks = accumulate([1] + counts[:-1:])
 
 	# Unpack rankings
-	rankings = chain.from_iterable([rank for i in xrange(0,count)] 
+	rankings = chain.from_iterable([rank for i in range(0,count)] 
 		for rank, count in zip(unique_ranks, counts))
 						  
 	for i, elemUse in enumerate(sorted_usage):
@@ -244,7 +244,7 @@ def generate_rows(usage, wins, total, func=str):
 	unique_ranks = accumulate([1] + counts[:-1:])
 
 	# Unpack rankings
-	rankings = chain.from_iterable([rank for i in xrange(0,count)] 
+	rankings = chain.from_iterable([rank for i in range(0,count)] 
 		for rank, count in zip(unique_ranks, counts))
 	
 	return [

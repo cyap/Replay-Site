@@ -1,11 +1,9 @@
 import re
 from collections import Counter
 from itertools import chain
-from urllib2 import urlopen
+from urllib.request import urlopen
 
 from fuzzywuzzy import fuzz
-
-import replay_compile
 
 class Tournament():
 
@@ -104,16 +102,16 @@ class Tournament():
 		fuzzy = self.filter_replays_by_pairings("fuzzy")
 		partial = self.filter_replays_by_pairings("partial")
 
-		print "Total replays:", len(self.replays)
-		#print exact, len(exact)
-		#print "Fuzzy matches", fuzzy, len(fuzzy)
-		#print "Partial matches:", partial, len(partial)
-		#print "Unmatched replays:", self.unmatchedReplays
-		#print "Unmatched pairings:", self.unmatchedPairings
-		#print self.fuzzyNameMatches
+		#print"Total replays:", len(self.replays)
+		##printexact, len(exact)
+		##print"Fuzzy matches", fuzzy, len(fuzzy)
+		##print"Partial matches:", partial, len(partial)
+		##print"Unmatched replays:", self.unmatchedReplays
+		##print"Unmatched pairings:", self.unmatchedPairings
+		##printself.fuzzyNameMatches
 		#for x in self.pairings:
-			#if x in self.pairingReplayMap:
-				#print x, self.pairingReplayMap[x]
+		#	if x in self.pairingReplayMap:
+		#		#printx, self.pairingReplayMap[x]
 		
 		r = exact | fuzzy | partial
 		return r
@@ -146,7 +144,7 @@ def parse_pairings(fileString=None, url=None, pairingsRaw=None):
 	if url:
 		# Pairings are contained in first post of a thread
 		# Posts are framed by <article> tags
-		raw = urlopen(url).read().split("</article>",1)[0].split("\n")
+		raw = urlopen(url).read().decode().split("</article>",1)[0].split("\n")
 		
 	# Checks for "vs" with no adjacent alphanumeric characters
 	pairingsRaw = (line for line in raw if
@@ -174,3 +172,4 @@ def format_name(name):
 	# User dictionary
 	# Move to other class?
 	return re.sub("[^\w\s'\.-]+", "", name).lower().strip()
+	#return name

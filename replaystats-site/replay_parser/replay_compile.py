@@ -2,11 +2,12 @@
 
 import multiprocessing.dummy
 import traceback
-from urllib2 import urlopen, Request, HTTPError
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
 
-from replay import Log, Replay
+from .replay import Log, Replay
 
 DEFAULT_URL_HEADER = "http://replay.pokemonshowdown.com/"
 # User-agent wrapper to mimic browser requests
@@ -24,7 +25,7 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 		thread = BeautifulSoup(
 				"".join(
 				urlopen(threadurl)
-				.read()
+				.read().decode()
 				.split("</article>")[start-1:end])
 				, "html.parser")
 		urls = (url.get("href") for url in thread.findAll("a") 
@@ -69,8 +70,8 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 			"\n".join(
 			(urlopen(Request(complete_url_header + str(i),
 			headers=REQUEST_HEADER))
-			.read() 
-			for i in xrange(1, 11)))
+			.read().decode()
+			for i in range(1, 11)))
 			, "html.parser")
 	urls = (url.get("href").strip("/") for url in page.findAll("a") 
 			if url.get("data-target"))
@@ -83,7 +84,7 @@ def replays_from_links(urls):
 	pool = multiprocessing.dummy.Pool(13)
 	# Throw out invalid replays
 	#return set(filter(None, pool.map(open_replay, urls)))
-	return filter(None, pool.map(open_replay, urls))
+	return list(filter(None, pool.map(open_replay, urls)))
 	
 def open_replay(url):
 	""" Open replay links and validate; return None if 404 error. """
@@ -98,7 +99,7 @@ def open_replay(url):
 	try:
 		log = Log([line for line in 
 				urlopen(Request(url, headers=REQUEST_HEADER))
-				.read()
+				.read().decode()
 				.split("\n")
 				if line.startswith("|")])
 		players = log.parse_players()
@@ -110,5 +111,5 @@ def open_replay(url):
 	except:
 		# Corrupted log file
 		traceback.print_exc()
-		print url
+		#printurl
 		return

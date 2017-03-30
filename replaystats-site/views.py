@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 
-from replay_parser import replay_compile, stats, tournament, circuitTours
+from .replay_parser import replay_compile, stats, tournament
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
@@ -223,7 +223,7 @@ def index(request):
 				pokemon, COL_WIDTH, teammates_rows[pokemon]) 
 				for pokemon, uses in usage.most_common() 
 				if pokemon in teammates_rows)
-			print teammates_whitespace
+			#printteammates_whitespace
 			
 			moves_whitespace = "\n\n".join(stats.print_table(
 				pokemon, COL_WIDTH, move_rows[pokemon]) 
@@ -286,7 +286,7 @@ def index(request):
 		if "combos_check" in request.POST:
 			# Combos
 			# Change to user input
-			for i in xrange(2,7):
+			for i in range(2,7):
 			
 				# List index error
 				try:
@@ -309,9 +309,9 @@ def index(request):
 					+ "\n\n")
 
 		# Replay pane
-		pairings = [(replay, tournament.format_name(replay.players[0]) 
+		pairings = [(replay, replay.players[0] 
 				   + " vs. " 
-				   + tournament.format_name(replay.players[1]))
+				   + replay.players[1])
 				   for replay in replays]
 		
 		replay_rawtext = "\n".join(replay.url for replay in replays)
@@ -406,13 +406,9 @@ def tour_index(request):
 			# Not cached
 			pairings = tournament.parse_pairings(url=url)
 			participants = tournament.participants_from_pairings(pairings)
-			tiers = request.POST["tier"].split(",")
-			replays = []
-			for tier in tiers:
-				replays = (replays + 
-					replay_compile.replays_from_range(rng, tier=tier))
+			replays = sum((replay_compile.replays_from_range(rng, tier=tier) 
+				for tier in request.POST["tier"].split(",")), [])
 			tour = tournament.Tournament(set(replays), pairings, participants)
-
 			replays = tour.match_tournament()
 			matches = tour.pairingReplayMap
 			unmatched_replays = tour.unmatchedReplays
@@ -428,12 +424,28 @@ def tour_index(request):
 			
 		# Replays
 		request.session["replays"] = replays | unmatched_replays
-		formatted_matches = [(str(pairing).strip("frozenset"), # pairing
+		'''
+		rows = [(
+			" vs. ".join(player for player in pairing), # pairing
+			matches[pairing][0].url,
+			matches[pairing][0].number,
+			" vs. ".join(player for player in matches[pairing][0].players),
+			matches[pairing][1])
+			if pairing in matches
+			else
+			(" vs. ".join(player for player in pairing),
+			"", "", "", "no match") for pairing in pairings]
+		'''	
+		
+		
+		formatted_matches = [#(str(pairing).strip("frozenset"), # pairing
+							(" vs. ".join(player for player in pairing),
 							 matches[pairing][0], # replay
 							 matches[pairing][1]) # filter
 							 if pairing in matches
 							 else 
-							 (str(pairing).strip("frozenset"), "", "no match")
+							 (" vs. ".join(player for player in pairing),
+							  "", "no match")
 							 for pairing in pairings]
 
 		return render(request, "results.html", {
@@ -442,7 +454,8 @@ def tour_index(request):
 			"url":request.POST["url"],
 			"participants" : participants,
 			"matches" : formatted_matches,
-			"unmatched_replays":unmatched_replays
+			"unmatched_replays":unmatched_replays,
+			#"rows": rows
 		})
 
 def update_session(request):
@@ -458,15 +471,15 @@ def update_session(request):
 		in request.session["replays"] if replay.url in unmatched_replays)
 		
 	matched_urls = set(request.POST.getlist("matches[]"))
-	print "urls:", matched_urls
+	#print"urls:", matched_urls
 	matched_replays = [replay for replay in request.session["replays"] 
 		if replay.url in matched_urls]
 	
 	# Change such that only URLs are being passed to the template
 	
-	#print matched_replays
+	##printmatched_replays
 	request.session[url]["matches"] = {pairing: (replay, filter) for pairing, replay, filter in zip(request.POST.getlist("pairings[]"), matched_replays, request.POST.getlist("filters[]"))}
-	#print request.session[url]["matches"]
+	##printrequest.session[url]["matches"]
 	#request.session.save()
 	
 	return HttpResponse('ok')
@@ -474,5 +487,5 @@ def update_session(request):
 def update_stats(request):
 	if not request.is_ajax() or not request.method=='POST':
 		return HttpResponseNotAllowed(['POST'])
-	print "okay"
+	#print"okay"
 	return HttpResponse('ok')
