@@ -5,13 +5,15 @@
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="{% static 'scripts/tour_match.js' %}"></script>
 <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script>
+	var CSRF = "{{ csrf_token }}";
+</script>
 
 <!DOCTYPE html>
 <html>
 <body>
 {% block content %}
 
-{% csrf_token %}
 Start: {{ start }}<br>
 End: {{ end }}<br>
 Thread: <a href={{url}}>{{ url }}</a><br>

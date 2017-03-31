@@ -1,6 +1,6 @@
 import operator
 from collections import Counter, namedtuple
-from itertools import chain, combinations, groupby
+from itertools import accumulate, chain, combinations, groupby
 
 from .replay import Replay
 
@@ -284,27 +284,21 @@ def stats_from_text(text):
 	try:
 		rows = text.split("\n")[3:] # TODO: Account for header
 		split_row = rows[0].split("|")
-		total = round(int(split_row[3].strip()) / (float(split_row[4].strip().strip("%"))/100))
-		return {"usage": Counter({split_row[2].strip(): int(split_row[3].strip()) for
-				split_row in (row.split("|") for row in rows)}),
-				"wins": Counter({split_row[2].strip():
-					int(round(int(split_row[3].strip())
-					* float(split_row[5].strip().strip("%"))/100)) for split_row in (row.split("|") for row in rows)}),
+		total = round(int(split_row[3].strip()) /
+			(float(split_row[4].strip().strip("%"))/100))
+		
+		return {"usage": Counter({
+					split_row[2].strip(): int(split_row[3].strip()) for
+					split_row in (row.split("|") for row in rows)}),
+				"wins": Counter({
+					split_row[2].strip(): int(round(int(split_row[3].strip())
+					* float(split_row[5].strip().strip("%"))/100)) for split_row
+					in (row.split("|") for row in rows)}),
 				"total":total}
 	except:
 		return {"usage": Counter(), "wins": Counter(), "total": 0}
 			
 			#"total": next(int(split_row[3].strip()) / int(split_row[4].strip()) for split_row in (rows[0].split("|")))}
-			
-def accumulate(iterable, func=operator.add):
-	''' Raw code for accumulate function (not available prior to Python 3) '''
-	it = iter(iterable)
-	total = next(it)
-	yield total
-	for element in it:
-		total = func(total, element)
-		yield total
-			
 			
 			
 			

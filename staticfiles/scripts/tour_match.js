@@ -26,7 +26,9 @@ window.onbeforeunload = function() {
 								return $(this).attr("class");
 							}).toArray(),
 		"unmatched_replays":unmatched_replays,
-		CSRF: getCSRFTokenValue()
+		"csrfmiddlewaretoken": CSRF
+		//CSRF: getCSRFTokenValue()
+		//CSRF: "${_csrf.token}"
 		})
 }
 
