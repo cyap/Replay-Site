@@ -7,6 +7,7 @@ import profile
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .replay_parser import replay_compile, stats, tournament
 
@@ -133,6 +134,7 @@ def index(request):
 		usage_whitespace = (sprite_header + "\n[CODE]\n" +
 			stats.pretty_print("Pokemon", 18, usage, wins, total)
 			+ "[/CODE]" + missing_text)
+			
 		# Advanced stats
 		
 		# Moves
@@ -282,7 +284,7 @@ def index(request):
 		else:
 			leads_rawtext = ""
 		
-		combo_rawtext = ""
+		combos_rawtext = ""
 		if "combos_check" in request.POST:
 			# Combos
 			# Change to user input
@@ -297,14 +299,15 @@ def index(request):
 						{combo:use for combo,use in combos.iteritems() 
 						if use > cutoff})
 				except:
+					#pass
 					combos = stats.combos(replays, i, 0.02 * total)
 				
 				combo_wins = stats.combo_wins(replays, i)
 				rows = list(stats.generate_rows(
 					combos, combo_wins, total, stats.format_combo2))
-				longest = len(max([row.element for row in rows] 
-					or ["Thundurus-Therian"], key=str.__len__))
-				combo_rawtext += (
+				longest = len(max([row.element for row in rows],
+					key=str.__len__, default="Thundurus-Therian"))
+				combos_rawtext += (
 					stats.print_table("Combos of " + str(i), longest, rows) 
 					+ "\n\n")
 
@@ -327,9 +330,10 @@ def index(request):
 					  "moves_whitespace":moves_whitespace,
 					  "usage_whitespace":usage_whitespace,
 					  "pairings":pairings,
-					  "combo_rawtext":combo_rawtext,
+					  "combos_rawtext":combos_rawtext,
 					  "leads_rawtext":leads_rawtext,
 					  "replay_rawtext":replay_rawtext})
+					  
 
 def spl_index(request):
 	if request.method == "GET":
@@ -385,7 +389,7 @@ def spl_index(request):
 					"moves":moves,
 					"pairings":pairings,
 					"choice":choice})
-					
+
 def tour_index(request):	
 	if request.method == "GET":
 		return render(request, "indextour.html")
@@ -457,7 +461,7 @@ def tour_index(request):
 			"unmatched_replays":unmatched_replays,
 			#"rows": rows
 		})
-
+		
 def update_session(request):
 	if not request.is_ajax() or not request.method=='POST':
 		return HttpResponseNotAllowed(['POST'])
