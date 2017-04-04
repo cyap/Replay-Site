@@ -52,7 +52,12 @@ class Log:
 					for line in self.text 
 					if line.startswith("|gen")))
 		except:
-			return None
+			try:
+				tier_line = next(line for line in self.text 
+					if line.startswith("|tier"))
+				return int(next(char for char in tier_line if char.isdigit()))
+			except:
+				return 0
 					
 	def parse_tier(self):
 		return next(line.split("|")[2].lower() for line in self.text 
@@ -296,6 +301,13 @@ class Replay:
 			else:
 				teams = self.log.parse_teams_from_preview()
 			self._teams = teams
+			# Gen 4 Rotom
+			if self.generation == 4:
+				for team in self._teams.values():
+					for pokemon in team:
+						if pokemon.startswith("Rotom"):
+							team.append("Rotom-Appliance")
+							break
 			for player in ("p1","p2"):
 				self._teams[self.playerwl[player]] = self._teams[player]
 			

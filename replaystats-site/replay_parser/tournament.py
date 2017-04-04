@@ -101,18 +101,6 @@ class Tournament():
 		exact = self.filter_replays_by_pairings("exact")
 		fuzzy = self.filter_replays_by_pairings("fuzzy")
 		partial = self.filter_replays_by_pairings("partial")
-
-		#print"Total replays:", len(self.replays)
-		##printexact, len(exact)
-		##print"Fuzzy matches", fuzzy, len(fuzzy)
-		##print"Partial matches:", partial, len(partial)
-		##print"Unmatched replays:", self.unmatchedReplays
-		##print"Unmatched pairings:", self.unmatchedPairings
-		##printself.fuzzyNameMatches
-		#for x in self.pairings:
-		#	if x in self.pairingReplayMap:
-		#		#printx, self.pairingReplayMap[x]
-		
 		r = exact | fuzzy | partial
 		return r
 		
@@ -139,12 +127,13 @@ def parse_pairings(fileString=None, url=None, pairingsRaw=None):
 	"""
 	# Pairings from text file
 	if fileString:
-		raw = open(fileString, "r").read().splitlines()
+		raw = open(fileString, "r").read().lower().splitlines()
 	# Pairings from thread url
 	if url:
 		# Pairings are contained in first post of a thread
 		# Posts are framed by <article> tags
-		raw = urlopen(url).read().decode().split("</article>",1)[0].split("\n")
+		raw = (urlopen(url).read().decode().lower().split("</article>",1)[0]
+			.split("<article>")[1].split("\n"))
 		
 	# Checks for "vs" with no adjacent alphanumeric characters
 	pairingsRaw = (line for line in raw if
@@ -172,4 +161,3 @@ def format_name(name):
 	# User dictionary
 	# Move to other class?
 	return re.sub("[^\w\s'\.-]+", "", name).lower().strip()
-	#return name
