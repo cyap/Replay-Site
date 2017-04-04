@@ -219,19 +219,6 @@ def index(request):
 					teammate_wins.get(pokemon, Counter()), 
 					uses)
 				for pokemon, uses in usage.most_common()}
-				
-			'''
-			teammates_whitespace = "\n\n".join(stats.print_table(
-				pokemon, COL_WIDTH, teammates_rows[pokemon]) 
-				for pokemon, uses in usage.most_common() 
-				if pokemon in teammates_rows)
-			#printteammates_whitespace
-			
-			moves_whitespace = "\n\n".join(stats.print_table(
-				pokemon, COL_WIDTH, move_rows[pokemon]) 
-				for pokemon, uses in usage.most_common() 
-				if pokemon in move_rows)
-			'''
 			
 			# Refactor to allow for customizable column name
 			#usage_dict = {}
@@ -290,17 +277,23 @@ def index(request):
 			# Change to user input
 			for i in range(2,7):
 			
+				combos = stats.combos(replays, i)
+				#cutoff = combos.most_common()[
+				#		min(len(combos.most_common()), 150)][1]
+				#combos = Counter(
+				#	{combo:use for combo,use in combos.iteritems() 
+				#	if use > cutoff})
 				# List index error
 				try:
-					combos = stats.combos(replays, i)
 					cutoff = combos.most_common()[
 						min(len(combos.most_common()), 150)][1]
 					combos = Counter(
-						{combo:use for combo,use in combos.iteritems() 
+						{combo:use for combo,use in combos.items() 
 						if use > cutoff})
 				except:
-					#pass
-					combos = stats.combos(replays, i, 0.02 * total)
+					pass
+					#combos = stats.combos(replays, i, 0.02 * total)
+					#combos = stats.combos(replays, i)
 				
 				combo_wins = stats.combo_wins(replays, i)
 				rows = list(stats.generate_rows(
@@ -397,9 +390,9 @@ def tour_index(request):
 	elif request.method == "POST":
 		url = request.POST["url"]
 		rng = range(int(request.POST["start"]),int(request.POST["end"]))
-	
+
 		# Cached
-		if url in request.session and request.session[url].get("range") == rng:
+		if url in request.session and request.session[url].get("range") == rng and "clear" not in request.POST:
 			participants = request.session[url]["participants"]
 			pairings = request.session[url]["pairings"]
 			matches = request.session[url]["matches"]
@@ -428,22 +421,9 @@ def tour_index(request):
 			
 		# Replays
 		request.session["replays"] = replays | unmatched_replays
-		'''
-		rows = [(
-			" vs. ".join(player for player in pairing), # pairing
-			matches[pairing][0].url,
-			matches[pairing][0].number,
-			" vs. ".join(player for player in matches[pairing][0].players),
-			matches[pairing][1])
-			if pairing in matches
-			else
-			(" vs. ".join(player for player in pairing),
-			"", "", "", "no match") for pairing in pairings]
-		'''	
 		
 		
-		formatted_matches = [#(str(pairing).strip("frozenset"), # pairing
-							(" vs. ".join(player for player in pairing),
+		formatted_matches = [(" vs. ".join(player for player in pairing),
 							 matches[pairing][0], # replay
 							 matches[pairing][1]) # filter
 							 if pairing in matches
@@ -452,14 +432,13 @@ def tour_index(request):
 							  "", "no match")
 							 for pairing in pairings]
 
-		return render(request, "results.html", {
+		return render(request, "tour_match.html", {
 			"start":request.POST["start"],
 			"end":request.POST["end"],
 			"url":request.POST["url"],
 			"participants" : participants,
 			"matches" : formatted_matches,
 			"unmatched_replays":unmatched_replays,
-			#"rows": rows
 		})
 		
 def update_session(request):
@@ -481,9 +460,7 @@ def update_session(request):
 	
 	# Change such that only URLs are being passed to the template
 	
-	##printmatched_replays
 	request.session[url]["matches"] = {pairing: (replay, filter) for pairing, replay, filter in zip(request.POST.getlist("pairings[]"), matched_replays, request.POST.getlist("filters[]"))}
-	##printrequest.session[url]["matches"]
 	#request.session.save()
 	
 	return HttpResponse('ok')
@@ -491,5 +468,4 @@ def update_session(request):
 def update_stats(request):
 	if not request.is_ajax() or not request.method=='POST':
 		return HttpResponseNotAllowed(['POST'])
-	#print"okay"
 	return HttpResponse('ok')

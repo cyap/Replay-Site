@@ -25,6 +25,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 	Combos <input type="checkbox" name="combos_check" checked/>
 	Leads <input type="checkbox" name="leads_check" checked/>
 	</div>
+
 <div id="tables">
   <table id="pairings_table">
     <tr class={{ match.3 }}>
@@ -46,13 +47,13 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 		<th>Drag</th>
 		<th>#</th>
 		<th>Players</th> 
-		<th>Filter</th>
+		<th>Match</th>
 	</tr>
   </thead>
   <tbody>
 	{% for match in matches %}
 	<tr class={{ match.2 }}>
-	  <td draggable="true" id="{{match.0}}" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
+	  <td draggable="true" class="dragHandler" id="{{match.0}}">#</td>
 	  <input type="hidden" name="replay_urls" value={{ match.1.url }}>
 	  <td><a href="{{ match.1.url }}">{{ match.1.number }}</a></td>
 	  </input>
@@ -74,12 +75,13 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 	<th>Drag</th>
 	<th>#</th>
 	<th>Players</th> 
+	<th>Match</th>
 </tr>
 
 {% for replay in unmatched_replays %}
   <tr>
   <div class="replay_container">
-	<td draggable="true" ondragstart="pickFunc()" ondragover="overFunc()" ondrop="dropFunc(this)">#</td>
+	<td draggable="true" class="dragHandler">#</td>
 	<input type="hidden" name="replay_urls" value={{ replay.url }}><td><a href="{{ replay.url }}">{{ replay.number }}</a></td></input>
 	<td>{{ replay.players }}</td>
 	<td>no match</td>
