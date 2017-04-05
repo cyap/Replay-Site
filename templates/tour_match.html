@@ -44,7 +44,6 @@ Thread: <a href={{url}}>{{ url }}</a><br>
   <table id="table-match">
   <thead>
 	<tr>
-		<th>Drag</th>
 		<th>#</th>
 		<th>Players</th> 
 		<th>Match</th>
@@ -52,8 +51,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
   </thead>
   <tbody>
 	{% for match in matches %}
-	<tr class={{ match.2 }}>
-	  <td draggable="true" class="dragHandler" id="{{match.0}}">#</td>
+	<tr draggable="true" class="{{ match.2 }} dragHandler">
 	  <input type="hidden" name="replay_urls" value={{ match.1.url }}>
 	  <td><a href="{{ match.1.url }}">{{ match.1.number }}</a></td>
 	  </input>
@@ -72,20 +70,18 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 
 <table id="unmatched_replays">
 <tr>
-	<th>Drag</th>
 	<th>#</th>
 	<th>Players</th> 
 	<th>Match</th>
 </tr>
 
 {% for replay in unmatched_replays %}
-  <tr>
-  <div class="replay_container">
-	<td draggable="true" class="dragHandler">#</td>
-	<input type="hidden" name="replay_urls" value={{ replay.url }}><td><a href="{{ replay.url }}">{{ replay.number }}</a></td></input>
+  <tr draggable="true" class="dragHandler">
+	<input type="hidden" name="replay_urls" value={{ replay.url }}>
+	<td><a href="{{ replay.url }}">{{ replay.number }}</a></td>
+	</input>
 	<td>{{ replay.players }}</td>
 	<td>no match</td>
-  </div>
 </tr>
 {% endfor %}
 </table>

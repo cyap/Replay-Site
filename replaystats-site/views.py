@@ -277,23 +277,25 @@ def index(request):
 			# Change to user input
 			for i in range(2,7):
 			
-				combos = stats.combos(replays, i)
+				combos = stats.combos(replays, i, 0.02 * total)
 				#cutoff = combos.most_common()[
 				#		min(len(combos.most_common()), 150)][1]
 				#combos = Counter(
 				#	{combo:use for combo,use in combos.iteritems() 
 				#	if use > cutoff})
 				# List index error
-				try:
-					cutoff = combos.most_common()[
-						min(len(combos.most_common()), 150)][1]
-					combos = Counter(
-						{combo:use for combo,use in combos.items() 
-						if use > cutoff})
-				except:
-					pass
-					#combos = stats.combos(replays, i, 0.02 * total)
-					#combos = stats.combos(replays, i)
+				
+				if True:
+					try:
+						cutoff = combos.most_common()[25][1]
+						#cutoff = combos.most_common()[
+						#	min(len(combos.most_common()), 100)][1]
+						combos = Counter(
+							{combo:use for combo,use in combos.items() 
+							if use > cutoff})
+					except:
+						#pass
+						combos = stats.combos(replays, i, 0.02 * total)
 				
 				combo_wins = stats.combo_wins(replays, i)
 				rows = list(stats.generate_rows(
