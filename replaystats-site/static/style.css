@@ -197,3 +197,7 @@ ul.form {
 .replay-entry {
 	box-sizing: border-box;
 }
+
+label {
+	float:left;
+}

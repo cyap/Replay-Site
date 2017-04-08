@@ -53,10 +53,14 @@
 	</div>
 	{% endblock %}
 
-Raw:
-<br>
-<textarea id=raw rows={{ row_count }} cols=60>
+Raw:<br>
+<textarea class="rawtext" id=raw rows={{ row_count }} cols=60>
 {{ raw }}
+</textarea><br>
+
+<label>Usage Stats:<br>
+<textarea class="rawtext results">
+{{ usage_whitespace }}
 </textarea>
 		
 </body>

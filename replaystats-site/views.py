@@ -363,6 +363,15 @@ def spl_index(request):
 			pairings = [{"replay":replay, "moves":replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2")} for replay in replays]
 			template = "scout_stats.html"
 			
+			gen_num = next((char for char in min(request.POST["tier"]) if char.isdigit()), 6)
+			usage = stats.aggregate_forms(stats.usage2(replays, choice),
+					gen_num, True) 
+			wins = stats.wins2(replays, choice)
+			total = len(replays)
+			
+			usage_whitespace = stats.pretty_print("Pokemon", 18, usage, wins, total)
+			
+			
 			raw = (
 			"\n\n---\n\n".join([
 			choice + "\n"
@@ -383,7 +392,8 @@ def spl_index(request):
 					"row_count":row_count,
 					"moves":moves,
 					"pairings":pairings,
-					"choice":choice})
+					"choice":choice,
+					"usage_whitespace":usage_whitespace})
 
 def tour_index(request):	
 	if request.method == "GET":

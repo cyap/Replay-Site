@@ -35,6 +35,10 @@ def wins(replays):
 	teams = chain.from_iterable([replay.teams["win"] for replay in replays])
 	return Counter(teams)
 	
+def wins2(replays, key):
+	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays if replay.teams.get(key, {}) == replay.teams["win"]])
+	return Counter(teams)
+	
 def combos(replays, size = 2, cutoff = 0):
 
 	#combos = chain.from_iterable(list(combinations(replay.teams["win"], size)) 
