@@ -305,7 +305,7 @@ class Replay:
 			if self.generation == 4:
 				for team in self._teams.values():
 					for pokemon in team:
-						if pokemon.startswith("Rotom"):
+						if pokemon.startswith("Rotom-"):
 							team.append("Rotom-Appliance")
 							break
 			for player in ("p1","p2"):

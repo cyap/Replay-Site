@@ -16,16 +16,17 @@ REQUEST_HEADER = {'User-Agent' :
 "like Gecko) Chrome/54.0.2840.98 Safari/537.36"}
 
 def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None, 
-						start=1, end=None):
+						start=1, end=1250):
 	""" Parse given thread for replay links and convert to set of replays.
 	Parse entire thread by default, with optional start and end parameters to
 	limit parsing to a range of posts.
 	"""
+	
+	'''
 	try:
 		thread = BeautifulSoup(
 				"".join(
-				urlopen(threadurl)
-				.read().decode()
+				urlopen(threadurl).read().decode()
 				.split("</article>")[start-1:end])
 				, "html.parser")
 		urls = (url.get("href") for url in thread.findAll("a") 
@@ -41,6 +42,39 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 	except:
 		#return {}
 		return []
+	'''
+	
+	pages = []
+	if not end:
+		# Calculate last post
+		first_page = BeautifulSoup(urlopen(threadurl).read().decode(), "html.parser")
+		end = int(str(first_page.find(class_="pageNavHeader"))
+				.split("of ")[1].split("<")[0]) * 25
+	for i in range(int(start / 25) + 1, int(end / 25) + 2):
+		page_num = "page-" + str(i)
+		url = threadurl + page_num
+		try:
+			page = (urlopen(threadurl.strip() + page_num)
+					.read().decode().split("</article>")[:-1])
+			pages += page
+		except:
+			traceback.print_exc()
+	
+	post_start = start - int(start / 25) * 25 - 1
+	post_end = post_start + end - start + 1 - (len(page) - 25)
+	
+	thread = BeautifulSoup("".join(pages[post_start:post_end]), "html.parser")
+	urls = (url.get("href") for url in thread.findAll("a") 
+			if url.get("href") and url.get("href").startswith(url_header))
+	# Optional: Filter by tier
+	# TODO: Tier from replay object or URL?
+	
+	# Change to tiers from log
+	# replay.pokemonshowdown.com/ou doesn't work
+	if tiers:
+		#urls = (url for url in urls if url.split("-")[-2] in tiers)
+		urls = (url for url in urls if url.split("-")[-2].split("/")[-1] in tiers)
+	return replays_from_links(urls)
 
 
 def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",

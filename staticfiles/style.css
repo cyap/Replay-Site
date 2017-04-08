@@ -159,9 +159,13 @@ ul.form {
 #options_pane {
 	display: block;
 }
-#unmatched_replays {
-	float:left;
-}
+
+/*#unmatched_replays {
+	position: sticky;
+	top: 1px;
+	/*left: 700;
+	top: 150;
+}*/
 
 #replay-listing {
 	list-style-type: none;
