@@ -50,7 +50,8 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 		first_page = BeautifulSoup(urlopen(threadurl).read().decode(), "html.parser")
 		end = int(str(first_page.find(class_="pageNavHeader"))
 				.split("of ")[1].split("<")[0]) * 25
-	for i in range(int(start / 25) + 1, int(end / 25) + 2):
+	
+	for i in range(int(start / 25) + 1, int((end-1) / 25) + 2):
 		page_num = "page-" + str(i)
 		url = threadurl + page_num
 		try:
@@ -61,7 +62,7 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 			traceback.print_exc()
 	
 	post_start = start - int(start / 25) * 25 - 1
-	post_end = post_start + end - start + 1 - (len(page) - 25)
+	post_end = post_start + (end - start) + 1
 	
 	thread = BeautifulSoup("".join(pages[post_start:post_end]), "html.parser")
 	urls = (url.get("href") for url in thread.findAll("a") 
