@@ -110,7 +110,9 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 			, "html.parser")
 	urls = (url.get("href").strip("/") for url in page.findAll("a") 
 			if url.get("data-target"))
-	urls = [url_header + url for url in urls if len(url.split("-")) > 2 and url.split("-")[-2] == tier]
+	
+	#urls = [url_header + url for url in urls if len(url.split("-")) > 2 and url.split("-")[-2] == tier]
+	urls = [url_header + url for url in urls if url.split("-")[-2].split("/")[-1] == tier]
 	#urls = [url_header + url for url in urls if url.split("-")[-2] == tier]
 	return replays_from_links(urls)
 		
