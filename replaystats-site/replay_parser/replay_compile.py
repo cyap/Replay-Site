@@ -43,39 +43,45 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 		#return {}
 		return []
 	'''
+	try:
+		pages = []
+		if not end:
+			# Calculate last post
+			first_page = BeautifulSoup(urlopen(threadurl).read().decode(), "html.parser")
+			end = int(str(first_page.find(class_="pageNavHeader"))
+					.split("of ")[1].split("<")[0]) * 25
 	
-	pages = []
-	if not end:
-		# Calculate last post
-		first_page = BeautifulSoup(urlopen(threadurl).read().decode(), "html.parser")
-		end = int(str(first_page.find(class_="pageNavHeader"))
-				.split("of ")[1].split("<")[0]) * 25
+		for i in range(int(start / 25) + 1, int((end-1) / 25) + 2):
+			page_num = "page-" + str(i)
+			url = threadurl + page_num
+			try:
+				page = (urlopen(threadurl.strip() + page_num)
+						.read().decode().split("</article>")[:-1])
+				pages += page
+			except:
+				traceback.print_exc()
 	
-	for i in range(int(start / 25) + 1, int((end-1) / 25) + 2):
-		page_num = "page-" + str(i)
-		url = threadurl + page_num
-		try:
-			page = (urlopen(threadurl.strip() + page_num)
-					.read().decode().split("</article>")[:-1])
-			pages += page
-		except:
-			traceback.print_exc()
+		post_start = start - int(start / 25) * 25 - 1
+		post_end = post_start + (end - start) + 1
 	
-	post_start = start - int(start / 25) * 25 - 1
-	post_end = post_start + (end - start) + 1
+		thread = BeautifulSoup("".join(pages[post_start:post_end]),
+			"html.parser")
+		urls = (url.get("href") for url in thread.findAll("a") 
+				if url.get("href") and url.get("href").startswith(url_header))
+				
+		# Optional: Filter by tier
+		# TODO: Tier from replay object or URL?
 	
-	thread = BeautifulSoup("".join(pages[post_start:post_end]), "html.parser")
-	urls = (url.get("href") for url in thread.findAll("a") 
-			if url.get("href") and url.get("href").startswith(url_header))
-	# Optional: Filter by tier
-	# TODO: Tier from replay object or URL?
-	
-	# Change to tiers from log
-	# replay.pokemonshowdown.com/ou doesn't work
-	if tiers:
-		#urls = (url for url in urls if url.split("-")[-2] in tiers)
-		urls = (url for url in urls if url.split("-")[-2].split("/")[-1] in tiers)
-	return replays_from_links(urls)
+		# Change to tiers from log
+		# replay.pokemonshowdown.com/ou doesn't work
+		if tiers:
+			#urls = (url for url in urls if url.split("-")[-2] in tiers)
+			urls = (url for url in urls if url.split("-")[-2].split("/")[-1] 
+				in tiers)
+		return replays_from_links(urls)
+	except:
+		return []
+
 
 
 def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",

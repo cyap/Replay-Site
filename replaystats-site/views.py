@@ -350,6 +350,7 @@ def spl_index(request):
 			for replay in replays]))
 			moves = [replay.moves for replay in replays]
 			pairings = None
+			usage_whitespace = ""
 			
 		else:
 			replays = replay_compile.replays_from_user(
