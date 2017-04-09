@@ -53,7 +53,7 @@ def combos(replays, size = 2, cutoff = 0):
 					for combination in uncounted_combos))
 	if cutoff:
 		combos = Counter({combo:use for combo,use in combos.items() 
-						  if use > cutoff})
+						  if use >= cutoff})
 	
 	for combo in list(combos.keys()):
 		for pokemon in AGGREGATED_FORMS:

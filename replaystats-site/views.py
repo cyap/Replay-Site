@@ -273,19 +273,17 @@ def index(request):
 		
 		combos_rawtext = ""
 		if "combos_check" in request.POST:
+		 
 			# Combos
 			# Change to user input
 			for i in range(2,7):
-			
-				combos = stats.combos(replays, i, 0.02 * total)
-				#cutoff = combos.most_common()[
-				#		min(len(combos.most_common()), 150)][1]
-				#combos = Counter(
-				#	{combo:use for combo,use in combos.iteritems() 
-				#	if use > cutoff})
-				# List index error
+				try:
+					combos = stats.combos(replays, i,
+						int(request.POST["cutoff"])/100 * total)
+				except:
+					combos = stats.combos(replays, i)
 				
-				if True:
+				if False:
 					try:
 						cutoff = combos.most_common()[25][1]
 						#cutoff = combos.most_common()[

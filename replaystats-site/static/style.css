@@ -201,3 +201,7 @@ ul.form {
 label {
 	float:left;
 }
+
+#cutoff {
+	width: 25px;
+}
