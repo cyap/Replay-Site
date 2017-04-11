@@ -28,14 +28,21 @@ def index(request):
 		# Check from which form
 		
 		# Resubmission
-		if "resubmit" in request.POST or "rep_submit" in request.POST:
+		#if "resubmit" in request.POST or "rep_submit" in request.POST:
+		if "rep_submit" in request.POST:
 			# Save new replays
 			replays = replay_compile.replays_from_links(
 				request.POST.getlist("replay_urls"))
 				
-			# TODO: Change to saving replay objects and filtering
-			if "resubmit" in request.POST:				
-				request.POST = request.session["form"]
+		# TODO: Change to saving replay objects and filtering
+		elif "resubmit" in request.POST:
+			cached_replays = set(request.POST.getlist("replay_urls"))
+			print(cached_replays)
+			replays = [replay for replay in request.session["replays"]
+				if replay.url in cached_replays]
+			replays += replay_compile.replays_from_links(
+				request.POST["new_urls"].splitlines())
+			request.POST = request.session["form"]
 			
 		else:
 			# Thread
@@ -63,7 +70,7 @@ def index(request):
 							request.POST.getlist("range_tiers")))))
 			# Links
 			link_replays = list(replay_compile.replays_from_links(
-				request.POST["replay_urls"].split("\n")))
+				request.POST["replay_urls"].splitlines()))
 			
 			# Aggregate replays
 			#replays = thread_replays | link_replays | range_replays
@@ -283,9 +290,9 @@ def index(request):
 				except:
 					combos = stats.combos(replays, i)
 				
-				if False:
+				if True:
 					try:
-						cutoff = combos.most_common()[25][1]
+						cutoff = combos.most_common()[150][1]
 						#cutoff = combos.most_common()[
 						#	min(len(combos.most_common()), 100)][1]
 						combos = Counter(
@@ -312,8 +319,10 @@ def index(request):
 		
 		replay_rawtext = "\n".join(replay.url for replay in replays)
 		
-		
+		# Caching
 		request.session["form"] = request.POST
+		request.session["replays"] = replays
+		
 		return render(request, "stats.html", 
 					 {"usage_table":usage_table,
 					  "net_mons":sum(usage.values()),

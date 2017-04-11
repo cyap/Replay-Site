@@ -16,38 +16,18 @@ REQUEST_HEADER = {'User-Agent' :
 "like Gecko) Chrome/54.0.2840.98 Safari/537.36"}
 
 def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None, 
-						start=1, end=1250):
+						start=1, end=None):
 	""" Parse given thread for replay links and convert to set of replays.
 	Parse entire thread by default, with optional start and end parameters to
 	limit parsing to a range of posts.
 	"""
-	
-	'''
-	try:
-		thread = BeautifulSoup(
-				"".join(
-				urlopen(threadurl).read().decode()
-				.split("</article>")[start-1:end])
-				, "html.parser")
-		urls = (url.get("href") for url in thread.findAll("a") 
-				if url.get("href") and url.get("href").startswith(url_header))
-		# Optional: Filter by tier
-		# TODO: Tier from replay object or URL?
-		
-		# Change to tiers from log
-		# replay.pokemonshowdown.com/ou doesn't work
-		if tiers:
-			urls = (url for url in urls if url.split("-")[-2] in tiers)
-		return replays_from_links(urls)
-	except:
-		#return {}
-		return []
-	'''
+
 	try:
 		pages = []
 		if not end:
 			# Calculate last post
-			first_page = BeautifulSoup(urlopen(threadurl).read().decode(), "html.parser")
+			first_page = BeautifulSoup(urlopen(threadurl)
+						.read().decode(), "html.parser")
 			end = int(str(first_page.find(class_="pageNavHeader"))
 					.split("of ")[1].split("<")[0]) * 25
 	
@@ -81,7 +61,6 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 		return replays_from_links(urls)
 	except:
 		return []
-
 
 
 def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
@@ -118,7 +97,8 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 			if url.get("data-target"))
 	
 	#urls = [url_header + url for url in urls if len(url.split("-")) > 2 and url.split("-")[-2] == tier]
-	urls = [url_header + url for url in urls if url.split("-")[-2].split("/")[-1] == tier]
+	urls = [url_header + url for url in urls if "-" in url and
+			url.split("-")[-2].split("/")[-1] == tier]
 	#urls = [url_header + url for url in urls if url.split("-")[-2] == tier]
 	return replays_from_links(urls)
 		
@@ -127,7 +107,9 @@ def replays_from_links(urls):
 	pool = multiprocessing.dummy.Pool(13)
 	# Throw out invalid replays
 	#return set(filter(None, pool.map(open_replay, urls)))
-	return list(filter(None, pool.map(open_replay, urls)))
+	replays = list(filter(None, pool.map(open_replay, urls)))
+	pool.close()
+	return replays
 	
 def open_replay(url):
 	""" Open replay links and validate; return None if 404 error. """

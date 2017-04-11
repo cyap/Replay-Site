@@ -9,8 +9,20 @@ $(document).ready(function() {
 		//.find(":input").prop("disabled",true);
 	});
 	
+	$("#add-replays").click(function() {
+		if ($("#replays-add").hasClass("hidden")) {
+			$("#replays-add").removeClass("hidden");
+		}
+		else {
+			$("#replays-add").addClass("hidden");
+		}
+	});
+	
 	$("#replay-text").width($("#replay-listing").width());
 	$("#replay-text").height($("#replay-listing").height());
+	
+	$("#replays-add").width($("#replay-listing").width());
+	
 	$("[name=replay-listing]").click();
 	
 	/*

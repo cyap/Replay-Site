@@ -188,9 +188,9 @@ def aggregate_forms(data, generation="4", counter=False):
 			
 def pretty_print(cname, cwidth, usage, wins, total):
 	header = (
-		"+ ---- + {2} + --- + ------- + ------- +\n"
-		"| Rank | {0}{1} | Use | Usage % |  Win %  |\n"
-		"+ ---- + {2} + --- + ------- + ------- +\n"
+		"+ ---- + {2} + ---- + ------- + ------- +\n"
+		"| Rank | {0}{1} | Use  | Usage % |  Win %  |\n"
+		"+ ---- + {2} + ---- + ------- + ------- +\n"
 		).format(cname, " " * (cwidth - len(cname)), "-" * cwidth)
 		
 	body = ""
@@ -221,7 +221,7 @@ def pretty_print(cname, cwidth, usage, wins, total):
 		body += "| {0} | {1} | {2} | {3}{4:.2f}% | {5}{6:.2f}% |\n".format(
 				rank + " " * (4 - len(rank)),
 				str(element) + " " * (cwidth - len(str(element))), 
-				" " * (3 - len(str(uses))) + str(uses), 
+				" " * (4 - len(str(uses))) + str(uses), 
 				" " * (3-len(str(int(userate)))), userate,
 				" " * (3-len(str(int(winrate)))), winrate
 				)
@@ -267,16 +267,16 @@ def print_table(cname, cwidth, rows):
 
 	# Row: (rank, element, usage, use %, win %)
 	header = (
-		"+ ---- + {2} + --- + ------- + ------- +\n"
-		"| Rank | {0}{1} | Use | Usage % |  Win %  |\n"
-		"+ ---- + {2} + --- + ------- + ------- +\n"
+		"+ ---- + {2} + ---- + ------- + ------- +\n"
+		"| Rank | {0}{1} | Use  | Usage % |  Win %  |\n"
+		"+ ---- + {2} + ---- + ------- + ------- +\n"
 		).format(cname, " " * (cwidth - len(cname)), "-" * cwidth)
 		
 	body = "\n".join(
 		"| {0} | {1} | {2} | {3}{4:.2f}% | {5}{6:.2f}% |".format(
 			row.rank + " " * (4 - len(row.rank)),
 			row.element + " " * (cwidth - len(row.element)),
-			" " * (3 - len(str(row.uses))) + str(row.uses), 
+			" " * (4 - len(str(row.uses))) + str(row.uses), 
 			" " * (3-len(str(int(row.userate)))), row.userate,
 			" " * (3-len(str(int(row.winrate)))), row.winrate
 		) for row in rows

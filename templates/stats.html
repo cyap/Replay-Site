@@ -28,11 +28,12 @@
 	{% endfor %}
 	</ul>
   
-<textarea class="rawtext" id="replay-text">
-{{ replay_rawtext }}
-</textarea><br>
-  
-	<input type="submit" name="resubmit" value="Resubmit">
+    <textarea class="rawtext" id="replay-text">{{ replay_rawtext }}</textarea><br>
+    
+    <textarea class="rawtext hidden" name="new_urls" id="replays-add"></textarea><br>
+    
+    <button type="button" id="add-replays">Add more</button>
+    <input type="submit" name="resubmit" value="Resubmit">
   </form>
 </div>
 
