@@ -104,13 +104,16 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 		
 def replays_from_links(urls):
 	""" Helper function to convert replay links to replay objects. """
-	pool = multiprocessing.dummy.Pool(13)
-	# Throw out invalid replays
-	#return set(filter(None, pool.map(open_replay, urls)))
-	replays = list(filter(None, pool.map(open_replay, urls)))
-	pool.close()
-	return replays
-	
+	try:
+		pool = multiprocessing.dummy.Pool(13)
+		# Throw out invalid replays
+		#return set(filter(None, pool.map(open_replay, urls)))
+		return list(filter(None, pool.map(open_replay, urls)))
+	except:
+		return
+	finally:
+		pool.close()
+
 def open_replay(url):
 	""" Open replay links and validate; return None if 404 error. """
 	# Check if URL adheres to the usual format of /*tier-number
