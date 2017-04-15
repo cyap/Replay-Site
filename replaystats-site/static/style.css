@@ -83,6 +83,12 @@ th {
 	margin-top: 5px;
 	margin-bottom: 5px;
 	background-color:white;
+	list-style-type: none;
+	display:block;
+}
+
+.form label {
+	display:block;
 }
 
 .form_pane {
@@ -198,9 +204,9 @@ ul.form {
 	box-sizing: border-box;
 }
 
-label {
+/*label {
 	float:left;
-}
+}*/
 
 #cutoff {
 	width: 25px;

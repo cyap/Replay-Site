@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+from .forms import ThreadForm, RangeForm, OptionsPane
 from .replay_parser import replay_compile, stats, tournament
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
@@ -22,7 +23,15 @@ def index2(request):
 	
 def index(request):
 	if request.method == "GET":
-		return render(request, "index.html")
+		# Forms
+		thread_form = ThreadForm(auto_id=True)
+		range_form = RangeForm()
+		options_pane = OptionsPane()
+		return render(request, "index.html", {
+			"thread_form":thread_form,
+			"range_form":range_form,
+			"options_pane":options_pane
+		})
 		
 	if request.method == "POST":
 		# Check from which form
@@ -282,7 +291,6 @@ def index(request):
 		if "combos_check" in request.POST:
 		 
 			# Combos
-			# Change to user input
 			for i in range(2,7):
 				try:
 					combos = stats.combos(replays, i,
@@ -290,17 +298,18 @@ def index(request):
 				except:
 					combos = stats.combos(replays, i)
 				
-				if True:
+				if "numeric_cutoff" in request.POST:
 					try:
-						cutoff = combos.most_common()[150][1]
+						cutoff = combos.most_common()[
+							int(request.POST["numeric_cutoff"])][1]
 						#cutoff = combos.most_common()[
 						#	min(len(combos.most_common()), 100)][1]
 						combos = Counter(
 							{combo:use for combo,use in combos.items() 
 							if use > cutoff})
 					except:
-						#pass
-						combos = stats.combos(replays, i, 0.02 * total)
+						pass
+						#combos = stats.combos(replays, i, 0.02 * total)
 				
 				combo_wins = stats.combo_wins(replays, i)
 				rows = list(stats.generate_rows(
@@ -334,7 +343,8 @@ def index(request):
 					  "pairings":pairings,
 					  "combos_rawtext":combos_rawtext,
 					  "leads_rawtext":leads_rawtext,
-					  "replay_rawtext":replay_rawtext})
+					  "replay_rawtext":replay_rawtext,
+					  })
 					  
 
 def spl_index(request):
@@ -363,7 +373,7 @@ def spl_index(request):
 			
 		else:
 			replays = replay_compile.replays_from_user(
-				request.POST["player"].replace(" ", "+"),
+				request.POST["player"].strip(),
 				tier=request.POST["tier"])
 			choice = request.POST["player"].lower()
 			moves = [replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2") for replay in replays]
@@ -405,6 +415,7 @@ def spl_index(request):
 
 def tour_index(request):	
 	if request.method == "GET":
+		#print(request.session["http://www.smogon.com/forums/threads/season-23-week-3-bw-ou-3-won-by-level-56.3600032/"])
 		return render(request, "indextour.html")
 
 	elif request.method == "POST":

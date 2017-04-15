@@ -156,7 +156,11 @@ class Log:
 				pokemon = nicknames[player][p]
 				move = ll[3]
 				moveset = moves[player][pokemon]
-				#moveset.add(move)
+				
+				# TODO: Filter non-initial moves
+				# Struggle - filter out afterwards
+				# Transform / Copycat
+				# Z-moves
 				if move not in moveset:
 					moveset.append(move)
 			elif line[1:7] == "switch" or line[1:5] == "drag":
