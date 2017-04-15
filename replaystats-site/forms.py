@@ -10,12 +10,12 @@ class ThreadForm(forms.Form):
 class RangeForm(forms.Form):
 	range_start = forms.CharField(label="Start", required=False)
 	range_end = forms.CharField(label="End", required=False)
-	range_tier = forms.CharField(label="Tier (Default: gen7pokebankou)", required=False)
+	range_tiers = forms.CharField(label="Tier (Default: gen7pokebankou)", required=False)
 	
 class OptionsPane(forms.Form):
-	moves_check = forms.BooleanField(label="Moves and Teammates", initial=True)
-	leads_check = forms.BooleanField(label="Leads", initial=True)
-	combos_check = forms.BooleanField(label="Combos", initial=True)
+	moves_check = forms.BooleanField(label="Moves and Teammates", initial=True, required=False)
+	leads_check = forms.BooleanField(label="Leads", initial=True, required=False)
+	combos_check = forms.BooleanField(label="Combos", initial=True, required=False)
 	cutoff = forms.CharField(label="Cutoff (%)", required=False)
 	numeric_cutoff = forms.CharField(label="Cutoff (numeric)", required=False)
  
