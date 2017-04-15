@@ -306,7 +306,7 @@ def index(request):
 						#	min(len(combos.most_common()), 100)][1]
 						combos = Counter(
 							{combo:use for combo,use in combos.items() 
-							if use > cutoff})
+							if use >= cutoff})
 					except:
 						pass
 						#combos = stats.combos(replays, i, 0.02 * total)
