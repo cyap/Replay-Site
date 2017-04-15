@@ -121,8 +121,8 @@ class Log:
 			l = (line for line in self.text if line.startswith("|switch"))
 			leads = {"p1":None,"p2":None}
 			try:
-				leads["p1"] = next(l).split("|")[3].split(",")[0]
-				leads["p2"] = next(l).split("|")[3].split(",")[0]
+				leads["p1"] = format_pokemon(next(l).split("|")[3].split(",")[0])
+				leads["p2"] = format_pokemon(next(l).split("|")[3].split(",")[0])
 			except:
 				pass
 		
