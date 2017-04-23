@@ -139,6 +139,23 @@ class Log:
 				elif line.startswith("|turn"):
 					break
 		return leads
+		
+	def parse_items(self, teams):
+		items = {"p1":{pokemon: "Other" for pokemon in teams["p1"]},
+				 "p2":{pokemon: "Other" for pokemon in teams["p2"]}}
+		return None
+		"""
+		Cases:
+		- Activation (end of turn)
+		- Activation (triggered)
+		- Knock Off
+		- Trick
+		- Thief
+		- Z-move
+		- Mega evolution
+		
+		"""
+			
 	
 	def parse_moves(self, teams):
 		moves = {"p1":{pokemon: [] for pokemon in teams["p1"]},

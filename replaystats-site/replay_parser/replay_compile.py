@@ -30,8 +30,12 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 			first_page = BeautifulSoup(urlopen(threadurl)
 						.read().decode(), "html.parser")
 			# TODO: iterate over string and find first digit
-			end = int(str(first_page.find(class_="pageNavHeader"))
-					.split("of ")[1].split("<")[0]) * 25
+			try:
+				end = int(str(first_page.find(class_="pageNavHeader"))
+						.split("of ")[1].split("<")[0]) * 25
+			except:
+				# only one page
+				end = 25
 		# Iterate through all pages
 		for i in range(int(start / 25) + 1, int((end-1) / 25) + 2):
 			page_num = "page-" + str(i)
@@ -61,6 +65,7 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 				in tiers)
 		return replays_from_links(urls)
 	except:
+		traceback.print_exc()
 		return []
 
 

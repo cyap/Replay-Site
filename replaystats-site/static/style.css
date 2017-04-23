@@ -208,6 +208,6 @@ ul.form {
 	float:left;
 }*/
 
-#cutoff {
-	width: 25px;
+#options_pane input[type="number"] {
+	width: 4em;
 }

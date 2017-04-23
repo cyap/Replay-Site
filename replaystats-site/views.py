@@ -17,11 +17,15 @@ TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
 COL_WIDTH = 23
 
 def index2(request):
-	profile.runctx('index2(request)', globals(), locals(), sort="tottime")
-	#return index2(request)
-	return render(request, "index.html")
+	if request.method == "GET":
+		return index2(request)
+	else:
+		#profile.runctx('index2(request)', globals(), locals(), sort="tottime")
+		#profile.run('index2(request)', sort="tottime")
+		return render(request, "index.html")
 	
 def index(request):
+	print(request.session.keys())
 	if request.method == "GET":
 		# Forms
 		thread_form = ThreadForm(auto_id=True)
@@ -46,7 +50,6 @@ def index(request):
 		# TODO: Change to saving replay objects and filtering
 		elif "resubmit" in request.POST:
 			cached_replays = set(request.POST.getlist("replay_urls"))
-			print(cached_replays)
 			replays = [replay for replay in request.session["replays"]
 				if replay.url in cached_replays]
 			replays += replay_compile.replays_from_links(
@@ -54,7 +57,7 @@ def index(request):
 			request.POST = request.session["form"]
 			
 		else:
-			# Thread
+			# Thread Form
 			thread_replays = list(
 				chain.from_iterable(
 					(replay_compile.replays_from_thread(
@@ -293,15 +296,15 @@ def index(request):
 			# Combos
 			for i in range(2,7):
 				try:
-					combos = stats.combos(replays, i,
-						int(request.POST["cutoff"])/100 * total)
+					combos = stats.combos(replays, i, 
+						float(request.POST["cutoff"])/100 * total)
 				except:
 					combos = stats.combos(replays, i)
 				
 				if "numeric_cutoff" in request.POST:
 					try:
 						cutoff = combos.most_common()[
-							int(request.POST["numeric_cutoff"])][1]
+							int(request.POST["numeric_cutoff"])-1][1]
 						#cutoff = combos.most_common()[
 						#	min(len(combos.most_common()), 100)][1]
 						combos = Counter(
@@ -349,6 +352,7 @@ def index(request):
 
 def spl_index(request):
 	if request.method == "GET":
+		print(request.session.keys())
 		return render(request, "spl_index.html")
 		
 	if request.method == "POST":
@@ -415,7 +419,6 @@ def spl_index(request):
 
 def tour_index(request):	
 	if request.method == "GET":
-		#print(request.session["http://www.smogon.com/forums/threads/season-23-week-3-bw-ou-3-won-by-level-56.3600032/"])
 		return render(request, "indextour.html")
 
 	elif request.method == "POST":

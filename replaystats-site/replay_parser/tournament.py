@@ -143,7 +143,37 @@ def parse_pairings(fileString=None, url=None, pairingsRaw=None):
 				re.sub(r'<.{0,4}>',"",pairing)
 				.strip("\n").lower()
 				)) for pairing in pairingsRaw]
-	return pairings	
+	return pairings
+
+
+
+def parse_winners(url):
+	post = (urlopen(url).read().decode().split("</article>")[1]
+			.split("<article>")[1].split("\n"))
+	raw = (line.split("<br />")[0] for line in post 
+			if re.compile(r'.*\Wvs\W.*').match(line))
+	winners = []
+	pairing_dict = {}
+	for line in raw:
+		#print(line)
+		line = re.sub(r'\(.+?\)', "", line)
+		line = re.sub(r'<a.+?">', "", line)
+		line = re.sub(r'<span.+?">', "", line)
+		line = line.replace("</a>", "")
+		line = line.replace("</span>", "")
+		#print(line)
+		pairing = frozenset([player.strip() for player in re.compile(r'vs\W').split(line)])
+		#print(pairing)
+		#winner = " vs. ".join(pairing)
+		pairing_dict[pairing] = ""
+		for player in pairing:
+			#print(player)
+			if player.startswith("<b>") or player.endswith("</b>"):
+				winner = player
+				pairing_dict[pairing] = re.sub(r'<.{0,4}>',"",winner).strip()
+				#winners.append(re.sub(r'<.{0,4}>',"",winner).strip())
+	return pairing_dict
+
 
 def participants_from_pairings(pairings):
 	""" Given pairings, return a set comprised of each unique player. """

@@ -44,7 +44,6 @@ def combos(replays, size = 2, cutoff = 0):
 	#combos = chain.from_iterable(list(combinations(replay.teams["win"], size)) 
 	#							+ list(combinations(replay.teams["lose"],size))
 	#							  for replay in replays)
-
 	uncounted_combos = chain.from_iterable(chain.from_iterable(
 			 replay.combos(size)[team] for team in ("win","lose")) 
 			 for replay in replays)
