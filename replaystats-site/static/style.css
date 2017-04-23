@@ -114,7 +114,8 @@ th {
 
 .rawtext {
 	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
-	white-space: nowrap;
+	font-size: 11;
+	white-space: pre;
 }
 
 
