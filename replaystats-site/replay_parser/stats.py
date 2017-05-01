@@ -14,41 +14,49 @@ AGGREGATED_FORMS = {"Arceus-*":ARCEUS_FORMS,
 # Separate responsibilities: for filtering teams and running data on teams
 # Port to database
 
-def get_data(teams):
-	data = Counter()
-	map(lambda x:
-		operator.setitem(data, x, data.get(x, 0) + 1), teams)
-	return data
+#def get_data(teams):
+#	data = Counter()
+#	map(lambda x:operator.setitem(data, x, data.get(x, 0) + 1), teams)
+#	return data
+
+def aggregate_wins(replays, key):
+	wins = []
+	ties = []
+	for replay in replays:
+		try:
+			wins += getattr(replay, key)[replay.winner]
+		except:
+			ties += getattr(replay, key)["|p1"]
+			ties += getattr(replay, key)["|p2"]
+	tie_counter = Counter(ties)
+	for k, v in tie_counter.items():
+		tie_counter[k] = v * .5
+	return Counter(wins) + tie_counter
 	
 def usage(replays):
-	teams = chain.from_iterable([replay.teams["win"]
-							   + replay.teams["lose"] 
+	teams = chain.from_iterable([replay.teams["|p1"]
+							   + replay.teams["|p2"] 
 							   for replay in replays])
 	return Counter(teams)
 
 def usage2(replays, key):
 	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays])
-	#printteams
 	return Counter(teams)
 
 def wins(replays):
-	teams = chain.from_iterable([replay.teams["win"] for replay in replays])
-	return Counter(teams)
+	return aggregate_wins(replays, "teams")
 	
 def wins2(replays, key):
-	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays if replay.teams.get(key, {}) == replay.teams["win"]])
+	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays if replay.teams.get(key, {}) == replay.teams.get("win", [])])
 	return Counter(teams)
 	
 def combos(replays, size = 2, cutoff = 0):
 
-	#combos = chain.from_iterable(list(combinations(replay.teams["win"], size)) 
-	#							+ list(combinations(replay.teams["lose"],size))
-	#							  for replay in replays)
 	uncounted_combos = chain.from_iterable(chain.from_iterable(
-			 replay.combos(size)[team] for team in ("win","lose")) 
+			 replay.combos(size)[team] for team in ("|p1","|p2")) 
 			 for replay in replays)
 
-	combos = Counter((format_combo(frozenset(combination)) 
+	combos = Counter((format_combo(combination) 
 					for combination in uncounted_combos))
 	if cutoff:
 		combos = Counter({combo:use for combo,use in combos.items() 
@@ -60,51 +68,36 @@ def combos(replays, size = 2, cutoff = 0):
 				for form in AGGREGATED_FORMS[pokemon]:
 					if pokemon.split("-")[0] + form in combo:
 						del(combos[combo])
-	'''
-	for pokemon in AGGREGATED_FORMS:
-		for form in AGGREGATED_FORMS[pokemon]:
-			try:
-				if pokemon == "Rotom-Appliance":
-					del(combos[frozenset((pokemon, form))])
-				else:
-					del(combos[frozenset((pokemon, pokemon.split("-")[0] + form))])
-			except:
-				pass'''
 	
 	# REFACTOR
 	return combos
 
 
 def combo_wins(replays, size = 2):
-	combos = chain.from_iterable((list(combinations(replay.teams["win"], size))
-								  for replay in replays))
-	return Counter((format_combo(frozenset(combination)) 
-					for combination in combos))
-def leads(replays, doubles=False):
-	##printlen(replays)
-	if not doubles:
-		leads = chain.from_iterable((replay.leads["win"], 
-									replay.leads["lose"])
-									  for replay in replays)
-	else:
-		leads = chain.from_iterable(replay.leads["win"] + replay.leads["lose"] for replay in replays)
-	
-	##printleads
-								  
-	#a = list(leads)
-	##printlen(a)
-	#l = Counter(a)
-	##printsum(l.values())
+	wins = []
+	ties = []
+	for replay in replays:
+		combos = replay.combos(size)
+		try:
+			wins += combos[replay.winner]
+		except:
+			ties += combos["|p1"]
+			ties += combos["|p2"]
+	tie_counter = Counter(map(format_combo, ties))
+	for k, v in tie_counter.items():
+		tie_counter[k] = v * .5
+	return Counter(map(format_combo, wins)) + tie_counter
+					
+def leads(replays):
+	leads = chain.from_iterable(
+			replay.leads["|p1"] 
+			+ replay.leads["|p2"] for replay in replays)
 	return Counter(leads)
 	
-def lead_wins(replays, doubles=False):
-	if not doubles:
-		leads = (replay.leads["win"] for replay in replays)
-	else:
-		leads = chain.from_iterable(replay.leads["win"] for replay in replays)
-	return Counter(leads)
+def lead_wins(replays):
+	return aggregate_wins(replays, "leads")
 
-def moves(replays, pokemonList):
+def moves(replays, pokemon_list):
 	# Create move counter
 	'''
 	moves = {}
@@ -121,14 +114,33 @@ def moves(replays, pokemonList):
 	
 	# Sum lists
 	return {pokemon: Counter(chain.from_iterable(
-		replay.moves["win"].get(pokemon, []) + replay.moves["lose"].get(pokemon, [])
+		replay.moves["|p1"].get(pokemon, []) 
+		+ replay.moves["|p2"].get(pokemon, [])
 		for replay in replays))
-		for pokemon in pokemonList}
+		for pokemon in pokemon_list}
 
-def move_wins(replays, pokemonList):
-	return {pokemon: Counter(chain.from_iterable([
-		replay.moves["win"].get(pokemon, []) for replay in replays]))
-		for pokemon in pokemonList}
+def move_wins(replays, pokemon_list):
+	win_counter = {pokemon:Counter() for pokemon in pokemon_list}
+	tie_counter = {pokemon:Counter() for pokemon in pokemon_list}
+	for replay in replays:
+		try:
+			moves = replay.moves[replay.winner]
+			for pokemon in moves:
+				win_counter[pokemon].update(moves[pokemon])
+		except:
+			p1_moves = replay.moves["|p1"]
+			for pokemon in p1_moves:
+				tie_counter[pokemon].update(p1_moves[pokemon])
+			p2_moves = replay.moves["|p2"]
+			for pokemon in p2_moves:
+				tie_counter[pokemon].update(p2_moves[pokemon])
+				
+	for counter in tie_counter.values():
+		for key in counter:
+			counter[key] *= 0.5
+	
+	return {pokemon:win_counter[pokemon] + tie_counter[pokemon] 
+			for pokemon in pokemon_list}
 	
 def format_combo(combo):
 	return combo
@@ -138,15 +150,31 @@ def format_combo2(combo):
 	
 def teammates(replays, filter=None):
 	tm = {}
-	teams = (filter,) if filter else ("win", "lose")
-	# Assign teams to each Pokemon
-	for replay in replays:
-		#for team in (replay.teams["win"], replay.teams["lose"]): 
-		#for team in filter or ("win", "lose"):
-		for team in teams:
-			for pokemon in replay.teams[team]:
-				tm[pokemon] = tm.get(pokemon, Counter()) + Counter(replay.teams[team])
-	
+	if filter == "win":
+		wins = {}
+		ties = {}
+		for replay in replays:
+			try:
+				for pokemon in replay.teams[replay.winner]:
+					wins[pokemon] = (wins.get(pokemon, Counter()) +
+						Counter(replay.teams[replay.winner]))
+			except:
+				for player in ("|p1", "|p2"):
+					for pokemon in replay.teams[player]:
+						ties[pokemon] = (ties.get(pokemon, Counter()) +
+							Counter(replay.teams[player]))
+		for pokemon in ties:
+			for key in ties[pokemon]:
+				ties[pokemon][key] *= 0.5
+		pokemon_list = set(wins.keys()) | set(ties.keys())
+		tm = {poke:wins.get(poke, Counter()) + ties.get(poke, Counter())
+			for poke in pokemon_list}
+	else:
+		for replay in replays:
+			for player in ("|p1", "|p2"):
+				for pokemon in replay.teams[player]:
+					tm[pokemon] = (tm.get(pokemon, Counter()) +
+						Counter(replay.teams[player]))
 	# Delete own Pokemon
 	for pokemon in tm:
 		del(tm[pokemon][pokemon])
@@ -159,8 +187,6 @@ def teammates(replays, filter=None):
 			except:
 				pass
 	return aggregate_forms(tm)
-	
-	#return sum((sum((Counter({pokemon: team for pokemon in team}) for team in replay.teams.values()), Counter()) for replay in replays), Counter())
 
 def aggregate_forms(data, generation="4", counter=False):
 	if generation == "4":
