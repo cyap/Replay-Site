@@ -63,7 +63,8 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 			#urls = (url for url in urls if url.split("-")[-2] in tiers)
 			urls = (url for url in urls if url.split("-")[-2].split("/")[-1] 
 				in tiers)
-		return replays_from_links(urls)
+		#return replays_from_links(urls)
+		return logs_from_links(urls)
 	except:
 		traceback.print_exc()
 		return []
@@ -84,7 +85,8 @@ def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
 	"""
 	complete_url_header = url_header + server + "-" + tier + "-"
 	urls = (complete_url_header + str(i) for i in range)
-	return replays_from_links(urls)
+	#return replays_from_links(urls)
+	return logs_from_links(urls)
 
 def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 	tier="gen7pokebankou"):
@@ -104,6 +106,53 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
 	urls = [url_header + url for url in urls if "-" in url and
 			url.split("-")[-2].split("/")[-1] == tier]
 	return replays_from_links(urls)
+	
+def logs_from_links(urls):
+	try:
+		pool = multiprocessing.dummy.Pool(13)
+		return list(filter(None, pool.map(open_log, urls)))
+	except:
+		return
+	finally:
+		pool.close()
+
+def open_log(url):
+	""" Open replay links and validate; return None if 404 error. """
+	try:
+		log = Log([line for line in 
+				urlopen(Request(url, headers=REQUEST_HEADER))
+				.read().decode()
+				.split("\n")
+				if line.startswith("|")])
+		return (log, url)
+	except HTTPError:
+		# Unsaved replay
+		return
+	except:
+		# Corrupted log file
+		print(url)
+		traceback.print_exc()
+		return
+		
+def initialize_replay(log, url=None, wnum=None):	
+	# players
+	try:
+		players = log.parse_players()
+	except:
+		pass
+		# throw error
+	try:
+		winner = list(players.keys())[wnum-1] if wnum else log.parse_winner()
+	except:
+		raise NoWinnerError
+	if url:
+		# TODO: Lazy initialization?
+		number = int(url.split("-")[-1])
+		tier = url.split("-")[-2]
+	else:
+		number = 0
+		tier = None
+	return Replay(log, players, winner, url, number, tier)
 		
 def replays_from_links(urls):
 	""" Helper function to convert replay links to replay objects. """
@@ -121,6 +170,7 @@ def open_replay(url):
 	""" Open replay links and validate; return None if 404 error. """
 	# Check if URL adheres to the usual format of /*tier-number
 	# TODO: Refactor - validation in a single place
+
 	try:
 		number = int(url.split("-")[-1])
 		tier = url.split("-")[-2]
@@ -145,3 +195,6 @@ def open_replay(url):
 		traceback.print_exc()
 		#printurl
 		return
+		
+class NoWinnerError(Exception):
+	pass
