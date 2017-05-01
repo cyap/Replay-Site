@@ -12,13 +12,13 @@
 		<a href={{replay.url}}>{{ replay.url }}</a>
 		<table class=movetable>
 			<tr>
-				<th colspan=2>{{ replay.playerwl.win }}</th>
+				<th colspan=2>{{ replay.|p1 }}</th>
 				<th class=move>1</th>
 				<th class=move>2</th>
 				<th class=move>3</th> 
 				<th class=move>4</th>
 			</tr>
-			{% for pokemon,moveset in replay.moves.win.items %}
+			{% for pokemon,moveset in replay.moves.|p1.items %}
 			<tr>
 				<td><img src="static/icons/{{pokemon}}.png"></td>
 				<td class=pokemon_col>{{ pokemon }}</td>
@@ -31,13 +31,13 @@
 		</table>
 		<table class=movetable>
 			<tr>
-				<th colspan=2>{{ replay.playerwl.lose }}</th>
+				<th colspan=2>{{ replay.|p2 }}</th>
 				<th class=move>1</th>
 				<th class=move>2</th>
 				<th class=move>3</th> 
 				<th class=move>4</th>
 			</tr>
-			{% for pokemon,moveset in replay.moves.lose.items %}
+			{% for pokemon,moveset in replay.moves.|p2.items %}
 			<tr>
 				<td><img src="static/icons/{{pokemon}}.png"></td>
 				<td class=pokemon_col>{{ pokemon }}</td>
@@ -61,3 +61,4 @@ Raw:
 		
 </body>
 </html>
+

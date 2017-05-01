@@ -159,9 +159,12 @@ class Log:
 		- Knock Off
 		- Trick
 		- Thief
+		- Frisk
+		- Doubles stuff
 		- Z-move
 		- Mega evolution
-		
+		- Input item and Pokemon
+
 		"""
 			
 	
