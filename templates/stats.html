@@ -21,11 +21,14 @@
     {% csrf_token %}
 	<ul id=replay-listing>
 	<table>
-	  <th></th>
-	  <th>Replay</th>
-	  <th>P1W</th>
-	  <th>P2W</th>
+	  <tr>
+	    <th rowspan=2 colspan=2>Replays</th>
+	    <th colspan=3>Winner</th>
+	  </tr>
+	  <th>P1</th>
+	  <th>P2</th>
 	  <th>Tie</th>
+	  
 	{% for replay, players in pairings %}
 	  <tr>
 	    <td><input type="checkbox" name="replay_urls" value={{ replay.url }} checked></td>
@@ -34,13 +37,6 @@
 		<td><input type="radio" name={{ replay.url }} value="2"></td>
 		<td><input type="radio" name={{ replay.url }} value="0"></td>
 	  </tr>
-	  <!--<li class="replay-entry">
-		<input type="checkbox" name="replay_urls" value={{ replay.url }} checked>
-		<a href="{{ replay.url }}">{{ players }}</a>
-		<input type="radio" name={{ replay.url }} value="1">
-		<input type="radio" name={{ replay.url }} value="2">
-		<input type="radio" name={{ replay.url }} value="0">
-	  </li>-->
 	{% endfor %}
 	</table>
 	</ul>

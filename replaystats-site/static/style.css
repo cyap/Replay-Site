@@ -56,7 +56,8 @@ th, td {
 }
 
 th {
-    text-align: left;
+    /*text-align: left;*/
+    height: 50%;
 }
 
 .tier_filter {
