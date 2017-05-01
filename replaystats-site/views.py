@@ -1,5 +1,5 @@
 from itertools import groupby, chain, repeat
-from collections import Counter
+from collections import Counter, defaultdict
 import operator
 import re
 import profile
@@ -10,7 +10,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .forms import ThreadForm, RangeForm, OptionsPane
-from .replay_parser import replay_compile, stats, tournament
+from .replay_parser import replay_compile, stats, tournament, replay
 
 AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
@@ -25,7 +25,6 @@ def index2(request):
 		return render(request, "index.html")
 	
 def index(request):
-	print(request.session.keys())
 	if request.method == "GET":
 		# Forms
 		thread_form = ThreadForm(auto_id=True)
@@ -41,17 +40,40 @@ def index(request):
 		# Check from which form
 		
 		# Resubmission
-		#if "resubmit" in request.POST or "rep_submit" in request.POST:
 		if "rep_submit" in request.POST:
-			# Save new replays
+		
+			# For calls made from tournament_matching page
 			replays = replay_compile.replays_from_links(
 				request.POST.getlist("replay_urls"))
-				
-		# TODO: Change to saving replay objects and filtering
+
 		elif "resubmit" in request.POST:
-			cached_replays = set(request.POST.getlist("replay_urls"))
-			replays = [replay for replay in request.session["replays"]
-				if replay.url in cached_replays]
+			# For calls made from resubmission page
+
+			# Replays resubmitted via form
+			saved_replay_urls = set(request.POST.getlist("replay_urls"))
+			
+			# Designate changed results in HTML (i.e. change name)
+			modified_replay_urls = set(request.POST.keys())
+			
+			# TODO:
+			# render buttons based on p1/p2 winner
+			# aesthetics
+			# name to designate winner
+			# (eventual) trigger flag based on modification: alternating class?
+			
+			# 2. Exclude from list (and not in changed_replays)
+			
+			replays = []
+			for replay in request.session["replays"]:
+				if replay.url in saved_replay_urls:
+					if replay.url in modified_replay_urls:
+					# Reconstruct Replay objects with new winner
+						pnum = int(request.POST[replay.url])
+						replay.winner = replay.players[pnum-1] if pnum else ""
+					replays.append(replay)
+			
+			# Newly submitted replays
+			# TODO: refactor to use new method
 			replays += replay_compile.replays_from_links(
 				request.POST["new_urls"].splitlines())
 			request.POST = request.session["form"]
@@ -81,12 +103,33 @@ def index(request):
 							request.POST.getlist("range_end"),
 							request.POST.getlist("range_tiers")))))
 			# Links
-			link_replays = list(replay_compile.replays_from_links(
-				request.POST["replay_urls"].splitlines()))
+			link_logs = replay_compile.logs_from_links(
+						request.POST["replay_urls"].splitlines())
+						
+			logs = thread_replays + range_replays + link_logs
+			
+			link_replays = []
+			invalid_replays = []
+			for log, url in logs:
+				try:
+					replay = replay_compile.initialize_replay(log, url)
+					link_replays.append(replay)
+				except replay_compile.NoWinnerError:
+					# No winner: Default to player 1
+					# TODO: Handle actual ties
+					replay = replay_compile.initialize_replay(log, url, wnum=1)
+					link_replays.append(replay)
+				except:
+					# no players
+					pass
+				
+			#link_replays = list(replay_compile.replays_from_links(
+			#	request.POST["replay_urls"].splitlines()))
 			
 			# Aggregate replays
 			#replays = thread_replays | link_replays | range_replays
-			replays = thread_replays + link_replays + range_replays
+			#replays = thread_replays + link_replays + range_replays
+			replays = link_replays
 			
 		# Refactor
 		tiers = {tier.strip() for tier in 
@@ -119,6 +162,8 @@ def index(request):
 		wins = (stats.aggregate_forms(
 					stats.wins(replays), gen_num, True) 
 					+ cumulative_usage["wins"])
+		ties = [replay for replay in replays if not replay.winner]
+		
 		total = len(replays) * 2 + cumulative_usage["total"]
 		
 		usage_table = list(stats.generate_rows(usage, wins, total))
@@ -138,8 +183,8 @@ def index(request):
 			
 		# Missing Pokemon
 		missing = chain.from_iterable(
-			(((replay.playerwl[wl], 6-len(replay.teams[wl])) 
-			for wl in ("win","lose") if len(replay.teams[wl]) < 6) 
+			(((replay.playerwl[player], 6-len(replay.teams[player])) 
+			for player in ("|p1","|p2") if len(replay.teams[player]) < 6) 
 			for replay in replays))
 		
 		missing_text = "\n".join(
@@ -269,9 +314,9 @@ def index(request):
 			# Change to tier from replay
 			format = "DOUBLES" in tier_label
 			leads = stats.aggregate_forms(
-				stats.leads(replays, format), gen_num, True)
+				stats.leads(replays), gen_num, True)
 			lead_wins = stats.aggregate_forms(
-				stats.lead_wins(replays, format), gen_num, True)
+				stats.lead_wins(replays), gen_num, True)
 			leads_rows = stats.generate_rows(leads, lead_wins, total)
 	
 			try:
@@ -369,7 +414,7 @@ def spl_index(request):
 			+ "\n".join([pokemon + ": " 
 			+ " / ".join([move for move in replay.moves[player][pokemon]])
 			for pokemon in replay.moves[player]])
-			for player in ("win","lose")])
+			for player in ("|p1","|p2")])
 			for replay in replays]))
 			moves = [replay.moves for replay in replays]
 			pairings = None
@@ -380,9 +425,9 @@ def spl_index(request):
 				request.POST["player"].strip(),
 				tier=request.POST["tier"])
 			choice = request.POST["player"].lower()
-			moves = [replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2") for replay in replays]
+			moves = [replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2") for replay in replays]
 			
-			pairings = [{"replay":replay, "moves":replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2")} for replay in replays]
+			pairings = [{"replay":replay, "moves":replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2")} for replay in replays]
 			template = "scout_stats.html"
 			
 			gen_num = next((char for char in min(request.POST["tier"]) if char.isdigit()), 6)
@@ -398,8 +443,8 @@ def spl_index(request):
 			"\n\n---\n\n".join([
 			choice + "\n"
 			+ "\n".join([pokemon + ": " 
-			+ " / ".join([move for move in (replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2"))[pokemon]])
-			for pokemon in replay.moves.get(choice) or replay.moves.get("p1" if replay.playerwl["p1"] == choice else "p2")])
+			+ " / ".join([move for move in (replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2"))[pokemon]])
+			for pokemon in replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2")])
 			for replay in replays]))
 		
 		# Raw original
