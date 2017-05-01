@@ -56,7 +56,6 @@ def index(request):
 			modified_replay_urls = set(request.POST.keys())
 			
 			# TODO:
-			# render buttons based on p1/p2 winner
 			# aesthetics
 			# name to designate winner
 			# (eventual) trigger flag based on modification: alternating class?
@@ -397,7 +396,6 @@ def index(request):
 
 def spl_index(request):
 	if request.method == "GET":
-		print(request.session.keys())
 		return render(request, "spl_index.html")
 		
 	if request.method == "POST":
