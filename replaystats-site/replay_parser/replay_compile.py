@@ -136,17 +136,17 @@ def open_log(url):
 		
 def initialize_replay(log, url=None, wnum=None):	
 	# players
-	#try:
 	players = log.parse_players()
 	if not players:
 		raise NoPlayerError
-	#except:
-		#pass
-		# throw error
-	try:
-		winner = list(players.keys())[wnum-1] if wnum else log.parse_winner()
-	except:
-		raise NoWinnerError
+		
+	if wnum == None:
+		try:
+			winner = log.parse_winner()
+		except:
+			raise NoWinnerError
+	else:
+		winner = list(players.keys())[wnum-1] if wnum else ""
 	if url:
 		# TODO: Lazy initialization?
 		number = int(url.split("-")[-1])
