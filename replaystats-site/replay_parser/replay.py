@@ -41,12 +41,12 @@ class Log:
 	
 	def parse_winner(self):
 		""" Parse replay for winner, declared at the bottom of replay. """
-		#try:
-		return (next(line for line in reversed(self.text) 
-				if line.startswith("|win"))
-				.split("|")[2].split("<")[0]).lower()
-		#except:
-		#	return ""
+		try:
+			return (next(line for line in reversed(self.text) 
+					if line.startswith("|win"))
+					.split("|")[2].split("<")[0]).lower()
+		except:
+			return ""
 		'''
 		return (next(line for line in reversed(self.text) 
 					if line.startswith("|win"))

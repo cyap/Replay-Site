@@ -136,10 +136,12 @@ def open_log(url):
 		
 def initialize_replay(log, url=None, wnum=None):	
 	# players
-	try:
-		players = log.parse_players()
-	except:
-		pass
+	#try:
+	players = log.parse_players()
+	if not players:
+		raise NoPlayerError
+	#except:
+		#pass
 		# throw error
 	try:
 		winner = list(players.keys())[wnum-1] if wnum else log.parse_winner()
@@ -196,4 +198,7 @@ def open_replay(url):
 		return
 		
 class NoWinnerError(Exception):
+	pass
+
+class NoPlayerError(Exception):
 	pass

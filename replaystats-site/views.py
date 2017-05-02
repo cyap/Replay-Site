@@ -118,7 +118,7 @@ def index(request):
 					# TODO: Handle actual ties
 					replay = replay_compile.initialize_replay(log, url, wnum=1)
 					link_replays.append(replay)
-				except:
+				except replay_compile.NoPlayerError:
 					# no players
 					pass
 				
