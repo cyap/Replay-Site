@@ -2,7 +2,7 @@
 
 .rawtext {
 	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
-	font-size: 11;
+	font-size: 11px;
 	white-space: pre;
 }
 
@@ -27,15 +27,27 @@
 }
 
 #replay-listing {
-	list-style-type: none;
 	margin-left: 0;
-	padding: 3;
+	padding: 3px;
 }
 
 #replay-text {
 	/*min-width:100%;*/
 	box-sizing:border-box;
+	padding: 3px;
+	display: block;
+	/*margin: 3px;*/
 	/*min-height: 150px;*/
+}
+
+#replays-add {
+	margin-top:3px;
+	display:block;
+	padding:3px;
+}
+
+.replay-tie {
+	background-color:orange;
 }
 
 .tab {
@@ -49,6 +61,11 @@
 #resubmit {
 	border: 1px solid black;
 	padding: 2px;
+}
+
+th {
+    text-align: center;
+    height: 50%;
 }
 
 /*
@@ -124,10 +141,7 @@ th, td {
     padding: 5px;
 }
 
-th {
-    /*text-align: left;*/
-    height: 50%;
-}
+
 
 .tier_filter {
 	background-color:blue;

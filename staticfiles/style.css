@@ -1,3 +1,89 @@
+/* Stats page */
+
+.rawtext {
+	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
+	font-size: 11px;
+	white-space: pre;
+}
+
+/* results on results page*/
+.rawtext.results {
+	width: 425px;
+	height: 250px;
+}
+
+#wrapper {
+	display:block;
+	position: relative;
+	margin-right:auto;
+	width:120%;
+}
+
+/* container results divs */
+.results.pane {
+	padding:10px;
+	margin:5px auto;
+	float:left;
+}
+
+#replay-listing {
+	margin-left: 0;
+	padding: 3px;
+}
+
+#replay-text {
+	/*min-width:100%;*/
+	box-sizing:border-box;
+	padding: 3px;
+	display: block;
+	/*margin: 3px;*/
+	/*min-height: 150px;*/
+}
+
+#replays-add {
+	margin-top:3px;
+	display:block;
+	padding:3px;
+}
+
+.replay-tie {
+	background-color:orange;
+}
+
+.tab {
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	border: 1px solid black;
+	border-bottom: 0;
+	margin-right:-5px;
+}
+
+#resubmit {
+	border: 1px solid black;
+	padding: 2px;
+}
+
+th {
+    text-align: center;
+    height: 50%;
+}
+
+/*
+.results.pane.info {
+	float:left;
+}
+
+.results.pane.visual {
+	float:left;
+}
+
+.results.pane.text {
+	float:left;
+
+}*/
+
+/* Tables */
+
 h1 {
 	font-size: 1.5em;
 	margin-top: 0;
@@ -55,9 +141,7 @@ th, td {
     padding: 5px;
 }
 
-th {
-    text-align: left;
-}
+
 
 .tier_filter {
 	background-color:blue;
@@ -112,46 +196,6 @@ th {
 	display:none;
 }
 
-.rawtext {
-	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
-	font-size: 11;
-	white-space: pre;
-}
-
-
-.rawtext.results {
-	width: 425px;
-	height: 250px;
-}
-
-.results.pane {
-	padding:10px;
-	margin:5px auto;
-}
-
-.results.pane.info {
-	float:left;
-	padding:10px;
-
-}
-
-.results.pane.visual {
-	float:left;
-}
-
-.results.pane.text {
-	float:left;
-
-}
-
-#wrapper {
-	display:block;
-	position: relative;
-	margin-right:auto;
-	width:120%;
-	
-}
-
 ul.form {
 	display: block;
     list-style-type: none;
@@ -173,37 +217,6 @@ ul.form {
 	/*left: 700;
 	top: 150;
 }*/
-
-#replay-listing {
-	list-style-type: none;
-	margin-left: 0;
-	/*padding-left: 0;*/
-	padding: 3;
-}
-
-#replay-text {
-	/*min-width:100%;*/
-	box-sizing:border-box;
-	/*min-height: 150px;*/
-}
-
-.tab {
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	border: 1px solid black;
-	border-bottom: 0;
-	box-shadow: none;
-	margin-right:-5px;
-}
-
-#resubmit {
-	border: 1px solid black;
-	padding: 2px;
-}
-
-.replay-entry {
-	box-sizing: border-box;
-}
 
 /*label {
 	float:left;
