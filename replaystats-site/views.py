@@ -73,8 +73,22 @@ def index(request):
 			
 			# Newly submitted replays
 			# TODO: refactor to use new method
-			replays += replay_compile.replays_from_links(
+			
+			logs = replay_compile.logs_from_links(
 				request.POST["new_urls"].splitlines())
+			for log, url in logs:
+				try:
+					replay = replay_compile.initialize_replay(log, url)
+					replays.append(replay)
+				except replay_compile.NoWinnerError:
+					# No winner: Default to tie
+					replay = replay_compile.initialize_replay(log, url, wnum=0)
+					replays.append(replay)
+				except replay_compile.NoPlayerError:
+					# no players
+					pass
+			#replays += replay_compile.replays_from_links(
+				#request.POST["new_urls"].splitlines())
 			request.POST = request.session["form"]
 			
 		else:
@@ -114,9 +128,8 @@ def index(request):
 					replay = replay_compile.initialize_replay(log, url)
 					link_replays.append(replay)
 				except replay_compile.NoWinnerError:
-					# No winner: Default to player 1
-					# TODO: Handle actual ties
-					replay = replay_compile.initialize_replay(log, url, wnum=1)
+					# No winner: Default to tie
+					replay = replay_compile.initialize_replay(log, url, wnum=0)
 					link_replays.append(replay)
 				except replay_compile.NoPlayerError:
 					# no players
