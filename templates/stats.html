@@ -5,98 +5,109 @@
 </head>
 
 <body>
-<div class="results pane info">
-  # of replays: {{ net_replays }}<br>
-  # of Pokemon: {{ net_mons }}<br>
+	<div class="results pane well well-lg" id="info">
+		<div id="counts">
+			<div class="well well-sm">
+			# of replays: {{ net_replays }}
+			</div>
+			<div class="well well-sm">
+			# of Pokemon: {{ net_mons }}
+			</div>
+		</div>
 
-  <button class="tab" name="replay-listing">Replays</button>
-  <button class="tab" name="replay-text">Links</button>
+		<ul class="nav nav-tabs centered">
+			<li class="active"><a data-toggle="tab" href="#list-pane">Replays</a></li>
+			<li><a data-toggle="tab" href="#link-pane">Links</a></li>
+		</ul>
 
-  <form method="post" id="resubmit">
-    {% csrf_token %}
-	<table id=replay-listing>
-	  <tr>
-	    <th rowspan=2 colspan=2>Replays<br>(Orange = tie due to winner missing)
-	    </th>
-	    <th colspan=3>Winner</th>
-	  </tr>
-	  <th>P1</th>
-	  <th>P2</th>
-	  <th>Tie</th>
-	  
-	{% for replay, players in pairings %}
-	  <tr>
-	    <td><input type="checkbox" name="replay_urls" value={{ replay.url }} checked></td>
-	    <td class={{ replay.winner|yesno:"replay-win,replay-tie" }}>
-	      <a href="{{ replay.url }}">{{ players }}</a>
-	    </td>
-		<td><input type="radio" name={{ replay.url }} value="1"></td>
-		<td><input type="radio" name={{ replay.url }} value="2"></td>
-		<td><input type="radio" name={{ replay.url }} value="0"></td>
-	  </tr>
-	{% endfor %}
-	</table>
-	
-    <textarea class="rawtext" id="replay-text">{{ replay_rawtext }}</textarea>
-    <textarea class="rawtext hidden" name="new_urls" id="replays-add"></textarea><br>
-    
-    <button type="button" id="add-replays">Add more</button>
-    <input type="submit" name="resubmit" value="Resubmit">
-  </form>
-</div>
+		<form method="post" id="resubmit">
+			{% csrf_token %}
+			<div class="tab-content">
+				<div class="tab-pane fade in active" id="list-pane">
+					<table id=replay-listing>
+						<tr>
+					 		<th rowspan=2 colspan=2>
+					 			Replays<br>
+					 			(Orange = tie due to winner missing)
+							</th>
+							<th colspan=3>Winner</th>
+						</tr>
+						<tr>
+							<th>P1</th>
+							<th>P2</th>
+							<th>Tie</th>
+						</tr>
+						{% for replay, players in pairings %}
+							<tr>
+								<td>
+									<input type="checkbox" name="replay_urls" value={{ replay.url }} checked>
+								</td>
+								<td class={{ replay.winner|yesno:"replay-win,replay-tie" }}>
+									<a href="{{ replay.url }}">{{ players }}</a>
+								</td>
+								<td><input type="radio" name={{ replay.url }} value="1"></td>
+								<td><input type="radio" name={{ replay.url }} value="2"></td>
+								<td><input type="radio" name={{ replay.url }} value="0"></td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
 
-<div id="wrapper">
-<div class="results pane visual">
-<table>
-  <tr>
-    <th></th>
-    <th>Pokemon</th>
-    <th>Usage</th>
-    <th>Usage %</th> 
-    <th>Win %</th>
-  </tr>
+				<div class="tab-pane fade" id="link-pane">
+					<textarea class="rawtext" id="replay-text">{{ replay_rawtext }}</textarea>
+				</div>
+			</div>
 
-  {% for element in usage_table %}
-  <tr>
-    <td><img src="static/icons/{{element.1}}.png"></td>
-    <td>{{ element.1 }}</td>
-    <td>{{ element.2 }}</td> 
-    <td>{{ element.3|stringformat:".2f" }}%</td>
-    <td>{{ element.4|stringformat:".2f" }}%</td>
-  </tr>
-{% endfor %}
-</table>
-</div>
+			<textarea class="rawtext hidden" name="new_urls" id="replays-add"></textarea><br>
+			
+			<button type="button" id="add-replays">Add more</button>
+			<input type="submit" name="resubmit" value="Resubmit">
+		</form>
+	</div>
 
-<div class="results pane text">
-Usage:<br>
-<textarea class="rawtext results">
-{{ usage_whitespace }}
-</textarea><br>
+	<div id="wrapper">
+		<div class="results pane visual">
+			<table>
+				<tr>
+					<th></th>
+					<th>Pokemon</th>
+					<th>Usage</th>
+					<th>Usage %</th> 
+					<th>Win %</th>
+				</tr>
 
-{% if moves_whitespace %}
-Moves and Teammates:<br>
-<textarea class="rawtext results">
-{{ moves_whitespace }}
-</textarea><br>
-{% endif %}
+				{% for element in usage_table %}
+					<tr>
+						<td><img src="static/icons/{{element.1}}.png"></td>
+						<td>{{ element.1 }}</td>
+						<td>{{ element.2 }}</td> 
+						<td>{{ element.3|stringformat:".2f" }}%</td>
+						<td>{{ element.4|stringformat:".2f" }}%</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
 
-{% if combos_rawtext %}
-Combos:<br>
-<textarea class="rawtext results">
-{{ combos_rawtext }}
-</textarea><br>
-{% endif %}
+		<div class="results pane text">
+			Usage:<br>
+			<textarea class="rawtext results">{{ usage_whitespace }}</textarea><br>
 
-{% if leads_rawtext %}
-Leads:<br>
-<textarea class="rawtext results">
-{{ leads_rawtext }}
-</textarea>
-{% endif %}
-</div>
+			{% if moves_whitespace %}
+				Moves and Teammates:<br>
+				<textarea class="rawtext results">{{ moves_whitespace }}</textarea><br>
+			{% endif %}
 
-</div>
-</div>
+			{% if combos_rawtext %}
+				Combos:<br>
+				<textarea class="rawtext results">{{ combos_rawtext }}</textarea><br>
+			{% endif %}
+
+			{% if leads_rawtext %}
+				Leads:<br>
+				<textarea class="rawtext results">{{ leads_rawtext }}</textarea>
+			{% endif %}
+		</div>
+
+	</div>
 </body>
 </html>
