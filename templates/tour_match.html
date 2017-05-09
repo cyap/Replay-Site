@@ -21,9 +21,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 <form method=post action="/">
 	{% csrf_token %}
 	<div class="form_pane" id="options_pane">
-	Moves and Teammates <input type="checkbox" name="moves_check" checked/>
-	Combos <input type="checkbox" name="combos_check" checked/>
-	Leads <input type="checkbox" name="leads_check" checked/>
+	{{ options_pane }}
 	</div>
 
 <div id="tables">
@@ -55,7 +53,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 	  <input type="hidden" name="replay_urls" value={{ match.1.url }}>
 	  <td><a href="{{ match.1.url }}">{{ match.1.number }}</a></td>
 	  </input>
-	  <td>{{ match.1.players}}</td>
+	  <td>{{ match.1.players }}</td>
 	  <td>{{ match.2 }}</td>
 	</tr>
 	{% endfor %}

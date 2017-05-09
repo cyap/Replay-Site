@@ -4,7 +4,7 @@ from itertools import combinations, islice
 import profile
 
 FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Groudon",
-		 "Kyogre"}
+		 "Kyogre", "Mimikyu"}
 COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 
 class Log:
@@ -439,8 +439,9 @@ class Replay:
 		return self.log.move_in_replay(move)		 
 					 
 def format_pokemon(pokemon):
-	base_form = pokemon.split("-")[0]
-	if base_form in FORMS or pokemon.endswith("-Mega"):
+	split_form = pokemon.split("-", 1)
+	base_form = split_form[0]
+	if base_form in FORMS or split_form[-1].startswith("Mega"):
 		return base_form
 	return pokemon
 
