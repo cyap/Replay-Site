@@ -147,11 +147,11 @@ def initialize_replay(log, url=None, wnum=None):
 			raise NoWinnerError
 	else:
 		winner = list(players.keys())[wnum-1] if wnum else ""
-	if url:
+	try:
 		# TODO: Lazy initialization?
 		number = int(url.split("-")[-1])
 		tier = url.split("-")[-2]
-	else:
+	except:
 		number = 0
 		tier = None
 	return Replay(log, players, winner, url, number, tier)
