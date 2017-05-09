@@ -126,14 +126,14 @@ def move_wins(replays, pokemon_list):
 		try:
 			moves = replay.moves[replay.winner]
 			for pokemon in moves:
-				win_counter[pokemon].update(moves[pokemon])
+				win_counter.get(pokemon, Counter()).update(moves.get(pokemon, []))
 		except:
 			p1_moves = replay.moves["|p1"]
 			for pokemon in p1_moves:
-				tie_counter[pokemon].update(p1_moves[pokemon])
+				tie_counter.get(pokemon, Counter()).update(p1_moves.get(pokemon, []))
 			p2_moves = replay.moves["|p2"]
 			for pokemon in p2_moves:
-				tie_counter[pokemon].update(p2_moves[pokemon])
+				tie_counter.get(pokemon, Counter()).update(p2_moves.get(pokemon, []))
 				
 	for counter in tie_counter.values():
 		for key in counter:
