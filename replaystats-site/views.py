@@ -196,7 +196,7 @@ def index(request):
 		# Missing Pokemon
 		missing = chain.from_iterable(
 			(((replay.playerwl[player], 6-len(replay.teams[player])) 
-			for player in ("|p1","|p2") if len(replay.teams[player]) < 6) 
+			for player in ("player_p1","player_p2") if len(replay.teams[player]) < 6) 
 			for replay in replays))
 		
 		missing_text = "\n".join(
@@ -417,16 +417,29 @@ def spl_index(request):
 			replays = replay_compile.replays_from_links(urls)
 			choice = None
 			template = "spl_stats.html"
-			
+			'''
 			raw = (
 			"\n\n---\n\n".join([
 			"\n\n".join([
-			player.capitalize() + ": " + replay.playerwl[player] + "\n"
+			replay.playerwl[player].capitalize() + ": " + player + "\n"
 			+ "\n".join([pokemon + ": " 
-			+ " / ".join([move for move in replay.moves[player][pokemon]])
-			for pokemon in replay.moves[player]])
-			for player in ("|p1","|p2")])
+			+ " / ".join([move for move in replay.moves[replay._players[player]][pokemon]])
+			for pokemon in replay._players[player]])
+			for player in ("player_p1","player_p2")])
 			for replay in replays]))
+			'''
+			raw = ""
+			for replay in replays:
+				for player in (replay.players):
+					raw += (player+ ":\n")
+					for pokemon in replay.teams[player]:
+						raw += (pokemon + ": ")
+						raw += str(replay.moves[player][pokemon])
+						raw += "\n"
+					raw += "\n"
+			
+			
+			
 			moves = [replay.moves for replay in replays]
 			pairings = None
 			usage_whitespace = ""
@@ -436,9 +449,9 @@ def spl_index(request):
 				request.POST["player"].strip(),
 				tier=request.POST["tier"])
 			choice = request.POST["player"].lower()
-			moves = [replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2") for replay in replays]
+			moves = [replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2") for replay in replays]
 			
-			pairings = [{"replay":replay, "moves":replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2")} for replay in replays]
+			pairings = [{"replay":replay, "moves":replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2")} for replay in replays]
 			template = "scout_stats.html"
 			
 			gen_num = next((char for char in min(request.POST["tier"]) if char.isdigit()), 6)
@@ -454,8 +467,8 @@ def spl_index(request):
 			"\n\n---\n\n".join([
 			choice + "\n"
 			+ "\n".join([pokemon + ": " 
-			+ " / ".join([move for move in (replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2"))[pokemon]])
-			for pokemon in replay.moves.get(choice) or replay.moves.get("|p1" if replay.playerwl["|p1"] == choice else "|p2")])
+			+ " / ".join([move for move in (replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2"))[pokemon]])
+			for pokemon in replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2")])
 			for replay in replays]))
 		
 		# Raw original
@@ -495,6 +508,14 @@ def tour_index(request):
 			participants = tournament.participants_from_pairings(pairings)
 			replays = sum((replay_compile.replays_from_range(rng, tier=tier) 
 				for tier in request.POST["tier"].split(",")), [])
+			replays2 = []
+			for replay, url in replays:
+				try:
+					replays2.append(
+					replay_compile.initialize_replay(replay, url))
+				except:
+					pass
+			replays = replays2
 			tour = tournament.Tournament(set(replays), pairings, participants)
 			replays = tour.match_tournament()
 			matches = tour.pairingReplayMap
@@ -521,7 +542,7 @@ def tour_index(request):
 							 (" vs. ".join(player for player in pairing),
 							  "", "no match")
 							 for pairing in pairings]
-
+		options_pane = OptionsPane()
 		return render(request, "tour_match.html", {
 			"start":request.POST["start"],
 			"end":request.POST["end"],
@@ -529,6 +550,7 @@ def tour_index(request):
 			"participants" : participants,
 			"matches" : formatted_matches,
 			"unmatched_replays":unmatched_replays,
+			"options_pane":options_pane
 		})
 		
 def update_session(request):
@@ -544,7 +566,6 @@ def update_session(request):
 		in request.session["replays"] if replay.url in unmatched_replays)
 		
 	matched_urls = set(request.POST.getlist("matches[]"))
-	#print"urls:", matched_urls
 	matched_replays = [replay for replay in request.session["replays"] 
 		if replay.url in matched_urls]
 	
