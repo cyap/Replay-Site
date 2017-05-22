@@ -445,9 +445,13 @@ def spl_index(request):
 			usage_whitespace = ""
 			
 		else:
+			if "zf" in request.POST["player"]:
+				tier = "gen2ou"
+			else:
+				tier = request.POST["tier"]
 			replays = replay_compile.replays_from_user(
 				request.POST["player"].strip(),
-				tier=request.POST["tier"])
+				tier=tier)
 			choice = request.POST["player"].lower()
 			moves = [replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2") for replay in replays]
 			
