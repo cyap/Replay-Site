@@ -1,14 +1,5 @@
 $(document).ready(function() {
 	
-	// Options pane
-	$(".tab").click(function() {
-		$("#"+$(this).attr("name")).removeClass("hidden");
-		//.find(":input").prop("disabled",false)
-		
-		$("#"+$(this).siblings(".tab").attr("name")).addClass("hidden");
-		//.find(":input").prop("disabled",true);
-	});
-	
 	$("#add-replays").click(function() {
 		if ($("#replays-add").hasClass("hidden")) {
 			$("#replays-add").removeClass("hidden");
@@ -18,12 +9,10 @@ $(document).ready(function() {
 		}
 	});
 	
-	$("#replay-text").width($("#replay-listing").width());
-	$("#replay-text").height($("#replay-listing").height());
+	$("#replay-text").width($("#replay-table").width());
+	$("#replay-text").height($("#replay-table").height());
 	
-	$("#replays-add").width($("#replay-listing").width());
-	
-	$("[name=replay-listing]").click();
+	$("#replays-add").width($("#replay-table").width());
 	
 	/*
 	// Post button

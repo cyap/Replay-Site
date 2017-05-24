@@ -9,10 +9,10 @@ $(document).ready(function() {
 		}
 	});
 	
-	$("#replay-text").width($("#replay-listing").width());
-	$("#replay-text").height($("#replay-listing").height());
+	$("#replay-text").width($("#replay-table").width());
+	$("#replay-text").height($("#replay-table").height());
 	
-	$("#replays-add").width($("#replay-listing").width());
+	$("#replays-add").width($("#replay-table").width());
 	
 	/*
 	// Post button

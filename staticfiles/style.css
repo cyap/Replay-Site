@@ -1,5 +1,66 @@
 /* Stats page */
 
+/* Info pane */
+
+#info {
+	margin-left: 5px;
+	background-color: white;
+	text-align: center;
+}
+	#counts {
+		margin-bottom: 10px;
+	}
+
+		#counts > .well-sm {
+			margin-bottom: 2px;
+		}
+
+	.nav-tabs {
+		text-align: center;
+		border: none;
+	}
+
+		.nav-tabs > li {
+		    float:none;
+		    display:inline-block;
+		    /*margin: 0px;*/
+		}
+
+	#resubmit {
+		padding: 7px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		
+	}
+
+	#replay-table {
+		padding: 3px;
+		margin-left: 0;
+		border-radius: 4px;
+	}
+		
+		#replay-table th {
+    		text-align: center;
+    		height: 50%;
+		}
+
+		.replay-tie {
+			background-color: orange;
+		}
+
+	#replay-text {
+		display: block;
+		box-sizing: border-box;
+		padding: 3px;
+		border-color: #ddd;
+	}
+
+	#replays-add {
+		display:block;
+		padding:3px;
+		margin-top:3px;
+	}
+
 .rawtext {
 	font-family: Consolas,Menlo,Monaco,"Lucida Console","Courier New",Courier,monospace;
 	font-size: 11px;
@@ -25,62 +86,6 @@
 	margin:5px auto;
 	float:left;
 }
-
-#replay-listing {
-	margin-left: 0;
-	padding: 3px;
-}
-
-#replay-text {
-	/*min-width:100%;*/
-	box-sizing:border-box;
-	padding: 3px;
-	display: block;
-	/*margin: 3px;*/
-	/*min-height: 150px;*/
-}
-
-#replays-add {
-	margin-top:3px;
-	display:block;
-	padding:3px;
-}
-
-.replay-tie {
-	background-color:orange;
-}
-
-.tab {
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	border: 1px solid black;
-	border-bottom: 0;
-	margin-right:-5px;
-}
-
-#resubmit {
-	border: 1px solid black;
-	padding: 2px;
-}
-
-th {
-    text-align: center;
-    height: 50%;
-}
-
-/*
-.results.pane.info {
-	float:left;
-}
-
-.results.pane.visual {
-	float:left;
-}
-
-.results.pane.text {
-	float:left;
-
-}*/
 
 /* Tables */
 

@@ -27,17 +27,19 @@
 		}
 
 	#resubmit {
-		padding: 2px;
+		padding: 7px;
 		border: 1px solid #ddd;
 		border-radius: 4px;
 		
 	}
 
-	#replay-listing {
+	#replay-table {
 		padding: 3px;
 		margin-left: 0;
+		border-radius: 4px;
 	}
-		#replay-listing th {
+		
+		#replay-table th {
     		text-align: center;
     		height: 50%;
 		}
@@ -50,7 +52,7 @@
 		display: block;
 		box-sizing: border-box;
 		padding: 3px;
-		
+		border-color: #ddd;
 	}
 
 	#replays-add {
