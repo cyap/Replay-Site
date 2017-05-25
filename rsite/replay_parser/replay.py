@@ -22,11 +22,8 @@ class Log:
 	
 	def parse_players(self):
 		""" Return dict with formatted player names. """
-		player_lines = (line for line in self.text if
-				   line.startswith("|player") and len(line.split("|")) > 3)
-		# Handle name formatting
-		#p1 = format_name(next(players).split("|")[3])
-		#p2 = format_name(next(players).split("|")[3])
+		player_lines = (line for line in self.text if line.startswith("|player") 
+			and len(line.split("|")) > 3)
 		
 		players = OrderedDict()
 		for line in player_lines:
@@ -34,10 +31,6 @@ class Log:
 			# Player -> Number
 			players[ll[3].lower()] = "player_"+ll[2]
 		return players
-		
-		#Players = namedtuple('Players', 'p1 p2')
-		#return Players(p1, p2)
-		#return (p1, p2)
 	
 	def parse_winner(self):
 		""" Parse replay for winner, declared at the bottom of replay. """
@@ -264,6 +257,15 @@ class Replay:
 
 	def __init__(self, log, players, winner, url=None, number=None, tier=None):
 		self.log = log
+		
+		### Player refactor ###
+		#self.p1 = Player(p1_name)
+		#self.p2 = Player(p2_name)
+		
+		# Initialize player based on parse
+		# Set teams based on parse 
+		
+		
 		self._players = players
 		self._winner = winner
 		
@@ -280,13 +282,15 @@ class Replay:
 	
 	@property
 	def players(self):
-		""" Return ordered pair (p1, p2) with players' names. Additional names,
-		which result from replacement players joining a battle in the instance
-		of a disconnection, are stored in a private variable rather than
-		displayed on access. 
+		""" Handles ordered dict mapping each player's name to its number (p1 
+		or p2). Additional names, which result from replacement players joining
+		a battle in the instance of a disconnection, are stored privately but
+		not displayed on access call.
+
+		Returns list containing player names, in order of number 
+		([player1, player2]).
 		"""
 		try:
-			# Player 1, Player 2
 			return list(self._players.keys())[0:2]
 		except:
 			self._players = self.log.parse_players()
@@ -367,8 +371,8 @@ class Replay:
 			#	self._teams[self.playerwl[player]] = self._teams[player]
 			
 			# Name -> teams
-			for name in list(self._players.keys()):
-				self._teams[name] = self._teams[self._players[name]]
+			#for name in list(self._players.keys()):
+				#self._teams[name] = self._teams[self._players[name]]
 			return self._teams
 	
 	def add_to_team(self, team, pokemon):
@@ -438,7 +442,8 @@ class Replay:
 		return self.log.move_in_replay(move)
 		
 class Player:
-	def __init__(self):
+	def __init__(self, name):
+		self.name = name
 		self.team = {}
 
 class Pokemon:

@@ -1,0 +1,738 @@
+
+<!DOCTYPE html>
+<html><head>
+
+	<meta charset="utf-8" />
+
+	<title>OU replay: Get Backer vs. CrashinBoomBang - Pok&eacute;mon Showdown</title>
+
+	<meta name="description" content="Watch a replay of a Pokémon battle between Get Backer and CrashinBoomBang (OU)" />
+
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=IE8" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?" />
+	<link rel="stylesheet" href="//pokemonshowdown.com/forum/theme/panels.css" />
+	<link rel="stylesheet" href="//pokemonshowdown.com/theme/main.css" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css?v0.11.0b036" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/replay.css?b12" />
+
+	<!-- Workarounds for IE bugs to display trees correctly. -->
+	<!--[if lte IE 6]><style> li.tree { height: 1px; } </style><![endif]-->
+	<!--[if IE 7]><style> li.tree { zoom: 1; } </style><![endif]-->
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-26211653-1']);
+		_gaq.push(['_setDomainName', 'pokemonshowdown.com']);
+		_gaq.push(['_setAllowLinker', true]);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+</head><body>
+
+	<div class="pfx-topbar">
+		<div class="header">
+			<ul class="nav">
+				<li><a class="button nav-first" href="//pokemonshowdown.com/"><img src="//pokemonshowdown.com/images/pokemonshowdownbeta.png" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
+				<li><a class="button" href="//pokemonshowdown.com/dex/">Pok&eacute;dex</a></li>
+				<li><a class="button cur" href="/">Replays</a></li>
+				<li><a class="button" href="//pokemonshowdown.com/ladder/">Ladder</a></li>
+				<li><a class="button nav-last" href="//pokemonshowdown.com/forums/">Forum</a></li>
+			</ul>
+			<ul class="nav nav-play">
+				<li><a class="button greenbutton nav-first nav-last" href="http://play.pokemonshowdown.com/">Play</a></li>
+			</ul>
+			<div style="clear:both"></div>
+		</div>
+	</div>
+	<div class="pfx-panel"><div class="pfx-body" style="max-width:1180px">
+		<div class="wrapper replay-wrapper">
+
+			<div class="battle"><div class="playbutton"><button disabled>Loading...</button></div></div>
+			<div class="battle-log"></div>
+			<div class="replay-controls">
+				<button data-action="start"><i class="fa fa-play"></i> Play</button>
+			</div>
+			<div class="replay-controls-2">
+				<div class="chooser leftchooser speedchooser">
+					<em>Speed:</em>
+					<div><button class="sel" value="fast">Fast</button><button value="normal">Normal</button><button value="slow">Slow</button><button value="reallyslow">Really Slow</button></div>
+				</div>
+				<div class="chooser colorchooser">
+					<em>Color&nbsp;scheme:</em>
+					<div><button class="sel" value="light">Light</button><button value="dark">Dark</button></div>
+				</div>
+				<div class="chooser soundchooser" style="display:none">
+					<em>Music:</em>
+					<div><button class="sel" value="on">On</button><button value="off">Off</button></div>
+				</div>
+			</div>
+			<!--[if lte IE 8]>
+				<div class="error"><p>&#3232;_&#3232; <strong>You're using an old version of Internet Explorer.</strong></p>
+				<p>We use some transparent backgrounds, rounded corners, and other effects that your old version of IE doesn't support.</p>
+				<p>Please install <em>one</em> of these: <a href="http://www.google.com/chrome">Chrome</a> | <a href="http://www.mozilla.org/en-US/firefox/">Firefox</a> | <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home">Internet Explorer 9</a></p></div>
+			<![endif]-->
+
+			
+			<pre class="urlbox" style="word-wrap: break-word;">http://replay.pokemonshowdown.com/smogtours-ou-39893</pre>
+
+			<h1 style="font-weight:normal;text-align:left"><strong>OU</strong>: <a href="//pokemonshowdown.com/users/getbacker" class="subtle">Get Backer</a> vs. <a href="//pokemonshowdown.com/users/crashinboombang" class="subtle">CrashinBoomBang</a></h1>
+			<p style="padding:0 1em;margin-top:0">
+				<small class="uploaddate" data-timestamp="1426290529"><em>Uploaded:</em> Mar 13, 2015</small>
+			</p>
+
+			<!--p class="linkbar">[<a href="./">Other replays</a>] [<a href="http://www.smogon.com/forums/showthread.php?t=3453192">Report bugs to the Smogon thread</a>]</p-->
+			<div id="loopcount"></div>
+		</div>
+
+		<input type="hidden" name="replayid" value="smogtours-ou-39893" />
+		<script type="text/plain" class="log">|inactive|Battle timer is ON: inactive players will automatically lose when time's up.
+|J|Get Backer
+|J|CrashinBoomBang
+|player|p1|Get Backer|53
+|player|p2|CrashinBoomBang|1
+|gametype|singles
+|gen|6
+|tier|OU
+|clearpoke
+|poke|p1|Gothitelle, M
+|poke|p1|Wobbuffet, F
+|poke|p1|Wynaut, F
+|poke|p1|Gothorita, M
+|poke|p1|Charizard, F
+|poke|p1|Azumarill, M
+|poke|p2|Azumarill, M
+|poke|p2|Landorus, M
+|poke|p2|Heatran, F
+|poke|p2|Keldeo-Resolute
+|poke|p2|Venusaur, F
+|poke|p2|Mandibuzz, F
+|rule|Swagger Clause: Swagger is banned
+|rule|Baton Pass Clause: Limit one Pokémon knowing Baton Pass
+|rule|Sleep Clause Mod: Limit one foe put to sleep
+|rule|Species Clause: Limit one of each Pokémon
+|rule|OHKO Clause: OHKO moves are banned
+|rule|Moody Clause: Moody is banned
+|rule|Evasion Moves Clause: Evasion moves are banned
+|rule|Endless Battle Clause: Forcing endless battles is banned
+|rule|HP Percentage Mod: HP is shown in percentages
+|teampreview
+|J|River Martini
+|J|the pdc show
+|J|Can-Eh-Dian
+|J|mccauley
+|J|Korby
+|J|Lockheeed
+|J|iplaytennislol
+|J|Lufia II
+|J|Zamrock
+|J|IUM
+|J|peaceland
+|J|monsoon wings
+|J|winterish
+|J|Key
+|J|Mizuhime
+|J|The TurtleLord
+|J|habajiga
+|J|BLINGAS
+|J|trc
+|J|littlelucario
+|J|Laga
+|J|stathakis
+|J|Dread Arceus
+|J|noname4505
+|J|NEW BREED
+|J|can you not hax
+|J|hollywood
+|J|Tokyo Tom✨
+|J|Kushalos
+|J|DarkDiglett
+|J|DJWebb
+|c|+The TurtleLord|.
+|c|+Zamrock|what is that
+|c|+Mizuhime|LOOOOOL 
+|c|+trc|lol
+|c|+Tokyo Tom✨|LOL
+|c|+iplaytennislol|what
+|c| peaceland|LOL
+|J|QueenOfLuvdiscs
+|c|★CrashinBoomBang|LOL
+|c|+Zamrock|LOOOOOOL
+|J|ging2
+|c|+trc|yfw
+|c| peaceland|LOOOOOOOL
+|c|+Laga|hahahahahahaha
+|c|+littlelucario|LOL
+|J|Write Your Fate
+|J|LMay
+|c|+The TurtleLord|THIS TEAM
+|J|H-C
+|c|+the pdc show|LOL
+|c|★CrashinBoomBang|now we're playing with power
+|c|@hollywood|lmao
+|c|+The TurtleLord|LOL
+|c|★CrashinBoomBang|ok
+|c| Write Your Fate|LOL
+|J|Mael oo
+|L|ging2
+|L|LMay
+|c|+iplaytennislol|LOL
+|J|edgar
+|c|+littlelucario|how is this nigga in r3
+|J|Evuelf
+|L|Tokyo Tom✨
+|J|JesusJ
+|J|Lazar Angelōv
+|J|Aurious
+|
+|start
+|switch|p1a: Wynaut|Wynaut, F|332\/332
+|switch|p2a: Landorus|Landorus, M|319\/319
+|turn|1
+|J|FAJI
+|J|Jimmy Turtwig
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Wynaut
+|-sidestart|p1: Get Backer|move: Stealth Rock
+|move|p1a: Wynaut|Encore|p2a: Landorus
+|-start|p2a: Landorus|Encore
+|
+|turn|2
+|J|soulraiser
+|
+|switch|p1a: Gothorita|Gothorita, M|323\/323
+|-damage|p1a: Gothorita|283\/323|[from] Stealth Rock
+|move|p2a: Landorus|Stealth Rock|p1a: Gothorita
+|-fail|p1a: Gothorita
+|
+|turn|3
+|c|+Lazar Angelōv|fat shit user
+|
+|move|p1a: Gothorita|Trick|p2a: Landorus
+|-activate|p1a: Gothorita|move: Trick|[of] p2a: Landorus
+|-item|p2a: Landorus|Choice Scarf|[from] move: Trick
+|-item|p1a: Gothorita|Life Orb|[from] move: Trick
+|move|p2a: Landorus|Stealth Rock|p1a: Gothorita
+|-fail|p1a: Gothorita
+|
+|turn|4
+|J|King Tsunami
+|J|Opjqlan
+|c|+iplaytennislol|rip
+|c| peaceland|its over
+|
+|move|p1a: Gothorita|Magic Coat|p1a: Gothorita
+|-singleturn|p1a: Gothorita|move: Magic Coat
+|move|p2a: Landorus|Stealth Rock|p1a: Gothorita
+|move|p1a: Gothorita|Stealth Rock|p2a: Landorus|[from]Magic Coat
+|-sidestart|p2: CrashinBoomBang|move: Stealth Rock
+|
+|-end|p2a: Landorus|Encore
+|turn|5
+|c|+trc|rofl
+|c|+Lazar Angelōv|cbb faggot confirmd
+|J|TFL
+|c| peaceland|LOL
+|J|Will of Fire
+|c|★CrashinBoomBang|LOL
+|c|+iplaytennislol|f
+|c| peaceland|LOOOOOOOOOOL
+|c| winterish|stop cbb
+|J|bluri
+|
+|switch|p1a: Gothitelle|Gothitelle, M|343\/343
+|-damage|p1a: Gothitelle|301\/343|[from] Stealth Rock
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|
+|-heal|p1a: Gothitelle|322\/343|[from] item: Leftovers
+|turn|6
+|c| peaceland|LOOOOOOOOOOOOOOOOL
+|c|+Lazar Angelōv|LOL
+|c|+littlelucario|loool
+|c|+Laga|HAHAHAHAHA
+|c| peaceland|OMG
+|c|+Lazar Angelōv|CBB GETTIN RAPED
+|c| peaceland|LOOOOOOL
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Substitute|p1a: Gothitelle
+|-start|p1a: Gothitelle|Substitute
+|-damage|p1a: Gothitelle|237\/343
+|
+|-heal|p1a: Gothitelle|258\/343|[from] item: Leftovers
+|turn|7
+|c|+Lazar Angelōv|LOL
+|c|+iplaytennislol|LOOOOOOOOOOOOOOOOOOL
+|c|+littlelucario|getting bodie
+|c| peaceland|IM DYING
+|c|+The TurtleLord|LOL
+|c|+Lazar Angelōv|LOOOOOOOOOOOOOOOOOOOOOOL
+|J|Dark_Psiana
+|c|+QueenOfLuvdiscs|yo
+|c|+Lazar Angelōv|LOOOOOOOOOOOOOOOOOOOOOOL
+|c|+littlelucario|LOOOL
+|c|+Lazar Angelōv|CM 
+|c|+Lazar Angelōv|6-0
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Calm Mind|p1a: Gothitelle
+|-boost|p1a: Gothitelle|spa|1
+|-boost|p1a: Gothitelle|spd|1
+|
+|-heal|p1a: Gothitelle|279\/343|[from] item: Leftovers
+|turn|8
+|c|+littlelucario|THIS IS THE BEST
+|c|+Lazar Angelōv|LOOOOOOOOOOOOOOOOOL
+|J|xtraDOLLARshine
+|J|Riahi
+|c|+QueenOfLuvdiscs|this is so legit
+|c|+Laga|hahAHAHAHAHA
+|L|xtraDOLLARshine
+|c|+The TurtleLord|LMFAO
+|L|Riahi
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Calm Mind|p1a: Gothitelle
+|-boost|p1a: Gothitelle|spa|1
+|-boost|p1a: Gothitelle|spd|1
+|
+|-heal|p1a: Gothitelle|300\/343|[from] item: Leftovers
+|turn|9
+|c|+Zamrock|oml
+|c|+FAJI|so bad
+|c| peaceland|LOOOOOOOOOOOOOOOOL
+|J|brokenwings
+|c| peaceland|ITS OVER
+|J|Escavalier
+|c|+Lazar Angelōv|LOOOOOOOOOOOOOOOOOOOOOL
+|J|Mikasah
+|J|Tokyo Tom✨
+|c|+trc|im dying
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Calm Mind|p1a: Gothitelle
+|-boost|p1a: Gothitelle|spa|1
+|-boost|p1a: Gothitelle|spd|1
+|
+|-heal|p1a: Gothitelle|321\/343|[from] item: Leftovers
+|turn|10
+|J|dadoux
+|J|Silly Burrito
+|c|+littlelucario|crashin
+|J|Req'd by Invok3r
+|J|TheJFrenzy1
+|J|ging2
+|J|Aurora
+|J|bomber
+|J|Starmei
+|J|brunch XD
+|J|Polekoner
+|J|Ranger mike
+|J|ox the fox
+|c|+Lazar Angelōv|CBB HOW U LIKE THEM WEINERS
+|J|Cosine180
+|J|Jirachee
+|L|bluri
+|c|+Lazar Angelōv|UP UR ASS
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Calm Mind|p1a: Gothitelle
+|-boost|p1a: Gothitelle|spa|1
+|-boost|p1a: Gothitelle|spd|1
+|
+|-heal|p1a: Gothitelle|342\/343|[from] item: Leftovers
+|turn|11
+|J|Lohgock
+|J|RaffaeleKing
+|c|+King Tsunami|LOL
+|J|Powered By Pokes
+|J|Imanalt
+|c|+King Tsunami|WHAT THE FUCK IS THIS
+|c|+The TurtleLord|lmfo
+|J|Teremiare
+|c|+Lazar Angelōv|shake join call
+|L|Cosine180
+|J|iZocker
+|c|+Ranger mike|LOL
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Calm Mind|p1a: Gothitelle
+|-boost|p1a: Gothitelle|spa|1
+|-boost|p1a: Gothitelle|spd|1
+|
+|-heal|p1a: Gothitelle|343\/343|[from] item: Leftovers
+|turn|12
+|J|Sam
+|J|Dark_380
+|c|+King Tsunami|cant talk
+|c| Req'd by Invok3r|oml i fought this nigga before
+|J|Deckline
+|J|Rockhp
+|J|ecossais2000
+|c| peaceland|the door...
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Calm Mind|p1a: Gothitelle
+|-boost|p1a: Gothitelle|spa|1
+|-boost|p1a: Gothitelle|spd|1
+|
+|turn|13
+|J|sugarhigh
+|J|Lord Mur
+|
+|move|p2a: Landorus|Stealth Rock|p1a: Gothitelle
+|-fail|p1a: Gothitelle
+|move|p1a: Gothitelle|Psychic|p2a: Landorus
+|-damage|p2a: Landorus|0 fnt
+|faint|p2a: Landorus
+|
+|
+|switch|p2a: Mandibuzz|Mandibuzz, F|423\/423
+|-damage|p2a: Mandibuzz|318\/423|[from] Stealth Rock
+|turn|14
+|c| peaceland|dazzling gleam this bitch
+|
+|move|p2a: Mandibuzz|Foul Play|p1a: Gothitelle
+|-supereffective|p1a: Gothitelle
+|-end|p1a: Gothitelle|Substitute
+|move|p1a: Gothitelle|Thunderbolt|p2a: Mandibuzz
+|-supereffective|p2a: Mandibuzz
+|-damage|p2a: Mandibuzz|0 fnt
+|faint|p2a: Mandibuzz
+|
+|c| peaceland|PLEASE
+|c|+littlelucario|GG
+|
+|switch|p2a: Azumarill|Azumarill, M|361\/361
+|-damage|p2a: Azumarill|316\/361|[from] Stealth Rock
+|turn|15
+|c| peaceland|OM
+|J|hingo
+|c|+The TurtleLord|YES
+|c| peaceland|G
+|c|+TheJFrenzy1|CBB you poor thing.
+|c|+The TurtleLord|GG
+|c|+King Tsunami|LOL
+|c| peaceland|LOOOOOOOOOOOOOOOOOL
+|c|+trc|\/\/ff
+|c|+littlelucario|g fucking g
+|c| peaceland|LOOOOOOOOOOOOOOOOOL
+|J|Moony
+|
+|move|p1a: Gothitelle|Thunderbolt|p2a: Azumarill
+|-supereffective|p2a: Azumarill
+|-damage|p2a: Azumarill|0 fnt
+|faint|p2a: Azumarill
+|
+|c|+King Tsunami|why is this guy such a god
+|c|+Tokyo Tom✨|WHYS IT SO SLOW
+|c|+ox the fox|ahahahahh
+|c|+Escavalier|lmao
+|c|+Tokyo Tom✨|LOL
+|J|Syawra
+|c|★CrashinBoomBang|gg
+|c|+RaffaeleKing|OML i remember this aids team HOLLY
+|L|hingo
+|c|+The TurtleLord|GG
+|c| peaceland|LOOOOOOOOOOOOOOOOOOOL
+|c|+The TurtleLord|GG
+|
+|switch|p2a: Keldeo-Resolute|Keldeo-Resolute|323\/323
+|-damage|p2a: Keldeo-Resolute|303\/323|[from] Stealth Rock
+|turn|16
+|c|+The TurtleLord|GG
+|c| peaceland|LOOOOOOOOOOOOOOOOL
+|c|+Lazar Angelōv|LOOOOOOOOOOOOOOOOOOOOL
+|J|Fairy Peak!
+|c|+brokenwings|LOL
+|J|JohnxYiu
+|J|Reverb
+|J|ShinyVeemon
+|L|BLINGAS
+|c|+Lazar Angelōv|LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOL
+|c|+QueenOfLuvdiscs|gg.
+|L|Fairy Peak!
+|c|+RaffaeleKing|i hate this aids team
+|c|+The TurtleLord|DESTROYED
+|c|+Ranger mike|crit here
+|J|craing ;_;
+|J|RiCH HOMiE CA$ED
+|L|RaffaeleKing
+|c| winterish|im dead
+|J|Here to Stay
+|c|★CrashinBoomBang|yea i remember
+|L|soulraiser
+|c|+littlelucario|REKT HIS LYFE
+|c|★CrashinBoomBang|why ctc isnt in call
+|L|ecossais2000
+|c|★CrashinBoomBang|I'll add dean tho
+|c|+RiCH HOMiE CA$ED|get popped pussy 
+|L|Lohgock
+|c|+King Tsunami|all cbb did was go for sr
+|c|+iplaytennislol|oml
+|c|+King Tsunami|and this guy won
+|c|+King Tsunami|unreal.
+|J|xtraDOLLARshine
+|c|+iplaytennislol|why is this allowed
+|J|Destiny Device
+|c|+RiCH HOMiE CA$ED|get backer
+|c|+RiCH HOMiE CA$ED|easy win
+|c|★CrashinBoomBang|sec bro
+|c|+littlelucario|this is why stag needs a ban
+|c|★CrashinBoomBang|just adding someone
+|J|soulraiser
+|c|★CrashinBoomBang|to a skype call
+|L|Aurious
+|c|+RiCH HOMiE CA$ED|nom nom nom
+|c|★CrashinBoomBang|nah i fucked up
+|J|Cienight
+|c|★CrashinBoomBang|i didnt think
+|J|blunderr
+|c|★CrashinBoomBang|my own fault
+|c|+littlelucario|still
+|J|jimmmeny
+|L|Req'd by Invok3r
+|c|+iplaytennislol|you gotta think long term next time CBB
+|L|mccauley
+|c|+dadoux|shadow tag next suspect lgi
+|c|+Lazar Angelōv|yo cbb
+|c| Aurora|lol
+|
+|move|p2a: Keldeo-Resolute|Scald|p1a: Gothitelle
+|-damage|p1a: Gothitelle|292\/343
+|move|p1a: Gothitelle|Psychic|p2a: Keldeo-Resolute
+|-supereffective|p2a: Keldeo-Resolute
+|-damage|p2a: Keldeo-Resolute|0 fnt
+|faint|p2a: Keldeo-Resolute
+|
+|-heal|p1a: Gothitelle|313\/343|[from] item: Leftovers
+|c|+Lazar Angelōv|add a nigga
+|c|+blunderr|cbb i love u anyways
+|c|+blunderr|forever
+|c|+Lazar Angelōv|plz!!!
+|c|+RiCH HOMiE CA$ED|play tennis next time cbb
+|
+|switch|p2a: Heatran|Heatran, F|323\/323
+|-damage|p2a: Heatran|283\/323|[from] Stealth Rock
+|turn|17
+|c|+Lazar Angelōv|ill be nice!!11
+|c|+Lazar Angelōv|LOL!
+|c|+blunderr|absolutely love u
+|c| ShinyVeemon|this physical heatran
+|
+|move|p2a: Heatran|Flash Cannon|p1a: Gothitelle
+|-crit|p1a: Gothitelle
+|-damage|p1a: Gothitelle|114\/343
+|move|p1a: Gothitelle|Thunderbolt|p2a: Heatran
+|-damage|p2a: Heatran|0 fnt
+|faint|p2a: Heatran
+|
+|-heal|p1a: Gothitelle|135\/343|[from] item: Leftovers
+|c| ShinyVeemon|gonna crit
+|
+|switch|p2a: Venusaur|Venusaur, F|363\/363
+|-damage|p2a: Venusaur|318\/363|[from] Stealth Rock
+|turn|18
+|c|+blunderr|lol.
+|c|+RiCH HOMiE CA$ED|lol
+|J|Zebraiken
+|c|+RiCH HOMiE CA$ED|classic
+|c|+trc|lol
+|J|hairy toenail
+|J|liberty32
+|c|+RiCH HOMiE CA$ED|easy win
+|
+|detailschange|p2a: Venusaur|Venusaur-Mega, F
+|-mega|p2a: Venusaur|Venusaur|Venusaurite
+|move|p2a: Venusaur|Earthquake|p1a: Gothitelle
+|-damage|p1a: Gothitelle|62\/343
+|move|p1a: Gothitelle|Psychic|p2a: Venusaur
+|-supereffective|p2a: Venusaur
+|-damage|p2a: Venusaur|0 fnt
+|faint|p2a: Venusaur
+|
+|win|Get Backer
+|c|+RiCH HOMiE CA$ED|6-0
+|c|+The TurtleLord|get backer
+|c|+The TurtleLord|your my hero
+|L|CrashinBoomBang
+|player|p2
+|L|trc
+|L|King Tsunami
+|c|+RiCH HOMiE CA$ED|easy
+|c|★Get Backer|welp
+|c|+RiCH HOMiE CA$ED|lol
+|L|Dread Arceus
+|L|jimmmeny
+|L|hollywood
+|L|hairy toenail
+|L|blunderr
+|c|★Get Backer|cant belive it worked
+|L|Jirachee
+|L|bomber
+|c|★Get Backer|tbh
+|c|+littlelucario|GG m8
+|L|Dark_Psiana
+|c|+Ranger mike|what a god
+|L|brunch XD
+|L|RiCH HOMiE CA$ED
+|L|the pdc show
+|L|Starmei
+|L|Powered By Pokes
+|L|ox the fox
+|L|Reverb
+|c| ShinyVeemon|A GOD
+|L|Lord Mur
+|L|Rockhp
+|L|monsoon wings
+|L|Laga
+|L|Silly Burrito
+|L|River Martini
+|L|Get Backer
+|player|p1
+|L|DJWebb
+|L|TheJFrenzy1
+|L|Can-Eh-Dian
+|L|Escavalier
+|L|brokenwings
+|L|Tokyo Tom✨
+|L|littlelucario
+|L|NEW BREED
+|J|SebPuygrenier
+|L|The TurtleLord
+|J|Cayo2
+|c| Aurora|'this team'
+|J|Aurious
+|L|Korby
+|L|Mael oo
+|J|Unamed
+|L|Teremiare
+|L|Lockheeed
+|L|habajiga
+|L|Lazar Angelōv
+|L|Unamed
+|J|davidTHEMASTER
+|L|ShinyVeemon
+|L|Zamrock
+|L|Evuelf
+|J|littlelucario
+|L|Aurious
+|L|Aurora
+|L|can you not hax
+|L|xtraDOLLARshine
+|L|Will of Fire
+|L|Key
+|L|FAJI
+|L|Dark_380
+|L|QueenOfLuvdiscs
+|L|Deckline
+|L|iplaytennislol
+|L|edgar
+|J|habajiga
+|J|GG No Re M8
+|L|habajiga
+|L|Write Your Fate
+|L|Zebraiken
+|J|blunderr
+|L|DarkDiglett
+|L|soulraiser
+|L|blunderr
+|J|Eｘi l e
+|J|Ayatollah Azelf
+|L|Destiny Device
+|L|GG No Re M8
+|L|Opjqlan
+|L|davidTHEMASTER
+|J|iplaytennislol
+|L|TFL
+|J|Piexplode
+|L|peaceland
+|L|iplaytennislol
+|J|bomber
+|J|QueenOfLuvdiscs
+|L|Ayatollah Azelf
+|L|QueenOfLuvdiscs
+|J|leremyju
+|L|Polekoner
+|J|Ayatollah Azelf
+|L|Ranger mike
+|L|IUM
+|L|JohnxYiu
+|c| Ayatollah Azelf|lol...
+|L|leremyju
+|L|littlelucario
+|L|Imanalt
+|L|SebPuygrenier
+|J|Crazy Uncle Anti
+|J|SAGA
+|L|Kushalos
+|J|Get Backer
+|L|Ayatollah Azelf
+|L|bomber
+|L|Cayo2
+|J|Prague Kick
+|J|SylvainArmand
+|L|Crazy Uncle Anti
+|L|Eｘi l e
+|J|Ayatollah Azelf
+|J|Liloo
+|L|SAGA
+|L|Ayatollah Azelf
+|J|jacob
+|L|jacob
+|J|TFL
+|J|user zf
+|L|Get Backer
+|L|TFL
+|L|user zf
+|J|IronBullet93
+|J|Another Way
+|L|Prague Kick</script>
+
+<div><script type="text/javascript"><!--
+google_ad_client = "ca-pub-6535472412829264";
+/* PS replay */
+google_ad_slot = "6865298132";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div>
+
+		<a href="/replay/" class="pfx-backbutton" data-target="back"><i class="fa fa-chevron-left"></i> More replays</a>
+
+	</div></div>
+	<script src="//play.pokemonshowdown.com/js/lib/jquery-1.11.0.min.js"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/lodash.core.js"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/backbone.js?"></script>
+	<script src="//pokemonshowdown.com/forum/js/panels.js"></script>
+
+	<script src="//play.pokemonshowdown.com/js/lib/jquery-cookie.js"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/soundmanager2-nodebug-jsmin.js?"></script>
+	<script>
+		soundManager.setup({url: '//play.pokemonshowdown.com/swf/'});
+	</script>
+	<script src="//play.pokemonshowdown.com/config/config.js?v0.11.0b036"></script>
+	<script src="//play.pokemonshowdown.com/js/battledata.js?v0.11.0b036"></script>
+	<script src="//play.pokemonshowdown.com/data/pokedex-mini.js?v0.11.0b036"></script>
+	<script src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?v0.11.0b036"></script>
+	<script src="//play.pokemonshowdown.com/data/graphics.js?v0.11.0b036"></script>
+	<script src="//play.pokemonshowdown.com/js/battle.js?v0.11.0b036"></script>
+	<script src="/js/replay.js?b47"></script>
+
+</body></html>

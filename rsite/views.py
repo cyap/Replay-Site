@@ -430,9 +430,9 @@ def spl_index(request):
 			'''
 			raw = ""
 			for replay in replays:
-				for player in (replay.players):
+				for player, number in replay._players.items():
 					raw += (player+ ":\n")
-					for pokemon in replay.teams[player]:
+					for pokemon in replay.teams[number]:
 						raw += (pokemon + ": ")
 						raw += str(replay.moves[player][pokemon])
 						raw += "\n"

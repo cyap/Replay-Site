@@ -1,1 +1,1 @@
-web: gunicorn replaystats-site.wsgi --log-file -
+web: gunicorn rsite.wsgi --log-file -
