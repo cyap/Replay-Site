@@ -37,7 +37,7 @@ class Log:
 		try:
 			return (next(line for line in reversed(self.text) 
 					if line.startswith("|win"))
-					.split("|")[2].split("<")[0]).lower()
+					.split("|")[2].split("<")[0]).lower().strip()
 		except:
 			return ""
 		'''
@@ -258,10 +258,6 @@ class Replay:
 	def __init__(self, log, players, winner, url=None, number=None, tier=None):
 		self.log = log
 		
-		### Player refactor ###
-		#self.p1 = Player(p1_name)
-		#self.p2 = Player(p2_name)
-		
 		# Initialize player based on parse
 		# Set teams based on parse 
 		
@@ -303,39 +299,16 @@ class Replay:
 	@winner.setter
 	def winner(self, new_winner):
 		if new_winner:
-			self._winner = new_winner
-			self.loser = self.players[self.players.index(self._winner)-1]
+			try:
+				self.loser = self.players[self.players.index(new_winner)-1]
+				self._winner = new_winner
+			except:
+				# TODO: raise error if winner not in player list
+				pass
 		else:
 			self._winner = ""
 			self.loser = ""
-
-	@property
-	def playerwl(self):
-		try:
-			return self._playerwl
-		except:
-			# p1 -> name
-			if self._winner:
-				win_player = self._players[self._winner]
-				lose_num = 1 ^ 2 ^ int(win_player[-1])
-				lose_player = "player_p" + str(lose_num)
-				self._loser = self.players[lose_num-1]
-				self._playerwl = {
-						"win":self._winner, 
-						"lose":self._loser,
-						win_player:"win", 
-						lose_player:"lose"}
-			else:
-				# Ties - refactor
-				self._loser = ""
-				self._playerwl = {
-					"win":"",
-					"lose":"",
-					"player_p1":"tie1",
-					"player_p2":"tie2"}
-			return self._playerwl
 				
-			
 	@property
 	def generation(self):
 		""" Return int/string representing generation. """
@@ -441,18 +414,6 @@ class Replay:
 		""" Return boolean indicating if move was used in match. """
 		return self.log.move_in_replay(move)
 		
-class Player:
-	def __init__(self, name):
-		self.name = name
-		self.team = {}
-
-class Pokemon:
-	def __init__(self):
-		self.name = None
-		self.moveset = []
-		self.item = None
-		
-		
 					 
 def format_pokemon(pokemon):
 	split_form = pokemon.split("-", 1)
@@ -467,15 +428,4 @@ def format_name(name):
 	Supported characters: Letters, numbers, spaces, period, apostrophe. 
 	"""
 	return re.sub("[^\w\s'\.-]+", "", re.sub("&#.*;", "", name)).lower().strip()
-
-
-def main(l):
-	for r in l:
-		#a = r.teams_from_preview()
-		b = r.moves
-
-if __name__ == "__main__":
-	import replay_compile
-	l = [replay_compile.open_replay("http://replay.pokemonshowdown.com/smogtours-ou-39893") for i in range(0,500)]
-	profile.run('main(l)', sort="tottime")
 	

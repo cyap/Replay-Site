@@ -194,17 +194,16 @@ def index(request):
 			).format(sprite_name, tier_label)
 			
 		# Missing Pokemon
-		missing = chain.from_iterable(
-			(((replay.playerwl[player], 6-len(replay.teams[player])) 
-			for player in ("player_p1","player_p2") if len(replay.teams[player]) < 6) 
-			for replay in replays))
-		
-		missing_text = "\n".join(
-			"[*][I]Missing {0} Pokemon from {1}.[/I]"
-			.format(miss[1], miss[0]) for miss in missing)
-			
+		missing_text = ""
+		for replay in replays:
+			for num, player in enumerate(("player_p1", "player_p2")):
+				if len(replay.teams[player]) < 6:
+					missing_text += ("[*][I]Missing {0} Pokemon from {1}.[/I]\n"
+					.format(6-len(replay.teams[player]), replay.players[num]))
+		# Refactor - players.keys()
+
 		if missing_text:
-			missing_text = "\n[LIST]" + missing_text + "\n[/LIST]"
+			missing_text = "\n[LIST]\n" + missing_text + "[/LIST]"
 		
 		# Usage rawtext
 		usage_whitespace = (sprite_header + "\n[CODE]\n" +
@@ -396,7 +395,6 @@ def index(request):
 					 {"usage_table":usage_table,
 					  "net_mons":sum(usage.values()),
 					  "net_replays":len(replays),
-					  "missing":missing,
 					  "tier_label":tier_label,
 					  "moves_whitespace":moves_whitespace,
 					  "usage_whitespace":usage_whitespace,
@@ -453,9 +451,13 @@ def spl_index(request):
 				request.POST["player"].strip(),
 				tier=tier)
 			choice = request.POST["player"].lower()
-			moves = [replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2") for replay in replays]
+			moves = [rep.moves.get(rep._players[choice]) for rep in replays]
 			
-			pairings = [{"replay":replay, "moves":replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2")} for replay in replays]
+			pairings = [
+				{
+					"replay":replay,
+					"moves":replay.moves.get(replay._players[choice])
+				} for replay in replays]
 			template = "scout_stats.html"
 			
 			gen_num = next((char for char in min(request.POST["tier"]) if char.isdigit()), 6)
@@ -471,8 +473,10 @@ def spl_index(request):
 			"\n\n---\n\n".join([
 			choice + "\n"
 			+ "\n".join([pokemon + ": " 
-			+ " / ".join([move for move in (replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2"))[pokemon]])
-			for pokemon in replay.moves.get(choice) or replay.moves.get("player_p1" if replay.playerwl["player_p1"] == choice else "player_p2")])
+			+ " / ".join([
+			move for move in 
+			(replay.moves.get(replay._players[choice]))[pokemon]])
+			for pokemon in replay.moves.get(replay._players[choice])])
 			for replay in replays]))
 		
 		# Raw original
