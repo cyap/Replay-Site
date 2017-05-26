@@ -291,6 +291,9 @@ class Replay:
 		except:
 			self._players = self.log.parse_players()
 			return list(self._players.keys())[0:2]
+	
+	def name_to_num(self, player):
+		return self._players[player]
 		
 	@property
 	def winner(self):

@@ -24,7 +24,7 @@ def aggregate_wins(replays, key):
 	ties = []
 	for replay in replays:
 		try:
-			wins += getattr(replay, key)[replay.winner]
+			wins += getattr(replay, key)[replay.name_to_num(replay.winner)]
 		except:
 			ties += getattr(replay, key)["player_p1"]
 			ties += getattr(replay, key)["player_p2"]
@@ -40,7 +40,8 @@ def usage(replays):
 	return Counter(teams)
 
 def usage2(replays, key):
-	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays])
+	teams = chain.from_iterable([replay.teams.get(replay.name_to_num(key), {})
+			for replay in replays])
 	return Counter(teams)
 
 def wins(replays):
@@ -79,7 +80,7 @@ def combo_wins(replays, size = 2):
 	for replay in replays:
 		combos = replay.combos(size)
 		try:
-			wins += combos[replay.winner]
+			wins += combos[replay.name_to_num(replay.winner)]
 		except:
 			ties += combos["player_p1"]
 			ties += combos["player_p2"]
@@ -124,7 +125,7 @@ def move_wins(replays, pokemon_list):
 	tie_counter = {pokemon:Counter() for pokemon in pokemon_list}
 	for replay in replays:
 		try:
-			moves = replay.moves[replay.winner]
+			moves = replay.moves[replay.name_to_num(replay.winner)]
 			for pokemon in moves:
 				win_counter.get(pokemon, Counter()).update(moves.get(pokemon, []))
 		except:
@@ -155,9 +156,9 @@ def teammates(replays, filter=None):
 		ties = {}
 		for replay in replays:
 			try:
-				for pokemon in replay.teams[replay.winner]:
+				for pokemon in replay.teams[replay.name_to_num(replay.winner)]:
 					wins[pokemon] = (wins.get(pokemon, Counter()) +
-						Counter(replay.teams[replay.winner]))
+						Counter(replay.teams[replay.name_to_num(replay.winner)]))
 			except:
 				for player in ("player_p1", "player_p2"):
 					for pokemon in replay.teams[player]:

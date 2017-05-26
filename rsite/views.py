@@ -426,43 +426,40 @@ def spl_index(request):
 			for player in ("player_p1","player_p2")])
 			for replay in replays]))
 			'''
+
 			raw = ""
 			for replay in replays:
-				for player, number in replay._players.items():
-					raw += (player+ ":\n")
-					for pokemon in replay.teams[number]:
+				for player in replay.players:
+					raw += (player + ":\n")
+					for pokemon in replay.teams[replay.name_to_num(player)]:
 						raw += (pokemon + ": ")
-						raw += str(replay.moves[player][pokemon])
-						raw += "\n"
+						raw += str(replay.moves[player][pokemon]) + "\n"
 					raw += "\n"
-			
-			
 			
 			moves = [replay.moves for replay in replays]
 			pairings = None
 			usage_whitespace = ""
 			
 		else:
-			if "zf" in request.POST["player"]:
-				tier = "gen2ou"
-			else:
-				tier = request.POST["tier"]
+			tier = request.POST["tier"]
 			replays = replay_compile.replays_from_user(
 				request.POST["player"].strip(),
 				tier=tier)
 			choice = request.POST["player"].lower()
-			moves = [rep.moves.get(rep._players[choice]) for rep in replays]
+			moves = [rep.moves.get(rep.name_to_num(choice)) for rep in replays]
 			
 			pairings = [
-				{
+				{	
 					"replay":replay,
-					"moves":replay.moves.get(replay._players[choice])
-				} for replay in replays]
+					"moves":replay.moves.get(replay.name_to_num(choice))
+				} 
+				for replay in replays]
 			template = "scout_stats.html"
 			
 			gen_num = next((char for char in min(request.POST["tier"]) if char.isdigit()), 6)
 			usage = stats.aggregate_forms(stats.usage2(replays, choice),
-					gen_num, True) 
+					gen_num, True)
+
 			wins = stats.wins2(replays, choice)
 			total = len(replays)
 			
@@ -475,8 +472,8 @@ def spl_index(request):
 			+ "\n".join([pokemon + ": " 
 			+ " / ".join([
 			move for move in 
-			(replay.moves.get(replay._players[choice]))[pokemon]])
-			for pokemon in replay.moves.get(replay._players[choice])])
+			(replay.moves.get(replay.name_to_num(choice)))[pokemon]])
+			for pokemon in replay.moves.get(replay.name_to_num(choice))])
 			for replay in replays]))
 		
 		# Raw original
