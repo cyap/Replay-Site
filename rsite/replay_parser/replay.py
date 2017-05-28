@@ -8,8 +8,9 @@ FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Groudon",
 COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 
 class Log:
-	def __init__(self, text):
+	def __init__(self, text, url=None):
 		self.text = text
+		self.url = url
 		'''
 		# Line dict
 		self.line_dict = {}
@@ -24,7 +25,6 @@ class Log:
 		""" Return dict with formatted player names. """
 		player_lines = (line for line in self.text if line.startswith("|player") 
 			and len(line.split("|")) > 3)
-		
 		players = OrderedDict()
 		for line in player_lines:
 			ll = line.split("|")
@@ -233,8 +233,7 @@ class Log:
 			moveset = moves[player][pokemon]
 			if move not in moveset:
 				moveset.append(move)
-		'''	
-		#print(moves)
+		'''
 		return moves
 
 	def parse_turn_count(self):
@@ -350,6 +349,11 @@ class Replay:
 			#for name in list(self._players.keys()):
 				#self._teams[name] = self._teams[self._players[name]]
 			return self._teams
+			
+			
+			# Team by name
+			# pre-set: 2 (creation) + 1 (access)
+			# not pre set: self.teams[name_to_num(name)]
 	
 	def add_to_team(self, team, pokemon):
 		if not self._teams["win"]:

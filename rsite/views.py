@@ -1,8 +1,6 @@
-from itertools import groupby, chain, repeat
-from collections import Counter, defaultdict
-import operator
+from itertools import chain
+from collections import Counter
 import re
-import profile
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -12,17 +10,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from .forms import ThreadForm, RangeForm, OptionsPane
 from .replay_parser import replay_compile, stats, tournament, replay
 
-AGGREGATED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
 COL_WIDTH = 23
-
-def index2(request):
-	if request.method == "GET":
-		return index2(request)
-	else:
-		#profile.runctx('index2(request)', globals(), locals(), sort="tottime")
-		#profile.run('index2(request)', sort="tottime")
-		return render(request, "index.html")
 	
 def index(request):
 	if request.method == "GET":
@@ -76,19 +65,18 @@ def index(request):
 			
 			logs = replay_compile.logs_from_links(
 				request.POST["new_urls"].splitlines())
-			for log, url in logs:
+			for log in logs:
 				try:
-					replay = replay_compile.initialize_replay(log, url)
+					replay = replay_compile.initialize_replay(log, log.url)
 					replays.append(replay)
 				except replay_compile.NoWinnerError:
 					# No winner: Default to tie
-					replay = replay_compile.initialize_replay(log, url, wnum=0)
+					replay = replay_compile.initialize_replay(log, log.url, wnum=0)
 					replays.append(replay)
 				except replay_compile.NoPlayerError:
 					# no players
 					pass
-			#replays += replay_compile.replays_from_links(
-				#request.POST["new_urls"].splitlines())
+
 			request.POST = request.session["form"]
 			
 		else:
@@ -121,27 +109,19 @@ def index(request):
 						
 			logs = thread_replays + range_replays + link_logs
 			
-			link_replays = []
+			replays = []
 			invalid_replays = []
-			for log, url in logs:
+			for log in logs:
 				try:
-					replay = replay_compile.initialize_replay(log, url)
-					link_replays.append(replay)
+					replay = replay_compile.initialize_replay(log, log.url)
+					replays.append(replay)
 				except replay_compile.NoWinnerError:
 					# No winner: Default to tie
-					replay = replay_compile.initialize_replay(log, url, wnum=0)
-					link_replays.append(replay)
+					replay = replay_compile.initialize_replay(log, log.url, wnum=0)
+					replays.append(replay)
 				except replay_compile.NoPlayerError:
 					# no players
 					pass
-				
-			#link_replays = list(replay_compile.replays_from_links(
-			#	request.POST["replay_urls"].splitlines()))
-			
-			# Aggregate replays
-			#replays = thread_replays | link_replays | range_replays
-			#replays = thread_replays + link_replays + range_replays
-			replays = link_replays
 			
 		# Refactor
 		tiers = {tier.strip() for tier in 
@@ -415,17 +395,6 @@ def spl_index(request):
 			replays = replay_compile.replays_from_links(urls)
 			choice = None
 			template = "spl_stats.html"
-			'''
-			raw = (
-			"\n\n---\n\n".join([
-			"\n\n".join([
-			replay.playerwl[player].capitalize() + ": " + player + "\n"
-			+ "\n".join([pokemon + ": " 
-			+ " / ".join([move for move in replay.moves[replay._players[player]][pokemon]])
-			for pokemon in replay._players[player]])
-			for player in ("player_p1","player_p2")])
-			for replay in replays]))
-			'''
 
 			raw = ""
 			for replay in replays:
@@ -433,7 +402,7 @@ def spl_index(request):
 					raw += (player + ":\n")
 					for pokemon in replay.teams[replay.name_to_num(player)]:
 						raw += (pokemon + ": ")
-						raw += str(replay.moves[player][pokemon]) + "\n"
+						raw += " / ".join(replay.moves[player][pokemon]) + "\n"
 					raw += "\n"
 			
 			moves = [replay.moves for replay in replays]
@@ -514,10 +483,10 @@ def tour_index(request):
 			replays = sum((replay_compile.replays_from_range(rng, tier=tier) 
 				for tier in request.POST["tier"].split(",")), [])
 			replays2 = []
-			for replay, url in replays:
+			for replay in replays:
 				try:
 					replays2.append(
-					replay_compile.initialize_replay(replay, url))
+					replay_compile.initialize_replay(replay, replay.url))
 				except:
 					pass
 			replays = replays2
@@ -537,7 +506,6 @@ def tour_index(request):
 			
 		# Replays
 		request.session["replays"] = replays | unmatched_replays
-		
 		
 		formatted_matches = [(" vs. ".join(player for player in pairing),
 							 matches[pairing][0], # replay

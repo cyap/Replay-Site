@@ -160,7 +160,7 @@ def replays_from_links(urls):
 		pool = multiprocessing.dummy.Pool(13)
 		# Throw out invalid replays
 		return list(filter(None, pool.map(
-			lambda x: initialize_replay(open_log(x)[0], x), urls)))
+			lambda url: initialize_replay(open_log(url), url), urls)))
 	except:
 		return
 	finally:
