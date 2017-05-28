@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
-<body>
+<head>
+  {% include "header.html" %}
+</head>
 
-{% block content %}
+<body>
+{% include "navbar.html" %}
+
 <form method="post">
 	{% csrf_token %}
 	Start:<br>
@@ -18,7 +22,6 @@
 	<input type="submit" value="Submit">
 	
 </form> 
-{% endblock %}
 
 </body>
 </html>
