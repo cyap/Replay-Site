@@ -311,24 +311,30 @@ def print_table(cname, cwidth, rows):
 	return header + body
 
 def stats_from_text(text):
-	try:
-		rows = text.split("\n")[3:] # TODO: Account for header
-		split_row = rows[0].split("|")
-		total = round(int(split_row[3].strip()) /
-			(float(split_row[4].strip().strip("%"))/100))
-		
-		return {"usage": Counter({
-					split_row[2].strip(): int(split_row[3].strip()) for
-					split_row in (row.split("|") for row in rows)}),
-				"wins": Counter({
-					split_row[2].strip(): int(round(int(split_row[3].strip())
-					* float(split_row[5].strip().strip("%"))/100)) for split_row
-					in (row.split("|") for row in rows)}),
-				"total":total}
-	except:
-		return {"usage": Counter(), "wins": Counter(), "total": 0}
+	""" Convert text stat output back to counters """
+	
+	# TODO: Change to loop so invalid rows can be thrown out
+	
+	# Find where stats start
+	rows = text.splitlines()
+	for i, row in enumerate(rows):
+		try:
+			first_row = row.split("|")
+			total = round(int(first_row[3].strip()) /
+					(float(first_row[4].strip().strip("%"))/100))
+			rows = rows[i:]
+			break
+		except:
+			pass
 			
-			#"total": next(int(split_row[3].strip()) / int(split_row[4].strip()) for split_row in (rows[0].split("|")))}
+	return {"usage": Counter({
+				split_row[2].strip(): int(split_row[3].strip()) for
+				split_row in (row.split("|") for row in rows)}),
+			"wins": Counter({
+				split_row[2].strip(): int(round(int(split_row[3].strip())
+				* float(split_row[5].strip().strip("%"))/100)) for split_row
+				in (row.split("|") for row in rows)}),
+			"total":total}
 			
-			
+	
 			
