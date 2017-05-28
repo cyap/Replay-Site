@@ -60,10 +60,8 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 		# replay.pokemonshowdown.com/ou doesn't work
 		# also some old replays
 		if tiers:
-			#urls = (url for url in urls if url.split("-")[-2] in tiers)
 			urls = (url for url in urls if url.split("-")[-2].split("/")[-1] 
 				in tiers)
-		#return replays_from_links(urls)
 		return logs_from_links(urls)
 	except:
 		traceback.print_exc()
@@ -161,41 +159,12 @@ def replays_from_links(urls):
 	try:
 		pool = multiprocessing.dummy.Pool(13)
 		# Throw out invalid replays
-		return list(filter(None, pool.map(open_replay, urls)))
+		return list(filter(None, pool.map(
+			lambda x: initialize_replay(open_log(x)[0], x), urls)))
 	except:
 		return
 	finally:
 		pool.close()
-
-def open_replay(url):
-	""" Open replay links and validate; return None if 404 error. """
-	# Check if URL adheres to the usual format of /*tier-number
-	# TODO: Refactor - validation in a single place
-
-	try:
-		number = int(url.split("-")[-1])
-		tier = url.split("-")[-2]
-	except:
-		number = 0
-		tier = None
-	# Validate log
-	try:
-		log = Log([line for line in 
-				urlopen(Request(url, headers=REQUEST_HEADER))
-				.read().decode()
-				.split("\n")
-				if line.startswith("|")])
-		players = log.parse_players()
-		winner = log.parse_winner()
-		return Replay(log, players, winner, url, number, tier)
-	except HTTPError:
-		# Unsaved replay
-		return
-	except:
-		# Corrupted log file
-		traceback.print_exc()
-		#printurl
-		return
 		
 class NoWinnerError(Exception):
 	pass
