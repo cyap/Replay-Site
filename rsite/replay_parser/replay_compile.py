@@ -121,8 +121,8 @@ def open_log(url):
 				urlopen(Request(url, headers=REQUEST_HEADER))
 				.read().decode()
 				.split("\n")
-				if line.startswith("|")])
-		return (log, url)
+				if line.startswith("|")], url)
+		return log
 	except HTTPError:
 		# Unsaved replay
 		return
