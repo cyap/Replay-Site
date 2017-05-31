@@ -6,52 +6,41 @@
 <html>
 <body>
 
-	{% block content %}
-	<div id=tables>
-	{% for replay in replays %}
-		<a href={{replay.url}}>{{ replay.url }}</a>
-		<table class=movetable>
-			<tr>
-				<th colspan=2>{{ replay.players.0 }}</th>
-				<th class=move>1</th>
-				<th class=move>2</th>
-				<th class=move>3</th> 
-				<th class=move>4</th>
-			</tr>
-			{% for pokemon,moveset in replay.moves.player_p1.items %}
-			<tr>
-				<td><img src="static/icons/{{pokemon}}.png"></td>
-				<td class=pokemon_col>{{ pokemon }}</td>
-				<td class=move>{{ moveset.0 }}</td>
-				<td class=move>{{ moveset.1 }}</td>
-				<td class=move>{{ moveset.2 }}</td>
-				<td class=move>{{ moveset.3 }}</td>
-			</tr>
+  <div id=tables>
+  {% for match in moves_tables %}
+    {% for url, table in match.items %}
+  	<a href={{ url }}>{{ url }}</a>
+    <table class=movetable>
+      {% for player, movesets in table.items %}
+	    <tr>
+		  <th colspan=2>{{ player }}</th>
+		  <th class=move>1</th>
+		  <th class=move>2</th>
+		  <th class=move>3</th> 
+		  <th class=move>4</th>
+	    </tr>
+		{% for pokemon, set in movesets %}
+		  <tr>
+			<td><img src="static/icons/{{pokemon}}.png"></td>
+			<td class=pokemon_col>{{ pokemon }}</td>
+			{% for move in set %}
+			  <td class=move>{{ move }}</td>
 			{% endfor %}
-		</table>
-		<table class=movetable>
-			<tr>
-				<th colspan=2>{{ replay.players.1 }}</th>
-				<th class=move>1</th>
-				<th class=move>2</th>
-				<th class=move>3</th> 
-				<th class=move>4</th>
-			</tr>
-			{% for pokemon,moveset in replay.moves.player_p2.items %}
-			<tr>
-				<td><img src="static/icons/{{pokemon}}.png"></td>
-				<td class=pokemon_col>{{ pokemon }}</td>
-				<td class=move>{{ moveset.0 }}</td>
-				<td class=move>{{ moveset.1 }}</td>
-				<td class=move>{{ moveset.2 }}</td>
-				<td class=move>{{ moveset.3 }}</td>
-			</tr>
+			{% with set|length|add:"-4"|stringformat:"+d"|slice:"1:" as range %}
+			{% for i in ""|center:range %}
+			    <td class=move></td>
 			{% endfor %}
-		</table>
-	<br>
+			{% endwith %}
+		  </tr>
+		{% endfor %}
+	  {% endfor %}
+	</table>
 	{% endfor %}
-	</div>
-	{% endblock %}
+  {% endfor %}
+  </div>
+
+
+
 
 Raw:
 <br>

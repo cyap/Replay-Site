@@ -65,17 +65,6 @@ def index(request):
 			
 			logs = replay_compile.logs_from_links(
 				request.POST["new_urls"].splitlines())
-			for log in logs:
-				try:
-					replay = replay_compile.initialize_replay(log, log.url)
-					replays.append(replay)
-				except replay_compile.NoWinnerError:
-					# No winner: Default to tie
-					replay = replay_compile.initialize_replay(log, log.url, wnum=0)
-					replays.append(replay)
-				except replay_compile.NoPlayerError:
-					# no players
-					pass
 
 			request.POST = request.session["form"]
 			
@@ -111,17 +100,19 @@ def index(request):
 			
 			replays = []
 			invalid_replays = []
-			for log in logs:
-				try:
-					replay = replay_compile.initialize_replay(log, log.url)
-					replays.append(replay)
-				except replay_compile.NoWinnerError:
-					# No winner: Default to tie
-					replay = replay_compile.initialize_replay(log, log.url, wnum=0)
-					replays.append(replay)
-				except replay_compile.NoPlayerError:
-					# no players
-					pass
+
+		
+		for log in logs:
+			try:
+				replay = replay_compile.initialize_replay(log, log.url)
+				replays.append(replay)
+			except replay_compile.NoWinnerError:
+				# No winner: Default to tie
+				replay = replay_compile.initialize_replay(log, log.url, wnum=0)
+				replays.append(replay)
+			except replay_compile.NoPlayerError:
+				# no players
+				pass
 			
 		# Refactor
 		tiers = {tier.strip() for tier in 
@@ -176,7 +167,7 @@ def index(request):
 		# Missing Pokemon
 		missing_text = ""
 		for replay in replays:
-			for num, player in enumerate(("player_p1", "player_p2")):
+			for num, player in enumerate(("p1", "p2")):
 				if len(replay.teams[player]) < 6:
 					missing_text += ("[*][I]Missing {0} Pokemon from {1}.[/I]\n"
 					.format(6-len(replay.teams[player]), replay.players[num]))
@@ -390,8 +381,9 @@ def spl_index(request):
 		return render(request, "spl_index.html")
 		
 	if request.method == "POST":
+	
 		if "link_submit" in request.POST:
-			urls = request.POST["replay_urls"].split("\n")
+			urls = request.POST["replay_urls"].splitlines()
 			replays = replay_compile.replays_from_links(urls)
 			choice = None
 			template = "spl_stats.html"
@@ -402,10 +394,29 @@ def spl_index(request):
 					raw += (player + ":\n")
 					for pokemon in replay.teams[replay.name_to_num(player)]:
 						raw += (pokemon + ": ")
-						raw += " / ".join(replay.moves[player][pokemon]) + "\n"
+						raw += " / ".join(replay.moves[player].get(pokemon, [])) + "\n"
 					raw += "\n"
 			
 			moves = [replay.moves for replay in replays]
+			
+			# Unpack dicts
+			
+			# [{p1:{pokemon:{moves}}}]
+			moves_tables = []
+			'''
+			for replay in replays:
+				for player in replay.players:
+					movesets = replay.moves[replay.name_to_num(player)].items()
+					moves_tables.append({player: movesets})'''
+			for replay in replays:
+				table = {}
+				match = {replay.url:table}
+				for player in replay.players:
+					movesets = replay.moves[replay.name_to_num(player)].items()
+					table[player] = movesets
+				moves_tables.append(match)
+
+			#print(moves_tables)
 			pairings = None
 			usage_whitespace = ""
 			
@@ -450,12 +461,13 @@ def spl_index(request):
 		
 		# Set not removing duplicates
 		#return render(request, "spl_stats.html", {
-		
+		print(moves_tables)
 		return render(request, template, {
 					"replays" : replays,
 					"raw":raw,
 					"row_count":row_count,
 					"moves":moves,
+					"moves_tables":moves_tables,
 					"pairings":pairings,
 					"choice":choice,
 					"usage_whitespace":usage_whitespace})
