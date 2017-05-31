@@ -11,25 +11,16 @@ class Log:
 	def __init__(self, text, url=None):
 		self.text = text
 		self.url = url
-		'''
-		# Line dict
-		self.line_dict = {}
-		for line in self.text:
-			prefix = line.split("|")[1]
-			try:
-				line_dict[prefix].append(line)
-			except:
-				line_dict[prefix] = [line]'''
 	
 	def parse_players(self):
 		""" Return dict with formatted player names. """
-		player_lines = (line for line in self.text if line.startswith("|player") 
+		lines = (line for line in self.text if line.startswith("|player") 
 			and len(line.split("|")) > 3)
 		players = OrderedDict()
-		for line in player_lines:
+		for line in lines:
 			ll = line.split("|")
 			# Player -> Number
-			players[ll[3].lower()] = "player_"+ll[2]
+			players[ll[3].lower()] = ll[2]
 		return players
 	
 	def parse_winner(self):
@@ -70,26 +61,19 @@ class Log:
 		Only works for gen 5+, where teams are stated at the beginning of
 		replays. 
 		"""
-		teams = {"player_p1":[],"player_p2":[]}
+		teams = {"p1":[],"p2":[]}
 		
-		teams["player_p1"] = list(islice(
+		teams["p1"] = list(islice(
 					  (format_pokemon(line.split("|")[3].split(",")[0]) 
 					  for line in self.text if line.startswith("|poke|p1")),6))
-		teams["player_p2"] = list(islice(
+		teams["p2"] = list(islice(
 					  (format_pokemon(line.split("|")[3].split(",")[0]) 
 					  for line in self.text if line.startswith("|poke|p2")),6))
-
-		
-		'''
-		limit = len([poke for poke in teams["|p1"] + teams["|p2"] 
-				if poke in COUNTED_FORMS])
-		if limit > 0:
-			return self.parse_teams_from_scan(6 + limit, teams)
-		'''
-		
+					  
+		# Check for additional forms unrevealed at team preview
 		for poke in COUNTED_FORMS:
 			base = poke.split("-")[0]
-			for player in ("player_p1", "player_p2"):
+			for player in ("p1", "p2"):
 				if poke in teams[player]:
 					exp = "\|(switch|drag)\{0}.*\|{1}.*".format(player, base)
 					try:
@@ -99,19 +83,76 @@ class Log:
 					except:
 						pass
 		return teams
+		
+	def parse_from_scan(self, *terms):
+	
+		SKIP_MOVES = {"Copycat", "Metronome"}
+		def update_state():
+			player = ll[2].split(":")[0]
+			poke = format_pokemon(ll[3].split(",")[0])
+			state[player] = poke
+	
+		def move_from_line():
+			# Filter moves called by Copycat, Metronome, etc.
+			if ll[-1][6:] in SKIP_MOVES:
+				return
+			# TODO: Optimize Struggle filter
+			move = ll[3]
+			if move == "Struggle":
+				return
+			# p[12][abc]
+			player = ll[2].split(":")[0]
+			# Accounting for replays that predate position
+			if player[-1].isdigit():
+				player += "a"
+			dicts["moves"][player[:-1]][state[player]].add(move)
+			
+		# Terms: teams, moves, items, abilities
+		dicts = {term:{"p1":defaultdict(set), "p2":defaultdict(set)} 
+				for term in terms}
+		
+		methods = {
+			"state":update_state,
+			"moves":move_from_line,
+			#"abilities":ability_from_line,
+			#"items":items_from_line,	
+		}
+		
+		match_func = {
+			"move":{"moves"},
+			"switch":{"state"},
+			"drag":{"state"}
+		}
+		
+		state = {"p1a":None, "p2a":None, "p1b":None, "p2b":None}
+		flags = []
+		
+		# Filter unspecified terms
+		for value in match_func.values():
+			value &= (set(terms) | {"state"})
+		
+		for line in self.text:
+			ll = line.split("|")
+			prefix = ll[1]
+			
+			# Call matching function for each term
+			for term in match_func.get(prefix, []):
+				methods[term]()
+
+		return dicts
 				
 	def parse_teams_from_scan(self, limit=6, teams=None):
 		if not teams:
-			teams = {"player_p1":[], "player_p2":[]}
+			teams = {"p1":[], "p2":[]}
 		for line in self.text:
 			if line.startswith("|switch") or line.startswith("|drag"):
 				ll = line.split("|")
-				player = "player_"+ll[2].split("a:")[0]
+				player = ll[2].split("a:")[0]
 				poke = format_pokemon(ll[3].split(",")[0])
 				team = teams[player]
 				if poke not in team:
 					team.append(poke)
-			if len(teams["player_p1"]) == limit and len(teams["player_p2"]) == limit:
+			if len(teams["p1"]) == limit and len(teams["p2"]) == limit:
 				break
 		return teams
 	
@@ -120,16 +161,16 @@ class Log:
 		# Singles
 		if not doubles:
 			l = (line for line in self.text if line.startswith("|switch"))
-			leads = {"player_p1":[],"player_p2":[]}
+			leads = {"p1":[],"p2":[]}
 			try:
-				leads["player_p1"] = [format_pokemon(next(l).split("|")[3].split(",")[0])]
-				leads["player_p2"] = [format_pokemon(next(l).split("|")[3].split(",")[0])]
+				leads["p1"] = [format_pokemon(next(l).split("|")[3].split(",")[0])]
+				leads["p2"] = [format_pokemon(next(l).split("|")[3].split(",")[0])]
 			except:
 				pass
 		
 		# Doubles
 		else:
-			leads = {"player_p1":[],"player_p2":[]}
+			leads = {"p1":[],"p2":[]}
 			for line in self.text:
 				if line.startswith("|switch"):
 					try:
@@ -142,8 +183,8 @@ class Log:
 		return leads
 		
 	def parse_items(self, teams):
-		items = {"player_p1":{pokemon: "Other" for pokemon in teams["player_p1"]},
-				 "player_p2":{pokemon: "Other" for pokemon in teams["player_p2"]}}
+		items = {"p1":{pokemon: "Other" for pokemon in teams["p1"]},
+				 "p2":{pokemon: "Other" for pokemon in teams["p2"]}}
 		return None
 		"""
 		Cases:
@@ -162,9 +203,9 @@ class Log:
 			
 	
 	def parse_moves(self, teams):
-		moves = {"player_p1":{pokemon: [] for pokemon in teams["player_p1"]},
-				 "player_p2":{pokemon: [] for pokemon in teams["player_p2"]}}
-		nicknames = {"player_p1":{},"player_p2":{}}
+		moves = {"p1":{pokemon: [] for pokemon in teams["p1"]},
+				 "p2":{pokemon: [] for pokemon in teams["p2"]}}
+		nicknames = {"p1":{},"p2":{}}
 		
 		for line in self.text:
 			if line[1:5] == "move":
@@ -174,8 +215,9 @@ class Log:
 					# Glitch in replay formatting
 					if re.match("p[12]{1}:", p):
 						p = p.replace(":","a:")
-					player = "player_"+re.split("[ab]:",p)[0]
-					pokemon = nicknames[player][p]
+						print(p)
+					player = re.split("[ab]:",p)[0]
+					pokemon = nicknames[player][p] 
 					move = ll[3]
 					moveset = moves[player][pokemon]
 				
@@ -187,10 +229,11 @@ class Log:
 						moveset.append(move)
 				except:
 					pass
+
 			elif line[1:7] == "switch" or line[1:5] == "drag":
 				try:
 					ll = line.split("|")
-					player = "player_"+re.split("[ab]:",ll[2])[0]
+					player = re.split("[ab]:",ll[2])[0]
 					nickname = ll[2]
 					pokemon = format_pokemon(ll[3].split(",")[0])
 					if nickname not in nicknames[player]:
@@ -199,41 +242,7 @@ class Log:
 				except:
 					pass
 		
-		'''
-		line_dict = {}
-		for line in self.text:
-			prefix = line.split("|")[1]
-			try:
-				line_dict[prefix].append(line)
-			except:
-				line_dict[prefix] = [line]
-		'''
-		
-		'''
-		line_dict = self.line_dict
-		
-		for line in line_dict.get("switch",[]) + line_dict.get("drag",[]):
-			ll = line.split("|")
-			player = re.split("[ab]:",ll[2])[0]
-			nickname = ll[2]
-			pokemon = format_pokemon(ll[3].split(",")[0])
-			if nickname not in nicknames[player]:
-				nicknames[player][nickname] = pokemon 
-				moves[player][nicknames[player][nickname]] = []
-		
-		for line in line_dict["move"]:
-			ll = line.split("|")
-			p = ll[2]
-			# Glitch in replay formatting
-			if re.match("p[12]{1}:", p):
-				p = p.replace(":","a:")
-			player = re.split("[ab]:",p)[0]
-			pokemon = nicknames[player][p]
-			move = ll[3]
-			moveset = moves[player][pokemon]
-			if move not in moveset:
-				moveset.append(move)
-		'''
+		print(moves)
 		return moves
 
 	def parse_turn_count(self):
@@ -342,7 +351,7 @@ class Replay:
 							break
 			# Win/Loss/Tie -> teams
 			# TODO: Is this necessary?
-			#for player in ("player_p1","player_p2"):
+			#for player in ("p1","p2"):
 			#	self._teams[self.playerwl[player]] = self._teams[player]
 			
 			# Name -> teams
@@ -375,11 +384,12 @@ class Replay:
 		try:
 			return self._moves
 		except:
-			self._moves = self.log.parse_moves(self.teams)
+			#self._moves = self.log.parse_moves(self.teams)
+			self._moves = self.log.parse_from_scan("moves")["moves"]
 			for name in self._players:
 				self._moves[name] = self._moves[self._players[name]]
 			
-			#for player in ("player_p1","player_p2"):
+			#for player in ("p1","p2"):
 				#self._moves[self.playerwl[player]] = self._moves[player]
 			#self._moves[self._loser] = self._moves.get("lose", [])
 			#self._moves[self._winner] = self._moves.get("win", [])
@@ -415,7 +425,7 @@ class Replay:
 		""" Return boolean indicating if Pokemon existed in match. """
 		# TODO: Non-tp gens
 		# Check teams
-		return pokemon in team["player_p1"] or pokemon in team["player_p2"]
+		return pokemon in team["p1"] or pokemon in team["p2"]
 	
 	def move_in_replay(self, move):
 		""" Return boolean indicating if move was used in match. """
