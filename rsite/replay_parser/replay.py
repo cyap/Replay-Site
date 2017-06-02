@@ -85,17 +85,18 @@ class Log:
 		return teams
 		
 	def parse_from_scan(self, *terms):
-	
-		SKIP_MOVES = {"Copycat", "Metronome"}
+		
 		def update_state():
 			player = ll[2].split(":")[0]
 			poke = format_pokemon(ll[3].split(",")[0])
 			state[player] = poke
 	
-		def move_from_line():
+		def move_from_line(SKIP_MOVES = {"Copycat", "Metronome", "Magic Coat"}):
 			# Filter moves called by Copycat, Metronome, etc.
 			if ll[-1][6:] in SKIP_MOVES:
 				return
+			# Transform, Magic Coat
+			# Mimic, Sketch
 			# TODO: Optimize Struggle filter
 			move = ll[3]
 			if move == "Struggle":
@@ -106,6 +107,7 @@ class Log:
 			if player[-1].isdigit():
 				player += "a"
 			dicts["moves"][player[:-1]][state[player]].add(move)
+			
 			
 		# Terms: teams, moves, items, abilities
 		dicts = {term:{"p1":defaultdict(set), "p2":defaultdict(set)} 
