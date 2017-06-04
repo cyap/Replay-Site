@@ -106,11 +106,14 @@ class Log:
 			# Accounting for replays that predate position
 			if player[-1].isdigit():
 				player += "a"
-			dicts["moves"][player[:-1]][state[player]].add(move)
+			moves = dicts["moves"][player[:-1]][state[player]]
+			if moves not in moves:
+				moves.append(move)
+			dicts["moves"][player[:-1]][state[player]].append(move)
 			
 			
 		# Terms: teams, moves, items, abilities
-		dicts = {term:{"p1":defaultdict(set), "p2":defaultdict(set)} 
+		dicts = {term:{"p1":defaultdict(list), "p2":defaultdict(list)} 
 				for term in terms}
 		
 		methods = {
@@ -386,8 +389,8 @@ class Replay:
 		try:
 			return self._moves
 		except:
-			#self._moves = self.log.parse_moves(self.teams)
-			self._moves = self.log.parse_from_scan("moves")["moves"]
+			self._moves = self.log.parse_moves(self.teams)
+			#self._moves = self.log.parse_from_scan("moves")["moves"]
 			for name in self._players:
 				self._moves[name] = self._moves[self._players[name]]
 			
