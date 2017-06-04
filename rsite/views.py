@@ -50,10 +50,9 @@ def index(request):
 			# (eventual) trigger flag based on modification: alternating class?
 			
 			# 2. Exclude from list (and not in changed_replays)
-			
 			replays = []
 			for replay in request.session["replays"]:
-				if replay.url in saved_replay_urls:
+				if replay.url.strip() in saved_replay_urls:
 					if replay.url in modified_replay_urls:
 					# Reconstruct Replay objects with new winner
 						pnum = int(request.POST[replay.url])
@@ -65,9 +64,8 @@ def index(request):
 			
 			urls = request.POST["new_urls"].splitlines()
 			logs = replay_compile.logs_from_links(urls)
-
 			request.POST = request.session["form"]
-			
+
 		else:
 			# Thread Form
 			thread_replays = list(
