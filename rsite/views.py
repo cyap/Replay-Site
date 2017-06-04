@@ -63,8 +63,8 @@ def index(request):
 			# Newly submitted replays
 			# TODO: refactor to use new method
 			
-			logs = replay_compile.logs_from_links(
-				request.POST["new_urls"].splitlines())
+			urls = request.POST["new_urls"].splitlines()
+			logs = replay_compile.logs_from_links(urls)
 
 			request.POST = request.session["form"]
 			
@@ -93,14 +93,15 @@ def index(request):
 							request.POST.getlist("range_end"),
 							request.POST.getlist("range_tiers")))))
 			# Links
-			link_logs = replay_compile.logs_from_links(
-						request.POST["replay_urls"].splitlines())
+			urls = request.POST["replay_urls"].splitlines()
+			link_logs = replay_compile.logs_from_links(urls)
 						
 			logs = thread_replays + range_replays + link_logs
 			
 			replays = []
-			invalid_replays = []
-
+		
+		invalid_replays = "\n".join(set(urls) - {log.url for log in logs})
+		print(invalid_replays)
 		
 		for log in logs:
 			try:
@@ -113,6 +114,7 @@ def index(request):
 			except replay_compile.NoPlayerError:
 				# no players
 				pass
+		
 			
 		# Refactor
 		tiers = {tier.strip() for tier in 
@@ -373,6 +375,7 @@ def index(request):
 					  "combos_rawtext":combos_rawtext,
 					  "leads_rawtext":leads_rawtext,
 					  "replay_rawtext":replay_rawtext,
+					  "invalid_replays":invalid_replays,
 					  })
 					  
 
@@ -535,7 +538,7 @@ def tour_index(request):
 			"participants" : participants,
 			"matches" : formatted_matches,
 			"unmatched_replays":unmatched_replays,
-			"options_pane":options_pane
+			"options_pane":options_pane,
 		})
 		
 def update_session(request):

@@ -247,7 +247,6 @@ class Log:
 				except:
 					pass
 		
-		print(moves)
 		return moves
 
 	def parse_turn_count(self):

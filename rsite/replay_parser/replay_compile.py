@@ -110,7 +110,7 @@ def logs_from_links(urls):
 		pool = multiprocessing.dummy.Pool(13)
 		return list(filter(None, pool.map(open_log, urls)))
 	except:
-		return
+		return []
 	finally:
 		pool.close()
 
