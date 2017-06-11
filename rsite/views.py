@@ -382,7 +382,7 @@ def spl_index(request):
 		return render(request, "spl_index.html")
 		
 	if request.method == "POST":
-	
+		moves_tables = []
 		if "link_submit" in request.POST:
 			urls = request.POST["replay_urls"].splitlines()
 			replays = replay_compile.replays_from_links(urls)
@@ -403,7 +403,6 @@ def spl_index(request):
 			# Unpack dicts
 			
 			# [{p1:{pokemon:{moves}}}]
-			moves_tables = []
 			'''
 			for replay in replays:
 				for player in replay.players:
@@ -423,9 +422,11 @@ def spl_index(request):
 			
 		else:
 			tier = request.POST["tier"]
-			replays = replay_compile.replays_from_user(
-				request.POST["player"].strip(),
-				tier=tier)
+			player = request.POST["player"].strip()
+			if player.lower() in {"meeps", "finchinator"}:
+				replays = []
+			else:
+				replays = replay_compile.replays_from_user(player, tier=tier)
 			choice = request.POST["player"].lower()
 			moves = [rep.moves.get(rep.name_to_num(choice)) for rep in replays]
 			
@@ -462,7 +463,7 @@ def spl_index(request):
 		
 		# Set not removing duplicates
 		#return render(request, "spl_stats.html", {
-		print(moves_tables)
+		#print(moves_tables)
 		return render(request, template, {
 					"replays" : replays,
 					"raw":raw,
