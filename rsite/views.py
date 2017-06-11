@@ -423,7 +423,17 @@ def spl_index(request):
 		else:
 			tier = request.POST["tier"]
 			player = request.POST["player"].strip()
-			if player.lower() in {"meeps", "finchinator"}:
+			if player.lower() in {
+				"meeps", 
+				"finchinator",
+				"the real ud",
+				"sam", "meatdealer",
+				"eo",
+				"dukevesper",
+				"reyscarface",
+				"hsa",
+				"d0nut",
+				"mr.378"}:
 				replays = []
 			else:
 				replays = replay_compile.replays_from_user(player, tier=tier)
