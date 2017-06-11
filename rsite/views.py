@@ -422,7 +422,7 @@ def spl_index(request):
 			
 		else:
 			tier = request.POST["tier"]
-			player = request.POST["player"].strip().split("[self]")[0].lower()
+			player = request.POST["player"].split("[self]")[0].strip().lower()
 			if request.POST["player"].strip().lower() in {
 				"meeps", 
 				"finchinator",
