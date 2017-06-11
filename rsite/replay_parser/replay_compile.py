@@ -125,6 +125,7 @@ def open_log(url):
 		return log
 	except HTTPError:
 		# Unsaved replay
+		print(url)
 		return
 	except:
 		# Corrupted log file
@@ -136,7 +137,8 @@ def initialize_replay(log, url=None, wnum=None):
 	# players
 	players = log.parse_players()
 	if not players:
-		raise NoPlayerError
+		#raise NoPlayerError
+		return None
 		
 	if wnum == None:
 		try:
@@ -162,6 +164,7 @@ def replays_from_links(urls):
 		return list(filter(None, pool.map(
 			lambda url: initialize_replay(open_log(url), url), urls)))
 	except:
+		traceback.print_exc()
 		return
 	finally:
 		pool.close()
