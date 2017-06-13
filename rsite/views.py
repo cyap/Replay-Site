@@ -104,11 +104,14 @@ def index(request):
 		for log in logs:
 			try:
 				replay = replay_compile.initialize_replay(log, log.url)
-				replays.append(replay)
+				if replay:
+					replays.append(replay)
 			except replay_compile.NoWinnerError:
 				# No winner: Default to tie
 				replay = replay_compile.initialize_replay(log, log.url, wnum=0)
-				replays.append(replay)
+				# TODO: refactor to handle no player error
+				if replay:
+					replays.append(replay)
 			except replay_compile.NoPlayerError:
 				# no players
 				pass

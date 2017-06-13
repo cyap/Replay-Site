@@ -135,9 +135,13 @@ def open_log(url):
 		
 def initialize_replay(log, url=None, wnum=None):	
 	# players
-	players = log.parse_players()
-	if not players:
+	try:
+		players = log.parse_players()
+	except:
 		#raise NoPlayerError
+		return None
+		
+	if not players:
 		return None
 		
 	if wnum == None:
