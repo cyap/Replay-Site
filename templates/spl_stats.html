@@ -21,7 +21,7 @@
 	    </tr>
 		{% for pokemon, set in movesets %}
 		  <tr>
-			<td><img src="static/icons/{{pokemon}}.png"></td>
+			<td><img src="/static/icons/{{pokemon}}.png"></td>
 			<td class=pokemon_col>{{ pokemon }}</td>
 			{% for move in set %}
 			  <td class=move>{{ move }}</td>

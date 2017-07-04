@@ -20,7 +20,7 @@
 			</tr>
 				{% for pokemon,moveset in pairing.moves.items %}
 				<tr>
-					<td><img src="static/icons/{{pokemon}}.png"></td>
+					<td><img src="/static/icons/{{pokemon}}.png"></td>
 					<td class=pokemon_col>{{ pokemon }}</td>
 					<td class=move>{{ moveset.0 }}</td>
 					<td class=move>{{ moveset.1 }}</td>
@@ -39,7 +39,7 @@
 			</tr>
 			{% for pokemon,moveset in replay.moves.lose.items %}
 			<tr>
-				<td><img src="static/icons/{{pokemon}}.png"></td>
+				<td><img src="/static/icons/{{pokemon}}.png"></td>
 				<td class=pokemon_col>{{ pokemon }}</td>
 				<td class=move>{{ moveset.0 }}</td>
 				<td class=move>{{ moveset.1 }}</td>
