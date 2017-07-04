@@ -426,20 +426,7 @@ def spl_index(request):
 		else:
 			tier = request.POST["tier"]
 			player = request.POST["player"].split("[self]")[0].strip().lower()
-			if request.POST["player"].strip().lower() in {
-				"meeps", 
-				"finchinator",
-				"the real ud",
-				"sam", "meatdealer",
-				"eo",
-				"dukevesper",
-				"reyscarface",
-				"hsa",
-				"d0nut",
-				"mr.378"}:
-				replays = []
-			else:
-				replays = replay_compile.replays_from_user(player, tier=tier)
+			replays = replay_compile.replays_from_user(player, tier=tier)
 			choice = player
 			moves = [rep.moves.get(rep.name_to_num(choice)) for rep in replays]
 			
