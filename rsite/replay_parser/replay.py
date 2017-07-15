@@ -75,7 +75,7 @@ class Log:
 			base = poke.split("-")[0]
 			for player in ("p1", "p2"):
 				if poke in teams[player]:
-					exp = "\|(switch|drag)\{0}.*\|{1}.*".format(player, base)
+					exp = "\|(switch|drag)\|{0}.*\|{1}.*".format(player, base)
 					try:
 						switch = next(line for line in self.text 
 							if re.match(exp, line))
