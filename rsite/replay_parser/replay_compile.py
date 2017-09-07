@@ -125,11 +125,11 @@ def open_log(url):
 		return log
 	except HTTPError:
 		# Unsaved replay
-		print(url)
+		#print(url)
 		return
 	except:
 		# Corrupted log file
-		print(url)
+		#print(url)
 		traceback.print_exc()
 		return
 		
