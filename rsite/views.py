@@ -499,8 +499,9 @@ def tour_index(request):
 			replays2 = []
 			for replay in replays:
 				try:
-					replays2.append(
-					replay_compile.initialize_replay(replay, replay.url))
+					rep = replay_compile.initialize_replay(replay, replay.url)
+					if rep:
+						replays2.append(rep)
 				except:
 					pass
 			replays = replays2
