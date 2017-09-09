@@ -8,6 +8,6 @@ listen = ['high', 'default', 'low']
 
 if __name__ == '__main__':
 	print('Worker running')
-    with Connection(conn):
-        worker = Worker(map(Queue, listen))
-        worker.work()
+	with Connection(conn):
+		worker = Worker(map(Queue, listen))
+		worker.work()
