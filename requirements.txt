@@ -14,3 +14,6 @@ six==1.10.0
 ujson==1.35
 update-checker==0.11
 whitenoise==3.2.2
+redis==2.10.6
+rq==0.8.2
+django-redis-cache==1.7.1
