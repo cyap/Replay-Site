@@ -105,24 +105,27 @@ def index(request):
 			logs = thread_replays + range_replays + link_logs
 			
 			replays = []
+			
+		if "rep_submit" not in request.POST:
+			invalid_replays = "\n".join(set(urls) - {log.url for log in logs})
+			print(invalid_replays)
 		
-		invalid_replays = "\n".join(set(urls) - {log.url for log in logs})
-		print(invalid_replays)
-		
-		for log in logs:
-			try:
-				replay = replay_compile.initialize_replay(log, log.url)
-				if replay:
-					replays.append(replay)
-			except replay_compile.NoWinnerError:
-				# No winner: Default to tie
-				replay = replay_compile.initialize_replay(log, log.url, wnum=0)
-				# TODO: refactor to handle no player error
-				if replay:
-					replays.append(replay)
-			except replay_compile.NoPlayerError:
-				# no players
-				pass
+			for log in logs:
+				try:
+					replay = replay_compile.initialize_replay(log, log.url)
+					if replay:
+						replays.append(replay)
+				except replay_compile.NoWinnerError:
+					# No winner: Default to tie
+					replay = replay_compile.initialize_replay(log, log.url, wnum=0)
+					# TODO: refactor to handle no player error
+					if replay:
+						replays.append(replay)
+				except replay_compile.NoPlayerError:
+					# no players
+					pass
+		else:
+			invalid_replays = []
 		
 			
 		# Refactor
