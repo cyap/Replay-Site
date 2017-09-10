@@ -548,13 +548,15 @@ def tour_index(request):
 		rng = range(int(request.POST["start"]),int(request.POST["end"]))
 
 		# Cached
-		if (url in request.session and request.session[url].get("range") == rng
-		and "clear" not in request.POST):
-			participants = request.session[url]["participants"]
-			pairings = request.session[url]["pairings"]
-			matches = request.session[url]["matches"]
-			unmatched_replays = request.session[url]["unmatched_replays"]
-			replays = request.session[url]["replays"]
+		if False:
+			pass
+		#if (url in request.session and request.session[url].get("range") == rng
+		#and "clear" not in request.POST):
+		#	participants = request.session[url]["participants"]
+		#	pairings = request.session[url]["pairings"]
+		#	matches = request.session[url]["matches"]
+		#	unmatched_replays = request.session[url]["unmatched_replays"]
+		#	replays = request.session[url]["replays"]
 
 		else:
 			# Not cached
@@ -577,6 +579,7 @@ def tour_index(request):
 	# minus start date
 	key = ''.join(map(str, datetime.datetime.now().timetuple()))
 	
+	request.session[url] = {}
 	request.session[key] = {}
 	request.session[key]['url'] = url
 	request.session[key]["range"] = rng
