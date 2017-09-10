@@ -16,7 +16,7 @@
 
 Start: {{ start }}<br>
 End: {{ end }}<br>
-Thread: <a href={{url}}>{{ url }}</a><br>
+Thread: <a href={{url}} target="_blank">{{ url }}</a><br>
 
 <form method=post action="/">
 	{% csrf_token %}
@@ -51,7 +51,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 	{% for match in matches %}
 	<tr draggable="true" class="{{ match.2 }} dragHandler">
 	  <input type="hidden" name="replay_urls" value={{ match.1.url }}>
-	  <td><a href="{{ match.1.url }}">{{ match.1.number }}</a></td>
+	  <td><a href="{{ match.1.url }}" target="_blank">{{ match.1.number }}</a></td>
 	  </input>
 	  <td>{{ match.1.players }}</td>
 	  <td>{{ match.2 }}</td>
@@ -76,7 +76,7 @@ Thread: <a href={{url}}>{{ url }}</a><br>
 {% for replay in unmatched_replays %}
   <tr draggable="true" class="dragHandler">
 	<input type="hidden" name="replay_urls" value={{ replay.url }}>
-	<td><a href="{{ replay.url }}">{{ replay.number }}</a></td>
+	<td><a href="{{ replay.url }}" target="_blank">{{ replay.number }}</a></td>
 	</input>
 	<td>{{ replay.players }}</td>
 	<td>no match</td>
