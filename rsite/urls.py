@@ -25,6 +25,5 @@ urlpatterns = [
     #url(r'^tournament', views.tour_worker),
     url(r'^update_session', views.update_session),
     url(r'^update_stats', views.update_stats),
-    url(r'^django-rq/', include('django_rq.urls')),
     url(r'^buffer', views.buffer)
 ]
