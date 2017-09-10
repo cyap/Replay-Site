@@ -13,7 +13,6 @@ from .replay_parser import replay_compile, stats, tournament, replay
 
 from rq import Queue
 from worker import conn
-from django_rq import job
 
 q = Queue(connection=conn)
 result = []
