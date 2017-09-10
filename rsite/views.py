@@ -499,7 +499,6 @@ def tour_worker(request):
 	#result = q.enqueue(tour_index, request)
 	#return render(request, "indextour.html")
 	
-@job
 def tour_match(range, url, tier):
 	pairings = tournament.parse_pairings(url=url)
 	participants = tournament.participants_from_pairings(pairings)
