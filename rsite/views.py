@@ -1,6 +1,7 @@
 from itertools import chain
 from collections import Counter
 import re
+import datetime
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -9,6 +10,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .forms import ThreadForm, RangeForm, OptionsPane
 from .replay_parser import replay_compile, stats, tournament, replay
+
+from rq import Queue
+from worker import conn
+from django_rq import job
+
+q = Queue(connection=conn)
+result = []
 
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
 COL_WIDTH = 23
@@ -474,6 +482,62 @@ def spl_index(request):
 					"choice":choice,
 					"usage_whitespace":usage_whitespace})
 
+def tour_worker(request):
+	if request.method == "GET":
+		return render(request, "indextour.html")
+	elif request.method == "POST":
+		url = request.POST["url"]
+		rng = range(int(request.POST["start"]),int(request.POST["end"]))
+		tier = request.POST["tier"]
+		#tour_match.delay(rng, url, tier)
+		return render(request, "buffer.html")
+		
+		#return render(request, "indextour.html")
+	#q = Queue(connection=conn)
+	#result = q.enqueue(tour_index, request)
+	#return render(request, "indextour.html")
+	
+@job
+def tour_match(range, url, tier):
+	pairings = tournament.parse_pairings(url=url)
+	participants = tournament.participants_from_pairings(pairings)
+	replays = sum((replay_compile.replays_from_range(rng, tier=tier) 
+		for tier in tier.split(",")), [])
+	replays2 = []
+	for replay in replays:
+		try:
+			rep = replay_compile.initialize_replay(replay, replay.url)
+			if rep:
+				replays2.append(rep)
+		except:
+			pass
+	replays = replays2
+	tour = tournament.Tournament(set(replays), pairings, participants)
+	replays = tour.match_tournament()
+	matches = tour.pairingReplayMap
+	unmatched_replays = tour.unmatchedReplays
+	
+		
+	# Replays
+	formatted_matches = [(" vs. ".join(player for player in pairing),
+						 matches[pairing][0], # replay
+						 matches[pairing][1]) # filter
+						 if pairing in matches
+						 else 
+						 (" vs. ".join(player for player in pairing),
+						  "", "no match")
+						 for pairing in pairings]
+	options_pane = OptionsPane()
+	return render(request, "tour_match.html", {
+		"start":start,
+		"end":end,
+		"url":url,
+		"participants" : participants,
+		"matches" : formatted_matches,
+		"unmatched_replays":unmatched_replays,
+		"options_pane":options_pane,
+	})
+
 def tour_index(request):	
 	if request.method == "GET":
 		return render(request, "indextour.html")
@@ -483,7 +547,8 @@ def tour_index(request):
 		rng = range(int(request.POST["start"]),int(request.POST["end"]))
 
 		# Cached
-		if url in request.session and request.session[url].get("range") == rng and "clear" not in request.POST:
+		if (url in request.session and request.session[url].get("range") == rng
+		and "clear" not in request.POST):
 			participants = request.session[url]["participants"]
 			pairings = request.session[url]["pairings"]
 			matches = request.session[url]["matches"]
@@ -505,41 +570,63 @@ def tour_index(request):
 				except:
 					pass
 			replays = replays2
-			tour = tournament.Tournament(set(replays), pairings, participants)
-			replays = tour.match_tournament()
-			matches = tour.pairingReplayMap
-			unmatched_replays = tour.unmatchedReplays
-		
-			# Caching
-			request.session[url] = {}
-			request.session[url]["range"] = rng
-			request.session[url]["pairings"] = pairings
-			request.session[url]["participants"] = participants
-			request.session[url]["replays"] = replays
-			request.session[url]["matches"] = matches
-			request.session[url]["unmatched_replays"] = unmatched_replays
 			
-		# Replays
-		request.session["replays"] = replays | unmatched_replays
+	# Caching
+	
+	# minus start date
+	key = ''.join(map(str, datetime.datetime.now().timetuple()))
+	
+	request.session[key] = {}
+	request.session[key]['url'] = url
+	request.session[key]["range"] = rng
+	request.session[key]["pairings"] = pairings
+	request.session[key]["replays"] = replays
+	request.session[key]["participants"] = participants
+	return redirect('/buffer?key=' + key)
+	
+def buffer(request):
+
+	key = request.GET['key']
+	url, rng, pairings, replays, participants = (request.session[key]['url'],
+		request.session[key]['range'], 
+		request.session[key]['pairings'], 
+		request.session[key]['replays'],
+		request.session[key]['participants'])
 		
-		formatted_matches = [(" vs. ".join(player for player in pairing),
-							 matches[pairing][0], # replay
-							 matches[pairing][1]) # filter
-							 if pairing in matches
-							 else 
-							 (" vs. ".join(player for player in pairing),
-							  "", "no match")
-							 for pairing in pairings]
-		options_pane = OptionsPane()
-		return render(request, "tour_match.html", {
-			"start":request.POST["start"],
-			"end":request.POST["end"],
-			"url":request.POST["url"],
-			"participants" : participants,
-			"matches" : formatted_matches,
-			"unmatched_replays":unmatched_replays,
-			"options_pane":options_pane,
-		})
+	# return buffer
+	tour = tournament.Tournament(set(replays), pairings, participants)
+	replays = tour.match_tournament()
+	matches = tour.pairingReplayMap
+	unmatched_replays = tour.unmatchedReplays
+
+	# Caching
+	request.session[url]["matches"] = matches
+	request.session[url]["unmatched_replays"] = unmatched_replays
+	
+	# Replays
+	request.session["replays"] = replays | unmatched_replays
+
+	formatted_matches = [(" vs. ".join(player for player in pairing),
+						 matches[pairing][0], # replay
+						 matches[pairing][1]) # filter
+						 if pairing in matches
+						 else 
+						 (" vs. ".join(player for player in pairing),
+						  "", "no match")
+						 for pairing in pairings]
+	options_pane = OptionsPane()
+	return render(request, "tour_match.html", {
+		#"start":request.POST["start"],
+		#"end":request.POST["end"],
+		#"url":request.POST["url"],
+		'start': rng[0],
+		'end': rng[-1],
+		'url': url,
+		"participants" : participants,
+		"matches" : formatted_matches,
+		"unmatched_replays":unmatched_replays,
+		"options_pane":options_pane,
+	})
 		
 def update_session(request):
 	if not request.is_ajax() or not request.method=='POST':
