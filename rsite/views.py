@@ -531,7 +531,7 @@ def tour_match(range, url, tier):
 	options_pane = OptionsPane()
 	return render(request, "tour_match.html", {
 		"start":start,
-		"end":end,
+		"end":end+1,
 		"url":url,
 		"participants" : participants,
 		"matches" : formatted_matches,
