@@ -437,15 +437,23 @@ def spl_index(request):
 			tier = request.POST["tier"]
 			player = request.POST["player"].split("[self]")[0].strip().lower()
 			replays = replay_compile.replays_from_user(player, tier=tier)
-			choice = player
-			moves = [rep.moves.get(rep.name_to_num(choice)) for rep in replays]
 			
-			pairings = [
-				{	
-					"replay":replay,
-					"moves":replay.moves.get(replay.name_to_num(choice))
-				} 
-				for replay in replays]
+			pairings = []
+			moves = []
+			choice = player
+			for replay in replays:
+				try:
+					player_num = replay.name_to_num(player)
+				except:
+					exp = re.compile(".*?".join(player))
+					for p in replay.players:
+						if exp.match(p):
+							replay._players[player] = replay._players[p]
+					player_num = replay.name_to_num(player)
+				move_list = replay.moves.get(player_num)
+				pairing = {"replay":replay, "moves":move_list}
+				moves.append(move_list)
+				pairings.append(pairing)
 			template = "scout_stats.html"
 			
 			gen_num = next((char for char in min(request.POST["tier"]) if char.isdigit()), 6)
