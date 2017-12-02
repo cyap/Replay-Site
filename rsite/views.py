@@ -92,11 +92,15 @@ def index(request):
 			range_replays = list(
 				chain.from_iterable(
 					(replay_compile.replays_from_range(
-						range=range(int(start), int(end)), tier=tier)
-						for start, end, tier in zip(
+						range=range(int(start), int(end)), 
+						tier=tier,
+						server=server
+						)
+						for start, end, tier, server in zip(
 							request.POST.getlist("range_start"),
 							request.POST.getlist("range_end"),
-							request.POST.getlist("range_tiers")))))
+							request.POST.getlist("range_tiers"),
+							request.POST.getlist("server")))))
 			# Links
 			urls = request.POST["replay_urls"].splitlines()
 			link_logs = replay_compile.logs_from_links(urls)
