@@ -81,9 +81,14 @@ def replays_from_range(range, url_header=DEFAULT_URL_HEADER, server="smogtours",
 	because the replay was not saved or because a different tier was played for
 	that number.
 	"""
-	complete_url_header = url_header + server + "-" + tier + "-"
+
+	# Main server URL formatted differently
+	if server:
+		server += '-'
+
+	complete_url_header = url_header + server + '-'.join([tier, ''])
+
 	urls = (complete_url_header + str(i) for i in range)
-	#return replays_from_links(urls)
 	return logs_from_links(urls)
 
 def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
