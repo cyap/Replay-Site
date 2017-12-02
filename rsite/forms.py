@@ -13,7 +13,7 @@ class RangeForm(forms.Form):
 	range_start = forms.IntegerField(label="Start", required=False)
 	range_end = forms.IntegerField(label="End", required=False)
 	range_tiers = forms.CharField(label="Tier", initial="gen7pokebankou", required=False)
-	server = forms.CharField(label="Server", initial="smogtours", required=False)
+	server = forms.CharField(label="Server (Leave blank for Main)", initial="smogtours", required=False)
 	
 class OptionsPane(forms.Form):
 	moves_check = forms.BooleanField(label="Moves and Teammates", initial=True, required=False)

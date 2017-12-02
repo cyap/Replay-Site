@@ -574,7 +574,8 @@ def tour_index(request):
 			# Not cached
 			pairings = tournament.parse_pairings(url=url)
 			participants = tournament.participants_from_pairings(pairings)
-			replays = sum((replay_compile.replays_from_range(rng, tier=tier) 
+			server = request.POST["server"]
+			replays = sum((replay_compile.replays_from_range(rng, tier=tier, server=server) 
 				for tier in request.POST["tier"].split(",")), [])
 			replays2 = []
 			for replay in replays:
