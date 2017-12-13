@@ -40,6 +40,7 @@ $(document).ready(function() {
 // On page exit, cache
 
 window.onbeforeunload = function() {
+	return "Are you sure? You didn't finish the form!";
 	
 	unmatched_replays = $(":input", "#unmatched_replays")
 							.map(function() {

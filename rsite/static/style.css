@@ -35,6 +35,11 @@ nav {
 		    display:inline-block;
 		    /*margin: 0px;*/
 		}
+	
+	.tab-pane {
+		max-height: 1000px;
+    	overflow: auto;
+	}
 
 	#resubmit {
 		padding: 7px;
@@ -69,6 +74,7 @@ nav {
 		display:block;
 		padding:3px;
 		margin-top:3px;
+		height:250px;
 	}
 
 .rawtext {
