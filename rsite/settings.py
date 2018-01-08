@@ -22,8 +22,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '+ay9_znq8$z0i(7c&*8%m2500obtj7*k(4rv-q=!$=c*c3!i$j'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-DEBUG = False
+DEBUG = True
+#DEBUG = False
 
 ALLOWED_HOSTS = [u'replaystats-eo.herokuapp.com', u'127.0.0.1']
 
