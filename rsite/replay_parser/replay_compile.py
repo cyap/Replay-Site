@@ -125,7 +125,8 @@ def open_log(url):
 		log = Log([line for line in 
 				urlopen(Request(url, headers=REQUEST_HEADER))
 				.read().decode()
-				.split("\n")
+				.split('<script type="text/plain" class="log">')[1]
+				.splitlines()
 				if line.startswith("|")], url)
 		return log
 	except HTTPError:
