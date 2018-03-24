@@ -45,15 +45,13 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
 				posts += page
 			except:
 				traceback.print_exc()
-	
 		post_start = start - int(start / 25) * 25 - 1
 		post_end = post_start + (end - start) + 1
 	
 		thread = BeautifulSoup("".join(posts[post_start:post_end]),
 			"html.parser")
 		urls = (url.get("href") for url in thread.findAll("a") 
-				if url.get("href") and url.get("href").startswith(url_header))
-				
+				if url.get("href") and url.get("href").split(":")[-1].startswith(url_header.split(":")[1]))
 		# Optional: Filter by tier
 	
 		# Change to tiers from log
