@@ -133,7 +133,8 @@ def parse_pairings(fileString=None, url=None, pairingsRaw=None):
 		# Pairings are contained in first post of a thread
 		# Posts are framed by <article> tags
 		raw = (urlopen(url).read().decode().lower().split("</article>",1)[0]
-			.split("<article>")[1].split("\n"))
+			#.split("<article>")[1]
+			.split("\n"))
 		
 	# Checks for "vs" with no adjacent alphanumeric characters
 	pairingsRaw = (line for line in raw if
@@ -148,7 +149,7 @@ def parse_pairings(fileString=None, url=None, pairingsRaw=None):
 
 
 def parse_winners(url):
-	post = (urlopen(url).read().decode().split("</article>")[1]
+	post = (urlopen(url).read().decode().split("</article>")[0]
 			.split("<article>")[1].split("\n"))
 	raw = (line.split("<br />")[0] for line in post 
 			if re.compile(r'.*\Wvs\W.*').match(line))
