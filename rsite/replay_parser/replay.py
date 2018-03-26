@@ -20,7 +20,7 @@ class Log:
 		for line in lines:
 			ll = line.split("|")
 			# Player -> Number
-			players[ll[3].lower()] = ll[2]
+			players[ll[3].upper()] = ll[2]
 		return players
 	
 	def parse_winner(self):
@@ -28,7 +28,7 @@ class Log:
 		try:
 			return (next(line for line in reversed(self.text) 
 					if line.startswith("|win"))
-					.split("|")[2].split("<")[0]).lower().strip()
+					.split("|")[2].split("<")[0]).upper().strip()
 		except:
 			return ""
 		'''
@@ -448,5 +448,5 @@ def format_name(name):
 	
 	Supported characters: Letters, numbers, spaces, period, apostrophe. 
 	"""
-	return re.sub("[^\w\s'\.-]+", "", re.sub("&#.*;", "", name)).lower().strip()
+	return re.sub("[^\w\s'\.-]+", "", re.sub("&#.*;", "", name)).upper().strip()
 	

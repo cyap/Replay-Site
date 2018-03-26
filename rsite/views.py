@@ -439,7 +439,7 @@ def spl_index(request):
 			
 		else:
 			tier = request.POST["tier"]
-			player = request.POST["player"].split("[self]")[0].strip().lower()
+			player = request.POST["player"].split("[self]")[0].strip().upper()
 			replays = replay_compile.replays_from_user(player, tier=tier)
 			
 			pairings = []
@@ -496,7 +496,6 @@ def spl_index(request):
 		
 		# Set not removing duplicates
 		#return render(request, "spl_stats.html", {
-		#print(moves_tables)
 		return render(request, template, {
 					"replays" : replays,
 					"raw":raw,
