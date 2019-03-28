@@ -7,3 +7,4 @@ include
 *.pyc
 db.sqlite3
 *.sublime-workspace
+*.sw*
