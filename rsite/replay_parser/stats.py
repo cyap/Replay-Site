@@ -48,7 +48,17 @@ def wins(replays):
 	return aggregate_wins(replays, "teams")
 	
 def wins2(replays, key):
-	teams = chain.from_iterable([replay.teams.get(key, {}) for replay in replays if replay.teams.get(key, {}) == replay.teams.get("win", [])])
+	# used for scouter winrates
+	def this_player(replay, key):
+		try:
+			return replay.name_to_num(key)
+		except KeyError:
+			return None
+
+	teams = chain.from_iterable([
+		replay.teams.get(this_player(replay, key), []) for replay in replays
+		if key == replay.winner
+	])
 	return Counter(teams)
 	
 def combos(replays, size = 2, cutoff = 0):
@@ -336,6 +346,3 @@ def stats_from_text(text):
 				* float(split_row[5].strip().strip("%"))/100)) for split_row
 				in (row.split("|") for row in rows)}),
 			"total":total}
-			
-	
-			
