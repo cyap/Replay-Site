@@ -11,10 +11,6 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from .forms import ThreadForm, RangeForm, OptionsPane
 from .replay_parser import replay_compile, stats, tournament, replay
 
-from rq import Queue
-from worker import conn
-
-q = Queue(connection=conn)
 result = []
 
 TIERS = ["RBY","GSC","ADV","DPP","BW","ORAS","SM"]
@@ -516,10 +512,6 @@ def tour_worker(request):
 		#tour_match.delay(rng, url, tier)
 		return render(request, "buffer.html")
 		
-		#return render(request, "indextour.html")
-	#q = Queue(connection=conn)
-	#result = q.enqueue(tour_index, request)
-	#return render(request, "indextour.html")
 	
 def tour_match(range, url, tier):
 	pairings = tournament.parse_pairings(url=url)

@@ -8,3 +8,4 @@ include
 db.sqlite3
 *.sublime-workspace
 *.sw*
+venv
