@@ -27,3 +27,9 @@ urlpatterns = [
     url(r'^update_stats', views.update_stats),
     url(r'^buffer', views.buffer)
 ]
+
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
