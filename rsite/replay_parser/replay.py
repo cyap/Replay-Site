@@ -4,7 +4,7 @@ from itertools import combinations, islice
 import profile
 
 FORMS = {"Genesect","Keldeo","Gastrodon","Magearna","Silvally","Groudon",
-         "Kyogre", "Mimikyu"}
+         "Kyogre", "Mimikyu", "Urshifu"}
 COUNTED_FORMS = {"Arceus-*", "Pumpkaboo-*", "Gourgeist-*", "Rotom-Appliance"}
 
 class Log:
