@@ -1,4 +1,5 @@
 {% load static %}
+{% load extras %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
 
@@ -20,7 +21,7 @@
 			</tr>
 				{% for pokemon,moveset in pairing.moves.items %}
 				<tr>
-					<td><img src="/static/icons/{{pokemon}}.png"></td>
+					<td><img class="sprite" src="https://www.smogon.com/forums/media/minisprites/{{ pokemon.lower|to_sprite }}.png"></td>
 					<td class=pokemon_col>{{ pokemon }}</td>
 					<td class=move>{{ moveset.0 }}</td>
 					<td class=move>{{ moveset.1 }}</td>
