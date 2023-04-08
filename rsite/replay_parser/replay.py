@@ -28,14 +28,9 @@ class Log:
         try:
             return (next(line for line in reversed(self.text) 
                     if line.startswith("|win"))
-                    .split("|")[2].split("<")[0]).upper().strip()
+                    .split("|")[2]).upper().strip()
         except:
             return ""
-        '''
-        return (next(line for line in reversed(self.text) 
-                    if line.startswith("|win"))
-                    .split("|")[2].split("<")[0]).lower()
-        ''' 
         
     def parse_generation(self):
         """ Return int representing generation. """
