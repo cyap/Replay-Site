@@ -58,7 +58,7 @@ def replays_from_thread(threadurl, url_header=DEFAULT_URL_HEADER, tiers=None,
         # replay.pokemonshowdown.com/ou doesn't work
         # also some old replays
         if tiers:
-            urls = (url for url in urls if url.split("-")[-2].split("/")[-1] 
+            urls = (url for url in urls if url.split("-")[0].split("/")[-1] 
                 in tiers)
         return logs_from_links(urls)
     except:
