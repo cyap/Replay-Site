@@ -97,7 +97,13 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
     """ Query the PS replay database for the saved replays of a given username
         (limit: last 10 pages' worth of replays).
     """
-    complete_url_header = url_header + 'search/?user=' + quote(name) + '&page='
+    import requests
+    import json
+    url = url_header + 'api/replays/search?user=' + quote(name) + f'&format={tier}' + '&page='
+    results = [json.loads(requests.get(f"{url}{i}").text[1:]) for i in range(1, 16)]
+    urls = [f"http://replay.pokemonshowdown.com/{r['id']}" for r in results[0]]
+
+    """
     page = BeautifulSoup(
             "\n".join(
             (urlopen(Request(complete_url_header + str(i),
@@ -109,6 +115,7 @@ def replays_from_user(name, url_header=DEFAULT_URL_HEADER,
             if url.get("data-target"))
     urls = [url_header + url for url in urls if "-" in url and
             url.split("-")[-2].split("/")[-1] == tier]
+    """
     return replays_from_links(urls)
     
 def logs_from_links(urls):
